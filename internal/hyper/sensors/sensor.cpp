@@ -30,16 +30,19 @@ auto Sensor::hasVariableRate() const -> bool {
   return rate() < Scalar{0};
 }
 
-auto Sensor::parameters() const -> const Parameters& {
-  return parameters_;
+auto Sensor::variables() const -> const Variables& {
+  return variables_;
 }
 
-auto Sensor::memoryBlocks() const -> MemoryBlocks<Scalar> {
-  return parameters().memoryBlocks();
+auto Sensor::parameters() const -> Pointers<Parameter> {
+  Pointers<Parameter> pointers;
+  pointers.reserve(variables_.size());
+  std::transform(variables_.begin(), variables_.end(), std::back_inserter(pointers), [](const auto& arg) { return arg.get(); });
+  return pointers;
 }
 
-auto Sensor::memoryBlocks(const Stamp& /* stamp */) const -> MemoryBlocks<Scalar> {
-  return parameters().memoryBlocks();
+auto Sensor::parameters(const Stamp& /* stamp */) const -> Pointers<Parameter> {
+  return Sensor::parameters();
 }
 
 auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
@@ -52,39 +55,41 @@ auto Sensor::transformation() -> Eigen::Map<Transformation> {
 
 auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& {
   emitter << YAML::BeginMap;
-  sensor.writeParameters(emitter);
+  sensor.writeVariables(emitter);
   emitter << YAML::EndMap;
   return emitter;
 }
 
-Sensor::Sensor(const Size& num_parameters, const Node& node)
+Sensor::Sensor(const Size& num_variables, const Node& node)
     : rate_{kDefaultRate},
-      parameters_{num_parameters} {
-  initializeParameters();
+      variables_{num_variables} {
+  initializeVariables();
   if (!node.IsNull()) {
-    readParameters(node);
+    readVariables(node);
   }
 }
 
 auto Sensor::address(const Size& index) const -> const Scalar* {
-  return parameters().variable(index).memory().address;
+  DCHECK_LT(index, variables_.size());
+  DCHECK(variables_[index] != nullptr);
+  return variables_[index]->memory().address;
 }
 
 auto Sensor::address(const Size& index) -> Scalar* {
   return const_cast<Scalar*>(std::as_const(*this).address(index));
 }
 
-auto Sensor::writeParameters(Emitter& emitter) const -> void {
+auto Sensor::writeVariables(Emitter& emitter) const -> void {
   yaml::Write(emitter, kRateName, rate());
   yaml::WriteVariable(emitter, kTransformationName, transformation());
 }
 
-auto Sensor::initializeParameters() -> void {
-  DCHECK_LE(Traits<Sensor>::kNumParameters, parameters().variables().size());
-  parameters_.setVariable(Traits<Sensor>::kTransformationOffset, std::make_unique<Transformation>());
+auto Sensor::initializeVariables() -> void {
+  DCHECK_LE(Traits<Sensor>::kNumParameters, variables_.size());
+  variables_[Traits<Sensor>::kTransformationOffset] = std::make_unique<Transformation>();
 }
 
-auto Sensor::readParameters(const Node& node) -> void {
+auto Sensor::readVariables(const Node& node) -> void {
   rate_ = yaml::ReadAs<Rate>(node, kRateName);
   transformation() = yaml::ReadVariable<Transformation>(node, kTransformationName);
 }

@@ -16,7 +16,8 @@ class Sensor {
   using Size = std::size_t;
   using Node = YAML::Node;
   using Emitter = YAML::Emitter;
-  using Parameters = CompositeVariable<Scalar>;
+  using Parameter = AbstractVariable<Scalar>;
+  using Variables = std::vector<std::unique_ptr<Parameter>>;
 
   using Rate = Traits<Sensor>::Rate;
   using Transformation = Traits<Sensor>::Transformation;
@@ -52,18 +53,18 @@ class Sensor {
   /// \return True if rate is variable.
   [[nodiscard]] auto hasVariableRate() const -> bool;
 
+  /// Variables accessor.
+  /// \return Variables.
+  [[nodiscard]] auto variables() const -> const Variables&;
+
   /// Parameters accessor.
   /// \return Parameters.
-  [[nodiscard]] auto parameters() const -> const Parameters&;
+  [[nodiscard]] virtual auto parameters() const -> Pointers<Parameter>;
 
-  /// Collects the memory blocks.
-  /// \return Memory blocks.
-  [[nodiscard]] virtual auto memoryBlocks() const -> MemoryBlocks<Scalar>;
-
-  /// Collects the memory blocks (stamp-based).
+  /// Parameters accessor (stamp-based).
   /// \param stamp Query stamp.
-  /// \return Memory blocks.
-  [[nodiscard]] virtual auto memoryBlocks(const Stamp& stamp) const -> MemoryBlocks<Scalar>;
+  /// \return Parameters.
+  [[nodiscard]] virtual auto parameters(const Stamp& stamp) const -> Pointers<Parameter>;
 
   /// Accesses the transformation.
   /// \return Transformation.
@@ -80,10 +81,10 @@ class Sensor {
   friend auto operator<<(Emitter& emitter, const Sensor& sensor) -> Emitter&;
 
  protected:
-  /// Constructor from number of parameters and YAML file.
-  /// \param num_parameters Number of parameters.
+  /// Constructor from number of variables and YAML file.
+  /// \param num_variables Number of variables.
   /// \param node Input YAML node.
-  Sensor(const Size& num_parameters, const Node& node);
+  Sensor(const Size& num_variables, const Node& node);
 
   /// Retrieves the address of a variable.
   /// \param index Index of variable.
@@ -95,20 +96,20 @@ class Sensor {
   /// \return Address.
   auto address(const Size& index) -> Scalar*;
 
-  /// Outputs all sensor parameters to a YAML emitter.
+  /// Outputs all sensor variables to a YAML emitter.
   /// \param emitter Output YAML emitter.
-  virtual auto writeParameters(Emitter& emitter) const -> void;
+  virtual auto writeVariables(Emitter& emitter) const -> void;
 
-  Rate rate_;             ///< Rate.
-  Parameters parameters_; ///< Parameters.
+  Rate rate_;           ///< Rate.
+  Variables variables_; ///< Variables.
 
  private:
-  /// Initializes the parameters.
-  auto initializeParameters() -> void;
+  /// Initializes the variables.
+  auto initializeVariables() -> void;
 
-  /// Reads all sensor parameters from a YAML node.
+  /// Reads all sensor variables from a YAML node.
   /// \param node Input YAML node.
-  auto readParameters(const Node& node) -> void;
+  auto readVariables(const Node& node) -> void;
 };
 
 } // namespace hyper

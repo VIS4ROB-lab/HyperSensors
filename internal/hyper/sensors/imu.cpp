@@ -19,15 +19,24 @@ constexpr auto kAccelerometerNoiseDensityName = "accelerometer_noise_density";
 constexpr auto kAccelerometerIntrinsicsName = "accelerometer_intrinsics";
 constexpr auto kAccelerometerAxesOffsetsName = "accelerometer_axes_offsets";
 
+/// Appends a vector and existing one.
+/// \tparam TElement Element type.
+/// \tparam TArgs Variadic argument types.
+/// \param output Vector to append to.
+/// \param args Vector to append.
 template <typename TElement, typename... TArgs>
 void appendVectors(std::vector<TElement>& output, const TArgs&... args) {
   (output.insert(output.end(), std::begin(args), std::end(args)), ...);
 }
 
+/// Concatenates vectors.
+/// \tparam TArgs Variadic argument types.
+/// \param args Input arguments.
+/// \return Concatenated vectors.
 template <typename... TArgs>
 auto concatVectors(const TArgs&... args) {
-  using Container = typename std::tuple_element<0, std::tuple<TArgs...>>::type;
-  Container output;
+  using Output = typename std::tuple_element<0, std::tuple<TArgs...>>::type;
+  Output output;
   output.reserve((... + args.size()));
   appendVectors(output, args...);
   return output;
@@ -41,18 +50,18 @@ IMU::IMU(const Node& node)
       gyroscope_bias_{},
       accelerometer_noise_density_{},
       accelerometer_bias_{} {
-  initializeParameters();
+  initializeVariables();
   if (!node.IsNull()) {
-    readParameters(node);
+    readVariables(node);
   }
 }
 
-auto IMU::memoryBlocks() const -> MemoryBlocks<Scalar> {
-  return concatVectors(Sensor::memoryBlocks(), gyroscopeBias().memoryBlocks(), accelerometerBias().memoryBlocks());
+auto IMU::parameters() const -> Pointers<Parameter> {
+  return concatVectors(Sensor::parameters(), gyroscopeBias().parameters(), accelerometerBias().parameters());
 }
 
-auto IMU::memoryBlocks(const Stamp& stamp) const -> MemoryBlocks<Scalar> {
-  return concatVectors(Sensor::memoryBlocks(stamp), gyroscopeBias().memoryBlocks(stamp), accelerometerBias().memoryBlocks(stamp));
+auto IMU::parameters(const Stamp& stamp) const -> Pointers<Parameter> {
+  return concatVectors(Sensor::parameters(stamp), gyroscopeBias().parameters(stamp), accelerometerBias().parameters(stamp));
 }
 
 auto IMU::gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity& {
@@ -121,12 +130,12 @@ auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
   return Eigen::Map<AccelerometerAxesOffsets>{address(Traits<IMU>::kAccelerometerAxesOffsetsOffset)};
 }
 
-auto IMU::initializeParameters() -> void {
-  DCHECK_LE(Traits<IMU>::kNumParameters, parameters().variables().size());
-  parameters_.setVariable(Traits<IMU>::kGyroscopeIntrinsicsOffset, std::make_unique<GyroscopeIntrinsics>());
-  parameters_.setVariable(Traits<IMU>::kGyroscopeSensitivityOffset, std::make_unique<GyroscopeSensitivity>());
-  parameters_.setVariable(Traits<IMU>::kAccelerometerIntrinsicsOffset, std::make_unique<AccelerometerIntrinsics>());
-  parameters_.setVariable(Traits<IMU>::kAccelerometerAxesOffsetsOffset, std::make_unique<AccelerometerAxesOffsets>());
+auto IMU::initializeVariables() -> void {
+  DCHECK_LE(Traits<IMU>::kNumParameters, variables_.size());
+  variables_[Traits<IMU>::kGyroscopeIntrinsicsOffset] = std::make_unique<GyroscopeIntrinsics>();
+  variables_[Traits<IMU>::kGyroscopeSensitivityOffset] = std::make_unique<GyroscopeSensitivity>();
+  variables_[Traits<IMU>::kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();
+  variables_[Traits<IMU>::kAccelerometerAxesOffsetsOffset] = std::make_unique<AccelerometerAxesOffsets>();
 
   // Initialize gyroscope bias.
   auto gyroscope_bias_interpolator = std::make_unique<BasisInterpolator>(3, true);
@@ -139,7 +148,7 @@ auto IMU::initializeParameters() -> void {
   accelerometer_bias_ = std::make_unique<AbstractState>(std::move(accelerometer_bias_interpolator), std::move(accelerometer_bias_policy));
 }
 
-auto IMU::readParameters(const Node& node) -> void {
+auto IMU::readVariables(const Node& node) -> void {
   gyroscopeIntrinsics() = yaml::ReadVariable<GyroscopeIntrinsics>(node, kGyroscopeIntrinsicsName);
   gyroscopeSensitivity() = yaml::ReadVariable<GyroscopeSensitivity>(node, kGyroscopeSensitivityName);
   gyroscopeNoiseDensity() = yaml::ReadAs<GyroscopeNoiseDensity>(node, kGyroscopeNoiseDensityName);
@@ -148,8 +157,8 @@ auto IMU::readParameters(const Node& node) -> void {
   accelerometerNoiseDensity() = yaml::ReadAs<AccelerometerNoiseDensity>(node, kAccelerometerNoiseDensityName);
 }
 
-auto IMU::writeParameters(Emitter& emitter) const -> void {
-  Sensor::writeParameters(emitter);
+auto IMU::writeVariables(Emitter& emitter) const -> void {
+  Sensor::writeVariables(emitter);
   yaml::WriteVariable(emitter, kGyroscopeIntrinsicsName, gyroscopeIntrinsics());
   yaml::WriteVariable(emitter, kGyroscopeSensitivityName, gyroscopeSensitivity());
   yaml::Write(emitter, kGyroscopeNoiseDensityName, gyroscopeNoiseDensity());

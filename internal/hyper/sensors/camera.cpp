@@ -90,9 +90,9 @@ Camera::Camera(const Node& node)
       sensor_size_{},
       shutter_type_{ShutterType::DEFAULT},
       shutter_delta_{kDefaultShutterDelta} {
-  initializeParameters();
+  initializeVariables();
   if (!node.IsNull()) {
-    readParameters(node);
+    readVariables(node);
   }
 }
 
@@ -129,7 +129,9 @@ auto Camera::intrinsics() -> Eigen::Map<Intrinsics<Scalar>> {
 }
 
 auto Camera::distortion() const -> const AbstractDistortion<Scalar>& {
-  return static_cast<const AbstractDistortion<Scalar>&>(parameters().variable(Traits<Camera>::kDistortionOffset)); // NOLINT
+  const auto p_distortion = variables_[Traits<Camera>::kDistortionOffset].get();
+  DCHECK(p_distortion != nullptr);
+  return static_cast<const AbstractDistortion<Scalar>&>(*p_distortion); // NOLINT
 }
 
 auto Camera::distortion() -> AbstractDistortion<Scalar>& {
@@ -137,7 +139,9 @@ auto Camera::distortion() -> AbstractDistortion<Scalar>& {
 }
 
 auto Camera::setDistortion(std::unique_ptr<AbstractDistortion<Scalar>>&& distortion) -> void {
-  parameters_.setVariable(Traits<Camera>::kDistortionOffset, std::move(distortion));
+  DCHECK_LE(Traits<Camera>::kNumParameters, variables_.size());
+  DCHECK(distortion.get() != nullptr);
+  variables_[Traits<Camera>::kDistortionOffset] = std::move(distortion);
 }
 
 auto Camera::correctShutterStamps(const Stamp& stamp, const std::vector<Pixel<Scalar>>& pixels) const -> Stamps {
@@ -177,10 +181,10 @@ auto Camera::triangulate(const Camera& other, const Eigen::Ref<const Bearing<Sca
   return Triangulate(T_this_other, b_this, b_other);
 }
 
-auto Camera::initializeParameters() -> void {
-  DCHECK_LE(Traits<Camera>::kNumParameters, parameters().variables().size());
-  parameters_.setVariable(Traits<Camera>::kIntrinsicsOffset, std::make_unique<Intrinsics<Scalar>>());
-  parameters_.setVariable(Traits<Camera>::kDistortionOffset, nullptr);
+auto Camera::initializeVariables() -> void {
+  DCHECK_LE(Traits<Camera>::kNumParameters, variables_.size());
+  variables_[Traits<Camera>::kIntrinsicsOffset] = std::make_unique<Intrinsics<Scalar>>();
+  variables_[Traits<Camera>::kDistortionOffset] = nullptr;
 }
 
 auto Camera::ReadSensorSize(const Node& node) -> SensorSize {
@@ -221,7 +225,7 @@ auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<AbstractDistort
   }
 }
 
-auto Camera::readParameters(const Node& node) -> void {
+auto Camera::readVariables(const Node& node) -> void {
   sensor_size_ = ReadSensorSize(node);
   shutter_type_ = ReadShutterType(node);
   shutter_delta_ = (shutterType() != ShutterType::GLOBAL) ? ReadShutterDelta(node) : kDefaultShutterDelta;
@@ -258,7 +262,6 @@ auto Camera::writeShutterDelta(Emitter& emitter) const -> void {
 }
 
 auto Camera::writeDistortion(Emitter& emitter) const -> void {
-  // Fetch distortion.
   emitter << YAML::BeginMap << YAML::Key << kDistortionName;
   emitter << YAML::Value << YAML::BeginMap;
   yaml::Write(emitter, "type", "radial_tangential");
@@ -267,8 +270,8 @@ auto Camera::writeDistortion(Emitter& emitter) const -> void {
   emitter << YAML::EndMap;
 }
 
-auto Camera::writeParameters(Emitter& emitter) const -> void {
-  Sensor::writeParameters(emitter);
+auto Camera::writeVariables(Emitter& emitter) const -> void {
+  Sensor::writeVariables(emitter);
   writeSensorSize(emitter);
   writeShutterType(emitter);
   writeShutterDelta(emitter);

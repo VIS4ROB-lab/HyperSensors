@@ -26,14 +26,14 @@ class IMU final : public Sensor {
   /// \param node Input YAML node.
   explicit IMU(const Node& node = {});
 
-  /// Collects the memory blocks.
-  /// \return Memory blocks.
-  [[nodiscard]] auto memoryBlocks() const -> MemoryBlocks<Scalar> final;
+  /// Parameters accessor.
+  /// \return Parameters.
+  [[nodiscard]] auto parameters() const -> Pointers<Parameter> final;
 
-  /// Collects the (time-specific) memory blocks.
+  /// Parameters accessor (stamp-based).
   /// \param stamp Query stamp.
-  /// \return Memory blocks.
-  [[nodiscard]] auto memoryBlocks(const Stamp& stamp) const -> MemoryBlocks<Scalar> final;
+  /// \return Parameters.
+  [[nodiscard]] auto parameters(const Stamp& stamp) const -> Pointers<Parameter> final;
 
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.
@@ -100,16 +100,16 @@ class IMU final : public Sensor {
   auto accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets>;
 
  private:
-  /// Initializes the parameters.
-  auto initializeParameters() -> void;
+  /// Initializes the variables.
+  auto initializeVariables() -> void;
 
-  /// Reads all sensor parameters from a YAML node.
+  /// Reads all sensor variables from a YAML node.
   /// \param node Input YAML node.
-  auto readParameters(const Node& node) -> void;
+  auto readVariables(const Node& node) -> void;
 
-  /// Outputs all sensor parameters to a YAML emitter.
+  /// Outputs all sensor variables to a YAML emitter.
   /// \param emitter Output YAML emitter.
-  auto writeParameters(Emitter& emitter) const -> void final;
+  auto writeVariables(Emitter& emitter) const -> void final;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;         ///< Gyroscope noise density.
   std::unique_ptr<AbstractState> gyroscope_bias_;         ///< Gyroscope bias.

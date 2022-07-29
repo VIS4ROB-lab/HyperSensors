@@ -18,7 +18,7 @@ target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wnon-virtual-dto
 target_compile_options(${PROJECT_NAME} INTERFACE -O3 -march=native -fconcepts)
 
 # Fetch (external) content.
-FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG 0911d0d5321bff571280fe2d7b92b0cd508668a4)
+FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG 15dbba0431832a66f7be055dac79c89ead2816df)
 FetchContent_MakeAvailable(HyperState)
 
 # Find Eigen target if not present.

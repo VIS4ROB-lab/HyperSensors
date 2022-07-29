@@ -109,8 +109,8 @@ class Camera final : public Sensor {
   auto triangulate(const Camera& other, const Eigen::Ref<const Bearing<Scalar>>& b_this, const Eigen::Ref<const Bearing<Scalar>>& b_other) -> Position<Scalar>;
 
  private:
-  /// Initializes the parameters.
-  auto initializeParameters() -> void;
+  /// Initializes the variables.
+  auto initializeVariables() -> void;
 
   /// Reads the sensor size.
   /// \param node Input YAML node.
@@ -132,9 +132,9 @@ class Camera final : public Sensor {
   /// \return Distortion
   static auto ReadDistortion(const Node& node) -> std::unique_ptr<AbstractDistortion<Scalar>>;
 
-  /// Reads all sensor parameters from a YAML node.
+  /// Reads all sensor variables from a YAML node.
   /// \param node Input YAML node.
-  auto readParameters(const Node& node) -> void;
+  auto readVariables(const Node& node) -> void;
 
   /// Writes the sensor size.
   /// \param emitter Modifiable emitter.
@@ -152,9 +152,9 @@ class Camera final : public Sensor {
   /// \param emitter Modifiable emitter.
   auto writeDistortion(Emitter& emitter) const -> void;
 
-  /// Outputs all sensor parameters to a YAML emitter.
+  /// Outputs all sensor variables to a YAML emitter.
   /// \param emitter Output YAML emitter.
-  auto writeParameters(Emitter& emitter) const -> void final;
+  auto writeVariables(Emitter& emitter) const -> void final;
 
   SensorSize sensor_size_;     ///< Sensor size.
   ShutterType shutter_type_;   ///< Shutter type.
