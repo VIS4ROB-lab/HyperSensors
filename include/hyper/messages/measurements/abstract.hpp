@@ -10,9 +10,13 @@ namespace hyper {
 class AbstractMeasurement
     : public AbstractMessage {
  public:
-  /// Memory block accessor.
-  /// \return Memory block.
-  [[nodiscard]] virtual auto memoryBlock() const -> MemoryBlock<const Scalar> = 0;
+  /// Variable accessor.
+  /// \return Variable.
+  [[nodiscard]] virtual auto variable() const -> const AbstractVariable<Scalar>& = 0;
+
+  /// Variable modifier.
+  /// \return Variable.
+  [[nodiscard]] virtual auto variable() -> AbstractVariable<Scalar>& = 0;
 
  protected:
   /// Constructor from stamp and sensor.

@@ -86,15 +86,10 @@ class Sensor {
   /// \param node Input YAML node.
   Sensor(const Size& num_variables, const Node& node);
 
-  /// Retrieves the address of a variable.
+  /// Maps a variable in vector form.
   /// \param index Index of variable.
-  /// \return Address.
-  [[nodiscard]] auto address(const Size& index) const -> const Scalar*;
-
-  /// Retrieves the address of a variable.
-  /// \param index Index of variable.
-  /// \return Address.
-  auto address(const Size& index) -> Scalar*;
+  /// \return Variable as vector.
+  [[nodiscard]] auto variableAsVector(const Size& index) const -> Eigen::Map<DynamicVector<Scalar>>;
 
   /// Outputs all sensor variables to a YAML emitter.
   /// \param emitter Output YAML emitter.

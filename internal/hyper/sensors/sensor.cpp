@@ -46,11 +46,13 @@ auto Sensor::parameters(const Stamp& /* stamp */) const -> Pointers<Parameter> {
 }
 
 auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
-  return Eigen::Map<const Transformation>{address(Traits<Sensor>::kTransformationOffset)};
+  const auto vector = variableAsVector(Traits<Sensor>::kTransformationOffset);
+  return Eigen::Map<const Transformation>{vector.data()};
 }
 
 auto Sensor::transformation() -> Eigen::Map<Transformation> {
-  return Eigen::Map<Transformation>{address(Traits<Sensor>::kTransformationOffset)};
+  auto vector = variableAsVector(Traits<Sensor>::kTransformationOffset);
+  return Eigen::Map<Transformation>{vector.data()};
 }
 
 auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& {
@@ -69,14 +71,10 @@ Sensor::Sensor(const Size& num_variables, const Node& node)
   }
 }
 
-auto Sensor::address(const Size& index) const -> const Scalar* {
+auto Sensor::variableAsVector(const Size& index) const -> Eigen::Map<DynamicVector<Scalar>> {
   DCHECK_LT(index, variables_.size());
   DCHECK(variables_[index] != nullptr);
-  return variables_[index]->memory().address;
-}
-
-auto Sensor::address(const Size& index) -> Scalar* {
-  return const_cast<Scalar*>(std::as_const(*this).address(index));
+  return variables_[index]->asVector();
 }
 
 auto Sensor::writeVariables(Emitter& emitter) const -> void {

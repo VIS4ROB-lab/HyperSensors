@@ -6,7 +6,7 @@
 #include <glog/logging.h>
 #include <yaml-cpp/yaml.h>
 
-#include "hyper/variables/memory.hpp"
+#include "hyper/variables/forward.hpp"
 
 namespace hyper::yaml {
 
@@ -70,9 +70,9 @@ auto Write(Emitter& emitter, const Key& key, const TValue& value) -> Emitter& {
 /// \return Modified YAML emitter.
 template <typename TVariable>
 auto WriteVariable(Emitter& emitter, const Key& key, const TVariable& variable) -> Emitter& {
-  const auto memory_block = variable.memory();
-  const auto address = memory_block.address;
-  return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<typename TVariable::Scalar>{address, address + memory_block.size};
+  const auto vector = variable.asVector();
+  const auto data = vector.data();
+  return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<typename TVariable::Scalar>{data, data + vector.size()};
 }
 
 } // namespace hyper::yaml

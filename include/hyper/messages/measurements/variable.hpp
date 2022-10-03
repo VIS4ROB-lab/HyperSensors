@@ -27,20 +27,14 @@ class VariableMeasurement
 
   /// Variable accessor.
   /// \return Variable.
-  [[nodiscard]] auto variable() const -> const TVariable& {
+  [[nodiscard]] auto variable() const -> const TVariable& final {
     return variable_;
   }
 
   /// Variable modifier.
   /// \return Variable.
-  auto variable() -> TVariable& {
+  auto variable() -> TVariable& final {
     return const_cast<TVariable&>(std::as_const(*this).variable());
-  }
-
-  /// Memory block accessor.
-  /// \return Memory block.
-  [[nodiscard]] auto memoryBlock() const -> MemoryBlock<const Scalar> final {
-    return variable_.memory();
   }
 
  private:

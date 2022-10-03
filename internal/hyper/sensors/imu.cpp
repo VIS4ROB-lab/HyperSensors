@@ -82,19 +82,23 @@ auto IMU::gyroscopeBias() -> AbstractState& {
 }
 
 auto IMU::gyroscopeIntrinsics() const -> Eigen::Map<const GyroscopeIntrinsics> {
-  return Eigen::Map<const GyroscopeIntrinsics>{address(Traits<IMU>::kGyroscopeIntrinsicsOffset)};
+  const auto vector = variableAsVector(Traits<IMU>::kGyroscopeIntrinsicsOffset);
+  return Eigen::Map<const GyroscopeIntrinsics>{vector.data()};
 }
 
 auto IMU::gyroscopeIntrinsics() -> Eigen::Map<GyroscopeIntrinsics> {
-  return Eigen::Map<GyroscopeIntrinsics>{address(Traits<IMU>::kGyroscopeIntrinsicsOffset)};
+  auto vector = variableAsVector(Traits<IMU>::kGyroscopeIntrinsicsOffset);
+  return Eigen::Map<GyroscopeIntrinsics>{vector.data()};
 }
 
 auto IMU::gyroscopeSensitivity() const -> Eigen::Map<const GyroscopeSensitivity> {
-  return Eigen::Map<const GyroscopeSensitivity>{address(Traits<IMU>::kGyroscopeSensitivityOffset)};
+  const auto vector = variableAsVector(Traits<IMU>::kGyroscopeSensitivityOffset);
+  return Eigen::Map<const GyroscopeSensitivity>{vector.data()};
 }
 
 auto IMU::gyroscopeSensitivity() -> Eigen::Map<GyroscopeSensitivity> {
-  return Eigen::Map<GyroscopeSensitivity>{address(Traits<IMU>::kGyroscopeSensitivityOffset)};
+  auto vector = variableAsVector(Traits<IMU>::kGyroscopeSensitivityOffset);
+  return Eigen::Map<GyroscopeSensitivity>{vector.data()};
 }
 
 auto IMU::accelerometerNoiseDensity() const -> const AccelerometerNoiseDensity& {
@@ -115,19 +119,23 @@ auto IMU::accelerometerBias() -> AbstractState& {
 }
 
 auto IMU::accelerometerIntrinsics() const -> Eigen::Map<const AccelerometerIntrinsics> {
-  return Eigen::Map<const AccelerometerIntrinsics>{address(Traits<IMU>::kAccelerometerIntrinsicsOffset)};
+  const auto vector = variableAsVector(Traits<IMU>::kAccelerometerIntrinsicsOffset);
+  return Eigen::Map<const AccelerometerIntrinsics>{vector.data()};
 }
 
 auto IMU::accelerometerIntrinsics() -> Eigen::Map<AccelerometerIntrinsics> {
-  return Eigen::Map<AccelerometerIntrinsics>{address(Traits<IMU>::kAccelerometerIntrinsicsOffset)};
+  auto vector = variableAsVector(Traits<IMU>::kAccelerometerIntrinsicsOffset);
+  return Eigen::Map<AccelerometerIntrinsics>{vector.data()};
 }
 
 auto IMU::accelerometerAxesOffsets() const -> Eigen::Map<const AccelerometerAxesOffsets> {
-  return Eigen::Map<const AccelerometerAxesOffsets>{address(Traits<IMU>::kAccelerometerAxesOffsetsOffset)};
+  const auto vector = variableAsVector(Traits<IMU>::kAccelerometerAxesOffsetsOffset);
+  return Eigen::Map<const AccelerometerAxesOffsets>{vector.data()};
 }
 
 auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
-  return Eigen::Map<AccelerometerAxesOffsets>{address(Traits<IMU>::kAccelerometerAxesOffsetsOffset)};
+  auto vector = variableAsVector(Traits<IMU>::kAccelerometerAxesOffsetsOffset);
+  return Eigen::Map<AccelerometerAxesOffsets>{vector.data()};
 }
 
 auto IMU::initializeVariables() -> void {

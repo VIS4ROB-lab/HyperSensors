@@ -121,11 +121,13 @@ auto Camera::shutterDelta() -> ShutterDelta& {
 }
 
 auto Camera::intrinsics() const -> Eigen::Map<const Intrinsics<Scalar>> {
-  return Eigen::Map<const Intrinsics<Scalar>>{address(Traits<Camera>::kIntrinsicsOffset)};
+  const auto vector = variableAsVector(Traits<Camera>::kIntrinsicsOffset);
+  return Eigen::Map<const Intrinsics<Scalar>>{vector.data()};
 }
 
 auto Camera::intrinsics() -> Eigen::Map<Intrinsics<Scalar>> {
-  return Eigen::Map<Intrinsics<Scalar>>{address(Traits<Camera>::kIntrinsicsOffset)};
+  auto vector = variableAsVector(Traits<Camera>::kIntrinsicsOffset);
+  return Eigen::Map<Intrinsics<Scalar>>{vector.data()};
 }
 
 auto Camera::distortion() const -> const AbstractDistortion<Scalar>& {
