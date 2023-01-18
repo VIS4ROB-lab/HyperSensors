@@ -9,7 +9,7 @@
 #include "hyper/sensors/camera.hpp"
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 class VisualTracks
     : public AbstractMessage {
@@ -79,4 +79,4 @@ class StereoVisualTracks
   const Sensor* other_sensor_; ///< Other sensor.
 };
 
-} // namespace hyper
+} // namespace hyper::messages

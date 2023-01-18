@@ -5,7 +5,7 @@
 
 #include "hyper/messages/visual.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 VisualTracks::VisualTracks(const Stamp& stamp, const Camera& camera)
     : AbstractMessage{stamp, camera},
@@ -56,4 +56,4 @@ auto StereoVisualTracks::setOtherSensor(const Camera& other_camera) -> void {
   other_sensor_ = &other_camera;
 }
 
-} // namespace hyper
+} // namespace hyper::messages

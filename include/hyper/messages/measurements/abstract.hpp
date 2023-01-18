@@ -6,7 +6,7 @@
 #include "hyper/messages/abstract.hpp"
 #include "hyper/variables/abstract.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 class AbstractMeasurement
     : public AbstractMessage {
@@ -26,4 +26,4 @@ class AbstractMeasurement
   explicit AbstractMeasurement(const Stamp& stamp, const Sensor& sensor);
 };
 
-} // namespace hyper
+} // namespace hyper::messages

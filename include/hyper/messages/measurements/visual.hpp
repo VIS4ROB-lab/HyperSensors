@@ -6,7 +6,7 @@
 #include "hyper/messages/measurements/variable.hpp"
 #include "hyper/sensors/camera.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 template <typename TVariable>
 class CameraMeasurement final
@@ -36,4 +36,4 @@ using PixelMeasurement = CameraMeasurement<Pixel<Scalar>>;
 
 using BearingMeasurement = CameraMeasurement<Bearing<Scalar>>;
 
-} // namespace hyper
+} // namespace hyper::messages

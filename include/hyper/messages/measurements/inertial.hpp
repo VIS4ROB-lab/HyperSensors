@@ -6,7 +6,7 @@
 #include "hyper/messages/measurements/variable.hpp"
 #include "hyper/sensors/imu.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 template <typename TManifold>
 class InertialMeasurement final
@@ -32,4 +32,4 @@ class InertialMeasurement final
   }
 };
 
-} // namespace hyper
+} // namespace hyper::messages

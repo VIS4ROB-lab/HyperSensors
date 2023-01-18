@@ -5,7 +5,7 @@
 
 #include "hyper/messages/measurements/abstract.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 auto AbstractMessage::stamp() const -> const Stamp& {
   return stamp_;
@@ -25,4 +25,4 @@ AbstractMessage::AbstractMessage(const Stamp& stamp, const Sensor& sensor)
       sensor_{&sensor} {
 }
 
-} // namespace hyper
+} // namespace hyper::messages

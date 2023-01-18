@@ -3,9 +3,9 @@
 
 #include "hyper/messages/measurements/abstract.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 AbstractMeasurement::AbstractMeasurement(const Stamp& stamp, const Sensor& sensor)
     : AbstractMessage{stamp, sensor} {}
 
-} // namespace hyper
+} // namespace hyper::messages

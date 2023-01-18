@@ -7,7 +7,7 @@
 #include "hyper/messages/forward.hpp"
 #include "hyper/sensors/forward.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 class AbstractMessage {
  public:
@@ -55,4 +55,4 @@ class AbstractMessage {
   const Sensor* sensor_; ///< Sensor.
 };
 
-} // namespace hyper
+} // namespace hyper::messages

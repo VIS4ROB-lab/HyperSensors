@@ -5,7 +5,7 @@
 
 #include "hyper/messages/forward.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 class AbstractMeasurement;
 
@@ -21,4 +21,4 @@ class InertialMeasurement;
 template <typename>
 class RelativeMeasurement;
 
-} // namespace hyper
+} // namespace hyper::messages

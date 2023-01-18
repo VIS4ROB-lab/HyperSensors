@@ -5,7 +5,7 @@
 
 #include "hyper/messages/measurements/variable.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 template <typename TVariable>
 class RelativeMeasurement final
@@ -51,4 +51,4 @@ using RelativeManifoldMeasurement = RelativeMeasurement<TManifold>;
 template <typename TManifold>
 using RelativeTangentMeasurement = RelativeMeasurement<Tangent<TManifold>>;
 
-} // namespace hyper
+} // namespace hyper::messages

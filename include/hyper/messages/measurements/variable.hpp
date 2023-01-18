@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include "hyper/variables/forward.hpp"
+
 #include "hyper/messages/measurements/abstract.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 template <typename TVariable>
 class VariableMeasurement
@@ -47,4 +49,4 @@ using ManifoldMeasurement = VariableMeasurement<TManifold>;
 template <typename TManifold>
 using TangentMeasurement = VariableMeasurement<Tangent<TManifold>>;
 
-} // namespace hyper
+} // namespace hyper::messages
