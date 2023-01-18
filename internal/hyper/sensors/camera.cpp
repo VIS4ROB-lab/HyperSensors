@@ -6,11 +6,11 @@
 #include "hyper/variables/intrinsics.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 namespace {
 
-// Parameter names.
+// Variable names.
 constexpr auto kSensorSizeName = "resolution";
 constexpr auto kShutterTypeName = "shutter";
 constexpr auto kShutterDeltaName = "shutter_delta";
@@ -86,7 +86,7 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
 }
 
 Camera::Camera(const Node& node)
-    : Sensor{Traits<Camera>::kNumParameters, node},
+    : Sensor{kNumParameters, node},
       sensor_size_{},
       shutter_type_{ShutterType::DEFAULT},
       shutter_delta_{kDefaultShutterDelta} {
@@ -121,17 +121,17 @@ auto Camera::shutterDelta() -> ShutterDelta& {
 }
 
 auto Camera::intrinsics() const -> Eigen::Map<const Intrinsics<Scalar>> {
-  const auto vector = variableAsVector(Traits<Camera>::kIntrinsicsOffset);
+  const auto vector = variableAsVector(kIntrinsicsOffset);
   return Eigen::Map<const Intrinsics<Scalar>>{vector.data()};
 }
 
 auto Camera::intrinsics() -> Eigen::Map<Intrinsics<Scalar>> {
-  auto vector = variableAsVector(Traits<Camera>::kIntrinsicsOffset);
+  auto vector = variableAsVector(kIntrinsicsOffset);
   return Eigen::Map<Intrinsics<Scalar>>{vector.data()};
 }
 
 auto Camera::distortion() const -> const AbstractDistortion<Scalar>& {
-  const auto p_distortion = variables_[Traits<Camera>::kDistortionOffset].get();
+  const auto p_distortion = variables_[kDistortionOffset].get();
   DCHECK(p_distortion != nullptr);
   return static_cast<const AbstractDistortion<Scalar>&>(*p_distortion); // NOLINT
 }
@@ -141,9 +141,9 @@ auto Camera::distortion() -> AbstractDistortion<Scalar>& {
 }
 
 auto Camera::setDistortion(std::unique_ptr<AbstractDistortion<Scalar>>&& distortion) -> void {
-  DCHECK_LE(Traits<Camera>::kNumParameters, variables_.size());
+  DCHECK_LE(kNumParameters, variables_.size());
   DCHECK(distortion.get() != nullptr);
-  variables_[Traits<Camera>::kDistortionOffset] = std::move(distortion);
+  variables_[kDistortionOffset] = std::move(distortion);
 }
 
 auto Camera::correctShutterStamps(const Stamp& stamp, const std::vector<Pixel<Scalar>>& pixels) const -> Stamps {
@@ -184,14 +184,13 @@ auto Camera::triangulate(const Camera& other, const Eigen::Ref<const Bearing<Sca
 }
 
 auto Camera::initializeVariables() -> void {
-  DCHECK_LE(Traits<Camera>::kNumParameters, variables_.size());
-  variables_[Traits<Camera>::kIntrinsicsOffset] = std::make_unique<Intrinsics<Scalar>>();
-  variables_[Traits<Camera>::kDistortionOffset] = nullptr;
+  DCHECK_LE(kNumParameters, variables_.size());
+  variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics<Scalar>>();
+  variables_[kDistortionOffset] = nullptr;
 }
 
 auto Camera::ReadSensorSize(const Node& node) -> SensorSize {
-  using Dimensions = std::vector<SensorSize::Value>;
-  const auto dimensions = yaml::ReadAs<Dimensions>(node, kSensorSizeName);
+  const auto dimensions = yaml::ReadAs<std::vector<Index>>(node, kSensorSizeName);
   CHECK_EQ(dimensions.size(), 2);
   return {dimensions[0], dimensions[1]};
 }
@@ -281,4 +280,4 @@ auto Camera::writeVariables(Emitter& emitter) const -> void {
   writeDistortion(emitter);
 }
 
-} // namespace hyper
+} // namespace hyper::sensors

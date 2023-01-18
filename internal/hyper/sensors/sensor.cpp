@@ -6,11 +6,11 @@
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/variables/groups/se3.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 namespace {
 
-// Parameter names.
+// Variable names.
 constexpr auto kRateName = "rate";
 constexpr auto kTransformationName = "transformation";
 
@@ -20,7 +20,7 @@ constexpr auto kDefaultRate = -1;
 } // namespace
 
 Sensor::Sensor(const Node& node)
-    : Sensor{Traits<Sensor>::kNumParameters, node} {}
+    : Sensor{kNumParameters, node} {}
 
 auto Sensor::rate() const -> const Rate& {
   return rate_;
@@ -46,12 +46,12 @@ auto Sensor::parameters(const Stamp& /* stamp */) const -> Pointers<Parameter> {
 }
 
 auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
-  const auto vector = variableAsVector(Traits<Sensor>::kTransformationOffset);
+  const auto vector = variableAsVector(kTransformationOffset);
   return Eigen::Map<const Transformation>{vector.data()};
 }
 
 auto Sensor::transformation() -> Eigen::Map<Transformation> {
-  auto vector = variableAsVector(Traits<Sensor>::kTransformationOffset);
+  auto vector = variableAsVector(kTransformationOffset);
   return Eigen::Map<Transformation>{vector.data()};
 }
 
@@ -83,8 +83,8 @@ auto Sensor::writeVariables(Emitter& emitter) const -> void {
 }
 
 auto Sensor::initializeVariables() -> void {
-  DCHECK_LE(Traits<Sensor>::kNumParameters, variables_.size());
-  variables_[Traits<Sensor>::kTransformationOffset] = std::make_unique<Transformation>();
+  DCHECK_LE(kNumParameters, variables_.size());
+  variables_[kTransformationOffset] = std::make_unique<Transformation>();
 }
 
 auto Sensor::readVariables(const Node& node) -> void {
@@ -92,4 +92,4 @@ auto Sensor::readVariables(const Node& node) -> void {
   transformation() = yaml::ReadVariable<Transformation>(node, kTransformationName);
 }
 
-} // namespace hyper
+} // namespace hyper::sensors

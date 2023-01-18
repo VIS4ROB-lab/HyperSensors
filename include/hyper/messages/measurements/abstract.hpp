@@ -4,6 +4,7 @@
 #pragma once
 
 #include "hyper/messages/abstract.hpp"
+#include "hyper/variables/abstract.hpp"
 
 namespace hyper {
 

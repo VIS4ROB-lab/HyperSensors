@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "hyper/definitions.hpp"
 #include "hyper/messages/forward.hpp"
 #include "hyper/sensors/forward.hpp"
 
@@ -10,6 +11,9 @@ namespace hyper {
 
 class AbstractMessage {
  public:
+  // Definitions.
+  using Sensor = sensors::Sensor;
+
   /// Default destructor.
   virtual ~AbstractMessage() = default;
 

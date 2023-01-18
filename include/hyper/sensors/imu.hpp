@@ -7,20 +7,27 @@
 #include "hyper/state/abstract.hpp"
 #include "hyper/variables/orthonormality_alignment.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 class IMU final : public Sensor {
  public:
-  // Definitions.
-  using GyroscopeNoiseDensity = Traits<IMU>::GyroscopeNoiseDensity;
-  using GyroscopeIntrinsics = Traits<IMU>::GyroscopeIntrinsics;
-  using GyroscopeSensitivity = Traits<IMU>::GyroscopeSensitivity;
-  using GyroscopeBias = Traits<IMU>::GyroscopeBias;
+  // Constants.
+  static constexpr auto kGyroscopeIntrinsicsOffset = Sensor::kNumParameters;
+  static constexpr auto kAccelerometerIntrinsicsOffset = kGyroscopeIntrinsicsOffset + 1;
+  static constexpr auto kAccelerometerAxesOffsetsOffset = kAccelerometerIntrinsicsOffset + 1;
+  static constexpr auto kGyroscopeSensitivityOffset = kAccelerometerAxesOffsetsOffset + 1;
+  static constexpr auto kNumParameters = kGyroscopeSensitivityOffset + 1;
 
-  using AccelerometerNoiseDensity = Traits<IMU>::AccelerometerNoiseDensity;
-  using AccelerometerIntrinsics = Traits<IMU>::AccelerometerIntrinsics;
-  using AccelerometerAxesOffsets = Traits<IMU>::AccelerometerAxesOffsets;
-  using AccelerometerBias = Traits<IMU>::AccelerometerBias;
+  // Definitions.
+  using GyroscopeNoiseDensity = Scalar;
+  using GyroscopeIntrinsics = OrthonormalityAlignment<Scalar, 3>;
+  using GyroscopeSensitivity = Cartesian<Scalar, 9>;
+  using GyroscopeBias = Stamped<Cartesian<Scalar, 3>>;
+
+  using AccelerometerNoiseDensity = Scalar;
+  using AccelerometerIntrinsics = OrthonormalityAlignment<Scalar, 3>;
+  using AccelerometerAxesOffsets = Cartesian<Scalar, 9>;
+  using AccelerometerBias = Stamped<Cartesian<Scalar, 3>>;
 
   /// Constructor from YAML file.
   /// \param node Input YAML node.
@@ -117,4 +124,4 @@ class IMU final : public Sensor {
   std::unique_ptr<AbstractState> accelerometer_bias_;     ///< Accelerometer bias.
 };
 
-} // namespace hyper
+} // namespace hyper::sensors

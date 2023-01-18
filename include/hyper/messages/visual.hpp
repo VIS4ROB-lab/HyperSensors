@@ -16,6 +16,9 @@ class VisualTracks
  public:
   // Definitions.
   using Image = cv_bridge::CvImageConstPtr;
+
+  using Camera = sensors::Camera;
+
   using Points = std::vector<cv::Point2f>;
   using Entry = std::tuple<Image, Points>;
   using Tracks = std::map<const Camera*, Entry>;

@@ -7,14 +7,30 @@
 #include "hyper/variables/bearing.hpp"
 #include "hyper/variables/distortions/abstract.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 class Camera final : public Sensor {
  public:
-  // Definitions.
-  using SensorSize = Traits<Camera>::SensorSize;
-  using ShutterType = Traits<Camera>::ShutterType;
-  using ShutterDelta = Traits<Camera>::ShutterDelta;
+  // Constants.
+  static constexpr auto kIntrinsicsOffset = Sensor::kNumParameters;
+  static constexpr auto kDistortionOffset = kIntrinsicsOffset + 1;
+  static constexpr auto kNumParameters = kDistortionOffset + 1;
+
+  // Sensor size.
+  struct SensorSize {
+    Index width, height;
+  };
+
+  // Shutter type.
+  enum class ShutterType {
+    GLOBAL,
+    VERTICAL,
+    HORIZONTAL,
+    DEFAULT = GLOBAL
+  };
+
+  // Shutter delta (i.e. increment between readouts).
+  using ShutterDelta = Stamp;
 
   /// Projects positions to the (normalized) image plane.
   /// \param position Position to project.
@@ -161,4 +177,4 @@ class Camera final : public Sensor {
   ShutterDelta shutter_delta_; ///< Shutter delta.
 };
 
-} // namespace hyper
+} // namespace hyper::sensors

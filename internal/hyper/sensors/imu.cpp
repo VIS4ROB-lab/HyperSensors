@@ -7,11 +7,11 @@
 #include "hyper/state/interpolators/basis.hpp"
 #include "hyper/state/policies/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 namespace {
 
-// Parameter names.
+// Variable names.
 constexpr auto kGyroscopeNoiseDensityName = "gyroscope_noise_density";
 constexpr auto kGyroscopeIntrinsicsName = "gyroscope_intrinsics";
 constexpr auto kGyroscopeSensitivityName = "gyroscope_sensitivity";
@@ -45,7 +45,7 @@ auto concatVectors(const TArgs&... args) {
 } // namespace
 
 IMU::IMU(const Node& node)
-    : Sensor{Traits<IMU>::kNumParameters, node},
+    : Sensor{kNumParameters, node},
       gyroscope_noise_density_{},
       gyroscope_bias_{},
       accelerometer_noise_density_{},
@@ -82,22 +82,22 @@ auto IMU::gyroscopeBias() -> AbstractState& {
 }
 
 auto IMU::gyroscopeIntrinsics() const -> Eigen::Map<const GyroscopeIntrinsics> {
-  const auto vector = variableAsVector(Traits<IMU>::kGyroscopeIntrinsicsOffset);
+  const auto vector = variableAsVector(kGyroscopeIntrinsicsOffset);
   return Eigen::Map<const GyroscopeIntrinsics>{vector.data()};
 }
 
 auto IMU::gyroscopeIntrinsics() -> Eigen::Map<GyroscopeIntrinsics> {
-  auto vector = variableAsVector(Traits<IMU>::kGyroscopeIntrinsicsOffset);
+  auto vector = variableAsVector(kGyroscopeIntrinsicsOffset);
   return Eigen::Map<GyroscopeIntrinsics>{vector.data()};
 }
 
 auto IMU::gyroscopeSensitivity() const -> Eigen::Map<const GyroscopeSensitivity> {
-  const auto vector = variableAsVector(Traits<IMU>::kGyroscopeSensitivityOffset);
+  const auto vector = variableAsVector(kGyroscopeSensitivityOffset);
   return Eigen::Map<const GyroscopeSensitivity>{vector.data()};
 }
 
 auto IMU::gyroscopeSensitivity() -> Eigen::Map<GyroscopeSensitivity> {
-  auto vector = variableAsVector(Traits<IMU>::kGyroscopeSensitivityOffset);
+  auto vector = variableAsVector(kGyroscopeSensitivityOffset);
   return Eigen::Map<GyroscopeSensitivity>{vector.data()};
 }
 
@@ -119,31 +119,31 @@ auto IMU::accelerometerBias() -> AbstractState& {
 }
 
 auto IMU::accelerometerIntrinsics() const -> Eigen::Map<const AccelerometerIntrinsics> {
-  const auto vector = variableAsVector(Traits<IMU>::kAccelerometerIntrinsicsOffset);
+  const auto vector = variableAsVector(kAccelerometerIntrinsicsOffset);
   return Eigen::Map<const AccelerometerIntrinsics>{vector.data()};
 }
 
 auto IMU::accelerometerIntrinsics() -> Eigen::Map<AccelerometerIntrinsics> {
-  auto vector = variableAsVector(Traits<IMU>::kAccelerometerIntrinsicsOffset);
+  auto vector = variableAsVector(kAccelerometerIntrinsicsOffset);
   return Eigen::Map<AccelerometerIntrinsics>{vector.data()};
 }
 
 auto IMU::accelerometerAxesOffsets() const -> Eigen::Map<const AccelerometerAxesOffsets> {
-  const auto vector = variableAsVector(Traits<IMU>::kAccelerometerAxesOffsetsOffset);
+  const auto vector = variableAsVector(kAccelerometerAxesOffsetsOffset);
   return Eigen::Map<const AccelerometerAxesOffsets>{vector.data()};
 }
 
 auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
-  auto vector = variableAsVector(Traits<IMU>::kAccelerometerAxesOffsetsOffset);
+  auto vector = variableAsVector(kAccelerometerAxesOffsetsOffset);
   return Eigen::Map<AccelerometerAxesOffsets>{vector.data()};
 }
 
 auto IMU::initializeVariables() -> void {
-  DCHECK_LE(Traits<IMU>::kNumParameters, variables_.size());
-  variables_[Traits<IMU>::kGyroscopeIntrinsicsOffset] = std::make_unique<GyroscopeIntrinsics>();
-  variables_[Traits<IMU>::kGyroscopeSensitivityOffset] = std::make_unique<GyroscopeSensitivity>();
-  variables_[Traits<IMU>::kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();
-  variables_[Traits<IMU>::kAccelerometerAxesOffsetsOffset] = std::make_unique<AccelerometerAxesOffsets>();
+  DCHECK_LE(kNumParameters, variables_.size());
+  variables_[kGyroscopeIntrinsicsOffset] = std::make_unique<GyroscopeIntrinsics>();
+  variables_[kGyroscopeSensitivityOffset] = std::make_unique<GyroscopeSensitivity>();
+  variables_[kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();
+  variables_[kAccelerometerAxesOffsetsOffset] = std::make_unique<AccelerometerAxesOffsets>();
 
   // Initialize gyroscope bias.
   auto gyroscope_bias_interpolator = std::make_unique<BasisInterpolator>(3, true);
@@ -175,4 +175,4 @@ auto IMU::writeVariables(Emitter& emitter) const -> void {
   yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
 }
 
-} // namespace hyper
+} // namespace hyper::sensors

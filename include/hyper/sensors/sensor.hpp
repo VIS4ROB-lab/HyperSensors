@@ -5,22 +5,26 @@
 
 #include "hyper/sensors/forward.hpp"
 
-#include "hyper/variables/composite.hpp"
+#include "hyper/definitions.hpp"
+#include "hyper/variables/groups/se3.hpp"
 #include "hyper/yaml/yaml.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 class Sensor {
  public:
+  // Constants.
+  static constexpr auto kTransformationOffset = 0;
+  static constexpr auto kNumParameters = kTransformationOffset + 1;
+
   // Definitions.
+  using Rate = Scalar;
   using Size = std::size_t;
   using Node = YAML::Node;
   using Emitter = YAML::Emitter;
   using Parameter = AbstractVariable<Scalar>;
   using Variables = std::vector<std::unique_ptr<Parameter>>;
-
-  using Rate = Traits<Sensor>::Rate;
-  using Transformation = Traits<Sensor>::Transformation;
+  using Transformation = SE3<Scalar>;
 
   /// Constructor from YAML file.
   /// \param node Input YAML node.
@@ -107,4 +111,4 @@ class Sensor {
   auto readVariables(const Node& node) -> void;
 };
 
-} // namespace hyper
+} // namespace hyper::sensors
