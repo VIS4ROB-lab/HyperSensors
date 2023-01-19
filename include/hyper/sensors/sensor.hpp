@@ -75,6 +75,15 @@ class Sensor {
   /// \return Pointers.
   [[nodiscard]] virtual auto pointers(const Time& time) const -> std::vector<Variable*>;
 
+  /// Parameters accessor.
+  /// \return Parameters.
+  [[nodiscard]] virtual auto parameters() const -> std::vector<Scalar*>;
+
+  /// Parameters accessor (time-based).
+  /// \param time Query time.
+  /// \return Parameters.
+  [[nodiscard]] virtual auto parameters(const Time& time) const -> std::vector<Scalar*>;
+
   /// Offset accessor.
   /// \return Offset.
   [[nodiscard]] auto offset() const -> Eigen::Map<const Offset>;
@@ -106,25 +115,18 @@ class Sensor {
   /// \param node Input YAML node.
   Sensor(const Index& num_variables, const Node& node);
 
-  /// Maps a variable in vector form.
-  /// \param index Index of variable.
-  /// \return Variable as vector.
-  [[nodiscard]] auto variableAsVector(const Index& index) const -> Eigen::Ref<VectorX<Scalar>>;
-
-  /// Outputs all sensor variables to a YAML emitter.
+  /// Writes the sensor information to a YAML emitter.
   /// \param emitter Output YAML emitter.
-  virtual auto writeVariables(Emitter& emitter) const -> void;
+  virtual auto write(Emitter& emitter) const -> void;
 
-  Rate rate_;            ///< Rate.
-  Variables variables_;  ///< Variables.
+  Rate rate_;                        ///< Rate.
+  Variables variables_;              ///< Variables.
+  std::vector<Scalar*> parameters_;  ///< Parameters (i.e. pointer to variable memory).
 
  private:
-  /// Initializes the variables.
-  auto initializeVariables() -> void;
-
-  /// Reads all sensor variables from a YAML node.
+  /// Reads the sensor information from a YAML node.
   /// \param node Input YAML node.
-  auto readVariables(const Node& node) -> void;
+  auto read(const Node& node) -> void;
 };
 
 }  // namespace hyper::sensors

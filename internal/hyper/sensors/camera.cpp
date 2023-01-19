@@ -86,9 +86,16 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
 }
 
 Camera::Camera(const Node& node) : Sensor{kNumVariables, node}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
-  initializeVariables();
+  // Initialize variables.
+  DCHECK_LE(kNumVariables, variables_.size());
+  variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics>();
+  variables_[kDistortionOffset] = nullptr;
+  parameters_[kIntrinsicsOffset] = variables_[kIntrinsicsOffset]->asVector().data();
+  parameters_[kDistortionOffset] = nullptr;
+
+  // Read YAML node.
   if (!node.IsNull()) {
-    readVariables(node);
+    read(node);
   }
 }
 
@@ -117,19 +124,16 @@ auto Camera::shutterDelta() -> ShutterDelta& {
 }
 
 auto Camera::intrinsics() const -> Eigen::Map<const Intrinsics> {
-  const auto vector = variableAsVector(kIntrinsicsOffset);
-  return Eigen::Map<const Intrinsics>{vector.data()};
+  return Eigen::Map<const Intrinsics>{parameters_[kIntrinsicsOffset]};
 }
 
 auto Camera::intrinsics() -> Eigen::Map<Intrinsics> {
-  auto vector = variableAsVector(kIntrinsicsOffset);
-  return Eigen::Map<Intrinsics>{vector.data()};
+  return Eigen::Map<Intrinsics>{parameters_[kIntrinsicsOffset]};
 }
 
 auto Camera::distortion() const -> const Distortion& {
-  const auto p_distortion = variables_[kDistortionOffset].get();
-  DCHECK(p_distortion != nullptr);
-  return static_cast<const Distortion&>(*p_distortion);  // NOLINT
+  DCHECK(variables_[kDistortionOffset] != nullptr);
+  return static_cast<const Distortion&>(*variables_[kDistortionOffset]);  // NOLINT
 }
 
 auto Camera::distortion() -> Distortion& {
@@ -137,9 +141,9 @@ auto Camera::distortion() -> Distortion& {
 }
 
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
-  DCHECK_LE(kNumVariables, variables_.size());
   DCHECK(distortion.get() != nullptr);
   variables_[kDistortionOffset] = std::move(distortion);
+  parameters_[kDistortionOffset] = variables_[kDistortionOffset]->asVector().data();
 }
 
 auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time> {
@@ -179,12 +183,6 @@ auto Camera::triangulate(const Camera& other, const Eigen::Ref<const Bearing>& b
   return Triangulate(T_this_other, b_this, b_other);
 }
 
-auto Camera::initializeVariables() -> void {
-  DCHECK_LE(kNumVariables, variables_.size());
-  variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics>();
-  variables_[kDistortionOffset] = nullptr;
-}
-
 auto Camera::ReadSensorSize(const Node& node) -> SensorSize {
   const auto dimensions = yaml::ReadAs<std::vector<Index>>(node, kSensorSizeName);
   CHECK_EQ(dimensions.size(), 2);
@@ -222,7 +220,7 @@ auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
   }
 }
 
-auto Camera::readVariables(const Node& node) -> void {
+auto Camera::read(const Node& node) -> void {
   sensor_size_ = ReadSensorSize(node);
   shutter_type_ = ReadShutterType(node);
   shutter_delta_ = (shutterType() != ShutterType::GLOBAL) ? ReadShutterDelta(node) : kDefaultShutterDelta;
@@ -267,8 +265,8 @@ auto Camera::writeDistortion(Emitter& emitter) const -> void {
   emitter << YAML::EndMap;
 }
 
-auto Camera::writeVariables(Emitter& emitter) const -> void {
-  Sensor::writeVariables(emitter);
+auto Camera::write(Emitter& emitter) const -> void {
+  Sensor::write(emitter);
   writeSensorSize(emitter);
   writeShutterType(emitter);
   writeShutterDelta(emitter);

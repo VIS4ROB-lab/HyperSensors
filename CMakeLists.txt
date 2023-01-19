@@ -20,7 +20,7 @@ if (PROJECT_IS_TOP_LEVEL)
 endif ()
 
 # Fetch (external) content.
-FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG d290d7b9e364a4ffc0b7285f8105c952c3e0caea)
+FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG 4d9a6238783772c054b4e35e5b7d466b3f20e0fb)
 FetchContent_MakeAvailable(HyperState)
 
 # Find Eigen target if not present.

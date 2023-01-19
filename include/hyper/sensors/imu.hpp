@@ -42,6 +42,15 @@ class IMU final : public Sensor {
   /// \return Pointers.
   [[nodiscard]] auto pointers(const Time& time) const -> std::vector<Variable*> final;
 
+  /// Parameters accessor.
+  /// \return Parameters.
+  [[nodiscard]] auto parameters() const -> std::vector<Scalar*> final;
+
+  /// Parameters accessor (time-based).
+  /// \param time Query time.
+  /// \return Parameters.
+  [[nodiscard]] auto parameters(const Time& time) const -> std::vector<Scalar*> final;
+
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.
   [[nodiscard]] auto gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity&;
@@ -107,16 +116,13 @@ class IMU final : public Sensor {
   auto accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets>;
 
  private:
-  /// Initializes the variables.
-  auto initializeVariables() -> void;
-
-  /// Reads all sensor variables from a YAML node.
+  /// Reads the sensor information from a YAML node.
   /// \param node Input YAML node.
-  auto readVariables(const Node& node) -> void;
+  auto read(const Node& node) -> void;
 
-  /// Outputs all sensor variables to a YAML emitter.
+  /// Writes the sensor information to a YAML emitter.
   /// \param emitter Output YAML emitter.
-  auto writeVariables(Emitter& emitter) const -> void final;
+  auto write(Emitter& emitter) const -> void final;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.
   GyroscopeBias gyroscope_bias_;                           ///< Gyroscope bias.
