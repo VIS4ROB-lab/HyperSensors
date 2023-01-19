@@ -44,7 +44,7 @@ auto concatVectors(const TArgs&... args) {
 
 }  // namespace
 
-IMU::IMU(const Node& node) : Sensor{kNumParameters, node}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
+IMU::IMU(const Node& node) : Sensor{kNumVariables, node}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
   initializeVariables();
   if (!node.IsNull()) {
     readVariables(node);
@@ -132,7 +132,7 @@ auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
 }
 
 auto IMU::initializeVariables() -> void {
-  DCHECK_LE(kNumParameters, variables_.size());
+  DCHECK_LE(kNumVariables, variables_.size());
   variables_[kGyroscopeIntrinsicsOffset] = std::make_unique<GyroscopeIntrinsics>();
   variables_[kGyroscopeSensitivityOffset] = std::make_unique<GyroscopeSensitivity>();
   variables_[kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();

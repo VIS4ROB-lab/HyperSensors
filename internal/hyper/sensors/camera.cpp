@@ -85,7 +85,7 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
   return c2 / (c2 + c3) * (T_ab.translation() + (c3 / c1) * (b_a + c0));
 }
 
-Camera::Camera(const Node& node) : Sensor{kNumParameters, node}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
+Camera::Camera(const Node& node) : Sensor{kNumVariables, node}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   initializeVariables();
   if (!node.IsNull()) {
     readVariables(node);
@@ -137,7 +137,7 @@ auto Camera::distortion() -> Distortion& {
 }
 
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
-  DCHECK_LE(kNumParameters, variables_.size());
+  DCHECK_LE(kNumVariables, variables_.size());
   DCHECK(distortion.get() != nullptr);
   variables_[kDistortionOffset] = std::move(distortion);
 }
@@ -146,12 +146,12 @@ auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pix
   std::vector<Time> times;
   times.reserve(pixels.size());
   if (shutterType() == ShutterType::HORIZONTAL) {
-    const auto h_2 = Scalar{0.5} * sensorSize().height;
+    const auto h_2 = Scalar{0.5} * static_cast<Scalar>(sensorSize().height);
     for (const auto& pixel : pixels) {
       times.emplace_back(time + shutter_delta_ * (pixel.y() - h_2));
     }
   } else {  // Vertical rolling shutter.
-    const auto w_2 = Scalar{0.5} * sensorSize().width;
+    const auto w_2 = Scalar{0.5} * static_cast<Scalar>(sensorSize().width);
     for (const auto& pixel : pixels) {
       times.emplace_back(time + shutter_delta_ * (pixel.x() - w_2));
     }
@@ -180,7 +180,7 @@ auto Camera::triangulate(const Camera& other, const Eigen::Ref<const Bearing>& b
 }
 
 auto Camera::initializeVariables() -> void {
-  DCHECK_LE(kNumParameters, variables_.size());
+  DCHECK_LE(kNumVariables, variables_.size());
   variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics>();
   variables_[kDistortionOffset] = nullptr;
 }

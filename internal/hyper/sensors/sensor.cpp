@@ -19,7 +19,7 @@ constexpr auto kDefaultRate = -1;
 
 }  // namespace
 
-Sensor::Sensor(const Node& node) : Sensor{kNumParameters, node} {}
+Sensor::Sensor(const Node& node) : Sensor{kNumVariables, node} {}
 
 auto Sensor::rate() const -> const Rate& {
   return rate_;
@@ -42,6 +42,16 @@ auto Sensor::pointers() const -> std::vector<Variable*> {
 
 auto Sensor::pointers(const Time& /* time */) const -> std::vector<Variable*> {
   return Sensor::pointers();
+}
+
+auto Sensor::offset() const -> Eigen::Map<const Offset> {
+  const auto vector = variableAsVector(kOffsetOffset);
+  return Eigen::Map<const Offset>{vector.data()};
+}
+
+auto Sensor::offset() -> Eigen::Map<Offset> {
+  auto vector = variableAsVector(kOffsetOffset);
+  return Eigen::Map<Offset>{vector.data()};
 }
 
 auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
@@ -80,7 +90,8 @@ auto Sensor::writeVariables(Emitter& emitter) const -> void {
 }
 
 auto Sensor::initializeVariables() -> void {
-  DCHECK_LE(kNumParameters, variables_.size());
+  DCHECK_LE(kNumVariables, variables_.size());
+  variables_[kOffsetOffset] = std::make_unique<Offset>();
   variables_[kTransformationOffset] = std::make_unique<Transformation>();
 }
 

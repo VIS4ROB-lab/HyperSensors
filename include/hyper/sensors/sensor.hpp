@@ -13,21 +13,22 @@ namespace hyper::sensors {
 class Sensor {
  public:
   // Constants.
-  static constexpr auto kTransformationOffset = 0;
-  static constexpr auto kNumParameters = kTransformationOffset + 1;
+  static constexpr auto kOffsetOffset = 0;
+  static constexpr auto kTransformationOffset = kOffsetOffset + 1;
+  static constexpr auto kNumVariables = kTransformationOffset + 1;
 
   // Definitions.
-  using Index = Eigen::Index;
   using Node = YAML::Node;
   using Emitter = YAML::Emitter;
 
   using Time = double;
   using Scalar = double;
-  using Rate = Scalar;
 
   using Variable = variables::Variable<Scalar>;
   using Variables = std::vector<std::unique_ptr<Variable>>;
 
+  using Rate = Scalar;
+  using Offset = variables::Cartesian<Scalar, 1>;
   using Transformation = variables::SE3<Scalar>;
 
   /// Constructor from YAML file.
@@ -74,11 +75,19 @@ class Sensor {
   /// \return Pointers.
   [[nodiscard]] virtual auto pointers(const Time& time) const -> std::vector<Variable*>;
 
-  /// Accesses the transformation.
+  /// Offset accessor.
+  /// \return Offset.
+  [[nodiscard]] auto offset() const -> Eigen::Map<const Offset>;
+
+  /// Offset modifier.
+  /// \return Offset.
+  [[nodiscard]] auto offset() -> Eigen::Map<Offset>;
+
+  /// Transformation accessor.
   /// \return Transformation.
   [[nodiscard]] auto transformation() const -> Eigen::Map<const Transformation>;
 
-  /// Accesses the transformation.
+  /// Transformation modifier.
   /// \return Transformation.
   [[nodiscard]] auto transformation() -> Eigen::Map<Transformation>;
 
@@ -89,6 +98,9 @@ class Sensor {
   friend auto operator<<(Emitter& emitter, const Sensor& sensor) -> Emitter&;
 
  protected:
+  // Definitions.
+  using Index = std::size_t;
+
   /// Constructor from number of variables and YAML file.
   /// \param num_variables Number of variables.
   /// \param node Input YAML node.

@@ -12,9 +12,9 @@ namespace hyper::sensors {
 class Camera final : public Sensor {
  public:
   // Constants.
-  static constexpr auto kIntrinsicsOffset = Sensor::kNumParameters;
+  static constexpr auto kIntrinsicsOffset = Sensor::kNumVariables;
   static constexpr auto kDistortionOffset = kIntrinsicsOffset + 1;
-  static constexpr auto kNumParameters = kDistortionOffset + 1;
+  static constexpr auto kNumVariables = kDistortionOffset + 1;
 
   // Sensor size.
   struct SensorSize {

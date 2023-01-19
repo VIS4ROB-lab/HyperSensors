@@ -12,11 +12,11 @@ namespace hyper::sensors {
 class IMU final : public Sensor {
  public:
   // Constants.
-  static constexpr auto kGyroscopeIntrinsicsOffset = Sensor::kNumParameters;
+  static constexpr auto kGyroscopeIntrinsicsOffset = Sensor::kNumVariables;
   static constexpr auto kAccelerometerIntrinsicsOffset = kGyroscopeIntrinsicsOffset + 1;
   static constexpr auto kAccelerometerAxesOffsetsOffset = kAccelerometerIntrinsicsOffset + 1;
   static constexpr auto kGyroscopeSensitivityOffset = kAccelerometerAxesOffsetsOffset + 1;
-  static constexpr auto kNumParameters = kGyroscopeSensitivityOffset + 1;
+  static constexpr auto kNumVariables = kGyroscopeSensitivityOffset + 1;
 
   // Definitions.
   using GyroscopeNoiseDensity = Scalar;
