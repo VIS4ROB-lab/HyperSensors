@@ -42,14 +42,9 @@ auto concatVectors(const TArgs&... args) {
   return output;
 }
 
-} // namespace
+}  // namespace
 
-IMU::IMU(const Node& node)
-    : Sensor{kNumParameters, node},
-      gyroscope_noise_density_{},
-      gyroscope_bias_{},
-      accelerometer_noise_density_{},
-      accelerometer_bias_{} {
+IMU::IMU(const Node& node) : Sensor{kNumParameters, node}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
   initializeVariables();
   if (!node.IsNull()) {
     readVariables(node);
@@ -175,4 +170,4 @@ auto IMU::writeVariables(Emitter& emitter) const -> void {
   yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
 }
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

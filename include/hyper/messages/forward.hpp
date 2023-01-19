@@ -11,4 +11,4 @@ class VisualTracks;
 
 class StereoVisualTracks;
 
-} // namespace hyper::messages
+}  // namespace hyper::messages

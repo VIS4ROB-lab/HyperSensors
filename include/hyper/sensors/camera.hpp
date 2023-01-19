@@ -22,12 +22,7 @@ class Camera final : public Sensor {
   };
 
   // Shutter type.
-  enum class ShutterType {
-    GLOBAL,
-    VERTICAL,
-    HORIZONTAL,
-    DEFAULT = GLOBAL
-  };
+  enum class ShutterType { GLOBAL, VERTICAL, HORIZONTAL, DEFAULT = GLOBAL };
 
   // Shutter delta (i.e. increment between readouts).
   using ShutterDelta = Stamp;
@@ -55,7 +50,8 @@ class Camera final : public Sensor {
   /// \param b_a Input bearing in frame a.
   /// \param b_b Input bearing in frame b.
   /// \return Triangulated position.
-  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing<Scalar>>& b_a, const Eigen::Ref<const Bearing<Scalar>>& b_b) -> Position<Scalar>;
+  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing<Scalar>>& b_a, const Eigen::Ref<const Bearing<Scalar>>& b_b)
+      -> Position<Scalar>;
 
   /// Constructor from YAML file.
   /// \param node Input YAML node.
@@ -172,9 +168,9 @@ class Camera final : public Sensor {
   /// \param emitter Output YAML emitter.
   auto writeVariables(Emitter& emitter) const -> void final;
 
-  SensorSize sensor_size_;     ///< Sensor size.
-  ShutterType shutter_type_;   ///< Shutter type.
-  ShutterDelta shutter_delta_; ///< Shutter delta.
+  SensorSize sensor_size_;      ///< Sensor size.
+  ShutterType shutter_type_;    ///< Shutter type.
+  ShutterDelta shutter_delta_;  ///< Shutter delta.
 };
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

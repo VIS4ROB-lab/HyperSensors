@@ -21,4 +21,4 @@ class InertialMeasurement;
 template <typename>
 class RelativeMeasurement;
 
-} // namespace hyper::messages
+}  // namespace hyper::messages

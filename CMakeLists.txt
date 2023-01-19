@@ -5,18 +5,19 @@ cmake_minimum_required(VERSION 3.16)
 include(FetchContent)
 
 # Define projects.
-project(HyperSensors VERSION 22.07.04 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperSensors LANGUAGES CXX)
+project(HyperSensors VERSION 23.01.19 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperSensors LANGUAGES CXX)
 
 # Define libraries and aliases.
 add_library(${PROJECT_NAME} SHARED)
 add_library(Hyper::Sensors ALIAS ${PROJECT_NAME})
 
 # Set properties.
-if(PROJECT_IS_TOP_LEVEL)
+if (PROJECT_IS_TOP_LEVEL)
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED YES)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -fconcepts -Wall -Wextra -Wnon-virtual-dtor -pedantic")
-endif()
+    option(HYPER_BUILD_TESTS "Build tests." TRUE)
+endif ()
 
 # Fetch (external) content.
 FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG 4da639caf2e186c442f400159bdf0a206178c2c2)
@@ -68,7 +69,6 @@ target_link_libraries(
 )
 
 # Build tests.
-option(HYPER_BUILD_TESTING "Build tests." TRUE)
-if (HYPER_BUILD_TESTING)
+if (HYPER_BUILD_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/apps/tests)
-endif (HYPER_BUILD_TESTING)
+endif (HYPER_BUILD_TESTS)

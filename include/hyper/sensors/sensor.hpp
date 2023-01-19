@@ -99,8 +99,8 @@ class Sensor {
   /// \param emitter Output YAML emitter.
   virtual auto writeVariables(Emitter& emitter) const -> void;
 
-  Rate rate_;           ///< Rate.
-  Variables variables_; ///< Variables.
+  Rate rate_;            ///< Rate.
+  Variables variables_;  ///< Variables.
 
  private:
   /// Initializes the variables.
@@ -111,4 +111,4 @@ class Sensor {
   auto readVariables(const Node& node) -> void;
 };
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

@@ -20,7 +20,7 @@ constexpr auto kDistortionName = "distortion";
 // Default parameters.
 constexpr auto kDefaultShutterDelta = 0;
 
-} // namespace
+}  // namespace
 
 auto Camera::ProjectToPlane(const Eigen::Ref<const Position<Scalar>>& position, Scalar* raw_J) -> Pixel<Scalar> {
   const auto inverse_z = Scalar{1} / position.z();
@@ -76,7 +76,8 @@ auto Camera::LiftToSphere(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* 
   return {pixel.x() * i_n, pixel.y() * i_n, i_n};
 }
 
-auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing<Scalar>>& b_a, const Eigen::Ref<const Bearing<Scalar>>& b_b) -> Position<Scalar> {
+auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing<Scalar>>& b_a, const Eigen::Ref<const Bearing<Scalar>>& b_b)
+    -> Position<Scalar> {
   // Triangulate position.
   const auto c0 = (T_ab.rotation() * b_b).eval();
   const auto c1 = c0.cross(b_a).norm();
@@ -85,11 +86,7 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
   return c2 / (c2 + c3) * (T_ab.translation() + (c3 / c1) * (b_a + c0));
 }
 
-Camera::Camera(const Node& node)
-    : Sensor{kNumParameters, node},
-      sensor_size_{},
-      shutter_type_{ShutterType::DEFAULT},
-      shutter_delta_{kDefaultShutterDelta} {
+Camera::Camera(const Node& node) : Sensor{kNumParameters, node}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   initializeVariables();
   if (!node.IsNull()) {
     readVariables(node);
@@ -133,7 +130,7 @@ auto Camera::intrinsics() -> Eigen::Map<Intrinsics<Scalar>> {
 auto Camera::distortion() const -> const AbstractDistortion<Scalar>& {
   const auto p_distortion = variables_[kDistortionOffset].get();
   DCHECK(p_distortion != nullptr);
-  return static_cast<const AbstractDistortion<Scalar>&>(*p_distortion); // NOLINT
+  return static_cast<const AbstractDistortion<Scalar>&>(*p_distortion);  // NOLINT
 }
 
 auto Camera::distortion() -> AbstractDistortion<Scalar>& {
@@ -154,7 +151,7 @@ auto Camera::correctShutterStamps(const Stamp& stamp, const std::vector<Pixel<Sc
     for (const auto& pixel : pixels) {
       stamps.emplace_back(stamp + shutter_delta_ * (pixel.y() - h_2));
     }
-  } else { // Vertical rolling shutter.
+  } else {  // Vertical rolling shutter.
     const auto w_2 = Scalar{0.5} * sensorSize().width;
     for (const auto& pixel : pixels) {
       stamps.emplace_back(stamp + shutter_delta_ * (pixel.x() - w_2));
@@ -280,4 +277,4 @@ auto Camera::writeVariables(Emitter& emitter) const -> void {
   writeDistortion(emitter);
 }
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

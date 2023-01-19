@@ -51,8 +51,8 @@ class AbstractMessage {
   /// \param sensor Sensor.
   explicit AbstractMessage(const Stamp& stamp, const Sensor& sensor);
 
-  Stamp stamp_;          ///< Stamp.
-  const Sensor* sensor_; ///< Sensor.
+  Stamp stamp_;           ///< Stamp.
+  const Sensor* sensor_;  ///< Sensor.
 };
 
-} // namespace hyper::messages
+}  // namespace hyper::messages

@@ -17,10 +17,9 @@ constexpr auto kTransformationName = "transformation";
 // Default parameters.
 constexpr auto kDefaultRate = -1;
 
-} // namespace
+}  // namespace
 
-Sensor::Sensor(const Node& node)
-    : Sensor{kNumParameters, node} {}
+Sensor::Sensor(const Node& node) : Sensor{kNumParameters, node} {}
 
 auto Sensor::rate() const -> const Rate& {
   return rate_;
@@ -62,9 +61,7 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Size& num_variables, const Node& node)
-    : rate_{kDefaultRate},
-      variables_{num_variables} {
+Sensor::Sensor(const Size& num_variables, const Node& node) : rate_{kDefaultRate}, variables_{num_variables} {
   initializeVariables();
   if (!node.IsNull()) {
     readVariables(node);
@@ -92,4 +89,4 @@ auto Sensor::readVariables(const Node& node) -> void {
   transformation() = yaml::ReadVariable<Transformation>(node, kTransformationName);
 }
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

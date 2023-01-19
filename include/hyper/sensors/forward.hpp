@@ -11,4 +11,4 @@ class Camera;
 
 class IMU;
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

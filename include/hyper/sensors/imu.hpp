@@ -118,10 +118,10 @@ class IMU final : public Sensor {
   /// \param emitter Output YAML emitter.
   auto writeVariables(Emitter& emitter) const -> void final;
 
-  GyroscopeNoiseDensity gyroscope_noise_density_;         ///< Gyroscope noise density.
-  std::unique_ptr<AbstractState> gyroscope_bias_;         ///< Gyroscope bias.
-  AccelerometerNoiseDensity accelerometer_noise_density_; ///< Accelerometer noise density.
-  std::unique_ptr<AbstractState> accelerometer_bias_;     ///< Accelerometer bias.
+  GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.
+  std::unique_ptr<AbstractState> gyroscope_bias_;          ///< Gyroscope bias.
+  AccelerometerNoiseDensity accelerometer_noise_density_;  ///< Accelerometer noise density.
+  std::unique_ptr<AbstractState> accelerometer_bias_;      ///< Accelerometer bias.
 };
 
-} // namespace hyper::sensors
+}  // namespace hyper::sensors

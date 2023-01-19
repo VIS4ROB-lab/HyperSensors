@@ -20,9 +20,6 @@ auto AbstractMessage::sensor() const -> const Sensor& {
   return *sensor_;
 }
 
-AbstractMessage::AbstractMessage(const Stamp& stamp, const Sensor& sensor)
-    : stamp_{stamp},
-      sensor_{&sensor} {
-}
+AbstractMessage::AbstractMessage(const Stamp& stamp, const Sensor& sensor) : stamp_{stamp}, sensor_{&sensor} {}
 
-} // namespace hyper::messages
+}  // namespace hyper::messages

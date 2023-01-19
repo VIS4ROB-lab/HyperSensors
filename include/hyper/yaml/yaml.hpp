@@ -75,4 +75,4 @@ auto WriteVariable(Emitter& emitter, const Key& key, const TVariable& variable) 
   return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<typename TVariable::Scalar>{data, data + vector.size()};
 }
 
-} // namespace hyper::yaml
+}  // namespace hyper::yaml

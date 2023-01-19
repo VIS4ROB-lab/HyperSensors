@@ -11,8 +11,7 @@
 
 namespace hyper::messages {
 
-class VisualTracks
-    : public AbstractMessage {
+class VisualTracks : public AbstractMessage {
  public:
   // Definitions.
   using Image = cv_bridge::CvImageConstPtr;
@@ -53,14 +52,13 @@ class VisualTracks
   /// \return Entry containing the associated image and tracked points.
   auto getTrack(const Camera& camera) -> Entry&;
 
-  Tracks tracks;           ///< Tracks.
-  Identifiers identifiers; ///< Track identifiers.
-  Positions positions;     ///< Track positions (optional).
-  Lengths lengths;         ///< Track lengths.
+  Tracks tracks;            ///< Tracks.
+  Identifiers identifiers;  ///< Track identifiers.
+  Positions positions;      ///< Track positions (optional).
+  Lengths lengths;          ///< Track lengths.
 };
 
-class StereoVisualTracks
-    : public VisualTracks {
+class StereoVisualTracks : public VisualTracks {
   /// Constructor from time and sensor.
   /// \param stamp Stamp.
   /// \param camera Camera.
@@ -76,7 +74,7 @@ class StereoVisualTracks
   auto setOtherSensor(const Camera& other_camera) -> void;
 
  private:
-  const Sensor* other_sensor_; ///< Other sensor.
+  const Sensor* other_sensor_;  ///< Other sensor.
 };
 
-} // namespace hyper::messages
+}  // namespace hyper::messages

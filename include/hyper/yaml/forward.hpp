@@ -8,4 +8,4 @@ namespace YAML {
 class Node;
 class Emitter;
 
-} // namespace YAML
+}  // namespace YAML
