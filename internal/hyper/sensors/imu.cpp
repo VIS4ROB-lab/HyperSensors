@@ -4,8 +4,8 @@
 #include <glog/logging.h>
 
 #include "hyper/sensors/imu.hpp"
-#include "hyper/state/interpolators/basis.hpp"
-#include "hyper/state/policies/cartesian.hpp"
+#include "hyper/state/interpolators/spatial/spatial.hpp"
+#include "hyper/state/interpolators/temporal/basis.hpp"
 
 namespace hyper::sensors {
 
@@ -51,12 +51,12 @@ IMU::IMU(const Node& node) : Sensor{kNumParameters, node}, gyroscope_noise_densi
   }
 }
 
-auto IMU::parameters() const -> Pointers<Parameter> {
-  return concatVectors(Sensor::parameters(), gyroscopeBias().parameters(), accelerometerBias().parameters());
+auto IMU::pointers() const -> std::vector<Variable*> {
+  return concatVectors(Sensor::pointers(), gyroscopeBias().pointers(), accelerometerBias().pointers());
 }
 
-auto IMU::parameters(const Stamp& stamp) const -> Pointers<Parameter> {
-  return concatVectors(Sensor::parameters(stamp), gyroscopeBias().parameters(stamp), accelerometerBias().parameters(stamp));
+auto IMU::pointers(const Time& time) const -> std::vector<Variable*> {
+  return concatVectors(Sensor::pointers(time), gyroscopeBias().pointers(time), accelerometerBias().pointers(time));
 }
 
 auto IMU::gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity& {
@@ -67,13 +67,12 @@ auto IMU::gyroscopeNoiseDensity() -> GyroscopeNoiseDensity& {
   return const_cast<GyroscopeNoiseDensity&>(std::as_const(*this).gyroscopeNoiseDensity());
 }
 
-auto IMU::gyroscopeBias() const -> const AbstractState& {
-  DCHECK(gyroscope_bias_ != nullptr);
-  return *gyroscope_bias_;
+auto IMU::gyroscopeBias() const -> const GyroscopeBias& {
+  return gyroscope_bias_;
 }
 
-auto IMU::gyroscopeBias() -> AbstractState& {
-  return const_cast<AbstractState&>(std::as_const(*this).gyroscopeBias());
+auto IMU::gyroscopeBias() -> GyroscopeBias& {
+  return const_cast<GyroscopeBias&>(std::as_const(*this).gyroscopeBias());
 }
 
 auto IMU::gyroscopeIntrinsics() const -> Eigen::Map<const GyroscopeIntrinsics> {
@@ -104,13 +103,12 @@ auto IMU::accelerometerNoiseDensity() -> AccelerometerNoiseDensity& {
   return const_cast<AccelerometerNoiseDensity&>(std::as_const(*this).accelerometerNoiseDensity());
 }
 
-auto IMU::accelerometerBias() const -> const AbstractState& {
-  DCHECK(accelerometer_bias_ != nullptr);
-  return *accelerometer_bias_;
+auto IMU::accelerometerBias() const -> const AccelerometerBias& {
+  return accelerometer_bias_;
 }
 
-auto IMU::accelerometerBias() -> AbstractState& {
-  return const_cast<AbstractState&>(std::as_const(*this).accelerometerBias());
+auto IMU::accelerometerBias() -> AccelerometerBias& {
+  return const_cast<AccelerometerBias&>(std::as_const(*this).accelerometerBias());
 }
 
 auto IMU::accelerometerIntrinsics() const -> Eigen::Map<const AccelerometerIntrinsics> {
@@ -140,15 +138,10 @@ auto IMU::initializeVariables() -> void {
   variables_[kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();
   variables_[kAccelerometerAxesOffsetsOffset] = std::make_unique<AccelerometerAxesOffsets>();
 
-  // Initialize gyroscope bias.
-  auto gyroscope_bias_interpolator = std::make_unique<BasisInterpolator>(3, true);
-  auto gyroscope_bias_policy = std::make_unique<CartesianPolicy<GyroscopeBias>>();
-  gyroscope_bias_ = std::make_unique<AbstractState>(std::move(gyroscope_bias_interpolator), std::move(gyroscope_bias_policy));
-
-  // Initialize accelerometer bias.
-  auto accelerometer_bias_interpolator = std::make_unique<BasisInterpolator>(3, true);
-  auto accelerometer_bias_policy = std::make_unique<CartesianPolicy<AccelerometerBias>>();
-  accelerometer_bias_ = std::make_unique<AbstractState>(std::move(accelerometer_bias_interpolator), std::move(accelerometer_bias_policy));
+  // Initialize gyroscope and accelerometer bias.
+  static auto interpolator = state::BasisInterpolator<Scalar, 4>{};
+  gyroscope_bias_.setInterpolator(&interpolator);
+  accelerometer_bias_.setInterpolator(&interpolator);
 }
 
 auto IMU::readVariables(const Node& node) -> void {

@@ -7,12 +7,12 @@
 
 namespace hyper::messages {
 
-auto AbstractMessage::stamp() const -> const Stamp& {
-  return stamp_;
+auto AbstractMessage::time() const -> const Time& {
+  return time_;
 }
 
-auto AbstractMessage::stamp() -> Stamp& {
-  return const_cast<Stamp&>(std::as_const(*this).stamp());
+auto AbstractMessage::time() -> Time& {
+  return const_cast<Time&>(std::as_const(*this).time());
 }
 
 auto AbstractMessage::sensor() const -> const Sensor& {
@@ -20,6 +20,6 @@ auto AbstractMessage::sensor() const -> const Sensor& {
   return *sensor_;
 }
 
-AbstractMessage::AbstractMessage(const Stamp& stamp, const Sensor& sensor) : stamp_{stamp}, sensor_{&sensor} {}
+AbstractMessage::AbstractMessage(const Time& time, const Sensor& sensor) : time_{time}, sensor_{&sensor} {}
 
 }  // namespace hyper::messages

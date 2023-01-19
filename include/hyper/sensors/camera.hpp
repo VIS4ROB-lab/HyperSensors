@@ -5,7 +5,7 @@
 
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/variables/bearing.hpp"
-#include "hyper/variables/distortions/abstract.hpp"
+#include "hyper/variables/distortions/distortion.hpp"
 
 namespace hyper::sensors {
 
@@ -25,33 +25,37 @@ class Camera final : public Sensor {
   enum class ShutterType { GLOBAL, VERTICAL, HORIZONTAL, DEFAULT = GLOBAL };
 
   // Shutter delta (i.e. increment between readouts).
-  using ShutterDelta = Stamp;
+  using ShutterDelta = Time;
+  using Pixel = variables::Pixel<Scalar>;
+  using Bearing = variables::Bearing<Scalar>;
+  using Landmark = variables::Position<Scalar, 3>;
+  using Intrinsics = variables::Intrinsics<Scalar>;
+  using Distortion = variables::Distortion<Scalar>;
 
-  /// Projects positions to the (normalized) image plane.
-  /// \param position Position to project.
-  /// \param raw_J Jacobian of the projection.
+  /// Projects landmarks to the (normalized) image plane.
+  /// \param landmark Landmark to project.
+  /// \param J_l Jacobian of the projection.
   /// \return Projected pixel coordinates.
-  static auto ProjectToPlane(const Eigen::Ref<const Position<Scalar>>& position, Scalar* raw_J = nullptr) -> Pixel<Scalar>;
+  static auto ProjectToPlane(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Pixel;
 
-  /// Projects positions to the unit sphere.
-  /// \param position Position to project.
-  /// \param raw_J Jacobian of the projection.
+  /// Projects landmarks to the unit sphere.
+  /// \param landmark Landmark to project.
+  /// \param J_l Jacobian of the projection.
   /// \return Projected bearing coordinates.
-  static auto ProjectToSphere(const Eigen::Ref<const Position<Scalar>>& position, Scalar* raw_J = nullptr) -> Bearing<Scalar>;
+  static auto ProjectToSphere(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Bearing;
 
   /// Lifts (normalized) pixel coordinates to the unit sphere.
   /// \param pixel Pixel to lift.
-  /// \param raw_J Jacobian of the lift.
+  /// \param J_p Jacobian of the lift.
   /// \return Bearing of lifted pixel coordinates.
-  static auto LiftToSphere(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J = nullptr) -> Bearing<Scalar>;
+  static auto LiftToSphere(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p = nullptr) -> Bearing;
 
-  /// Triangulates a position from relative a transformation and bearings.
+  /// Triangulates a landmark from relative a transformation and bearings.
   /// \param T_ab Input transformation.
   /// \param b_a Input bearing in frame a.
   /// \param b_b Input bearing in frame b.
-  /// \return Triangulated position.
-  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing<Scalar>>& b_a, const Eigen::Ref<const Bearing<Scalar>>& b_b)
-      -> Position<Scalar>;
+  /// \return Triangulated landmark.
+  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
 
   /// Constructor from YAML file.
   /// \param node Input YAML node.
@@ -83,42 +87,43 @@ class Camera final : public Sensor {
 
   /// Intrinsics accessor.
   /// \return Reference to intrinsics.
-  [[nodiscard]] auto intrinsics() const -> Eigen::Map<const Intrinsics<Scalar>>;
+  [[nodiscard]] auto intrinsics() const -> Eigen::Map<const Intrinsics>;
 
   /// Intrinsics modifier.
   /// \return Reference to intrinsics.
-  auto intrinsics() -> Eigen::Map<Intrinsics<Scalar>>;
+  auto intrinsics() -> Eigen::Map<Intrinsics>;
 
   /// Distortion accessor.
   /// \return Reference to distortion.
-  [[nodiscard]] auto distortion() const -> const AbstractDistortion<Scalar>&;
+  [[nodiscard]] auto distortion() const -> const Distortion&;
 
   /// Distortion modifier.
   /// \return Reference to distortion.
-  auto distortion() -> AbstractDistortion<Scalar>&;
+  auto distortion() -> Distortion&;
 
   /// Sets the distortion.
   /// \tparam DistortionType Distortion type.
   /// \param distortion Distortion to be set.
-  auto setDistortion(std::unique_ptr<AbstractDistortion<Scalar>>&& distortion) -> void;
+  auto setDistortion(std::unique_ptr<Distortion>&& distortion) -> void;
 
-  /// Corrects the shutter stamps.
-  /// \param stamp Global shutter stamp.
+  /// Corrects the shutter times.
+  /// \param time Global shutter time.
   /// \param pixels Input pixels.
-  /// \return Corrected shutter stamps.
-  [[nodiscard]] auto correctShutterStamps(const Stamp& stamp, const std::vector<Pixel<Scalar>>& pixels) const -> Stamps;
+  /// \return Corrected shutter times.
+  [[nodiscard]] auto correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time>;
 
   /// Converts pixels to bearings.
   /// \param pixels Input pixels.
+  /// \param parameters External distortion parameters (optional).
   /// \return Bearings.
-  [[nodiscard]] auto convertPixelsToBearings(const std::vector<Pixel<Scalar>>& pixels) const -> std::vector<Bearing<Scalar>>;
+  [[nodiscard]] auto convertPixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
 
-  /// Triangulates a position from bearings.
+  /// Triangulates a landmark from bearings.
   /// \param other Other camera.
   /// \param b_this Bearing in this frame.
   /// \param b_other Bearing in other frame.
-  /// \return Triangulated position.
-  auto triangulate(const Camera& other, const Eigen::Ref<const Bearing<Scalar>>& b_this, const Eigen::Ref<const Bearing<Scalar>>& b_other) -> Position<Scalar>;
+  /// \return Triangulated landmark.
+  auto triangulate(const Camera& other, const Eigen::Ref<const Bearing>& b_this, const Eigen::Ref<const Bearing>& b_other) -> Landmark;
 
  private:
   /// Initializes the variables.
@@ -142,7 +147,7 @@ class Camera final : public Sensor {
   /// Reads the distortion.
   /// \param node Input YAML node.
   /// \return Distortion
-  static auto ReadDistortion(const Node& node) -> std::unique_ptr<AbstractDistortion<Scalar>>;
+  static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
 
   /// Reads all sensor variables from a YAML node.
   /// \param node Input YAML node.

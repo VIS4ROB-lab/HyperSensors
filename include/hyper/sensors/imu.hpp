@@ -4,7 +4,7 @@
 #pragma once
 
 #include "hyper/sensors/sensor.hpp"
-#include "hyper/state/abstract.hpp"
+#include "hyper/state/continuous.hpp"
 #include "hyper/variables/orthonormality_alignment.hpp"
 
 namespace hyper::sensors {
@@ -20,27 +20,27 @@ class IMU final : public Sensor {
 
   // Definitions.
   using GyroscopeNoiseDensity = Scalar;
-  using GyroscopeIntrinsics = OrthonormalityAlignment<Scalar, 3>;
-  using GyroscopeSensitivity = Cartesian<Scalar, 9>;
-  using GyroscopeBias = Stamped<Cartesian<Scalar, 3>>;
+  using GyroscopeIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
+  using GyroscopeSensitivity = variables::Cartesian<Scalar, 9>;
+  using GyroscopeBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
 
   using AccelerometerNoiseDensity = Scalar;
-  using AccelerometerIntrinsics = OrthonormalityAlignment<Scalar, 3>;
-  using AccelerometerAxesOffsets = Cartesian<Scalar, 9>;
-  using AccelerometerBias = Stamped<Cartesian<Scalar, 3>>;
+  using AccelerometerIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
+  using AccelerometerAxesOffsets = variables::Cartesian<Scalar, 9>;
+  using AccelerometerBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
 
   /// Constructor from YAML file.
   /// \param node Input YAML node.
   explicit IMU(const Node& node = {});
 
-  /// Parameters accessor.
-  /// \return Parameters.
-  [[nodiscard]] auto parameters() const -> Pointers<Parameter> final;
+  /// Pointers accessor.
+  /// \return Pointers.
+  [[nodiscard]] auto pointers() const -> std::vector<Variable*> final;
 
-  /// Parameters accessor (stamp-based).
-  /// \param stamp Query stamp.
-  /// \return Parameters.
-  [[nodiscard]] auto parameters(const Stamp& stamp) const -> Pointers<Parameter> final;
+  /// Pointers accessor (time-based).
+  /// \param time Query time.
+  /// \return Pointers.
+  [[nodiscard]] auto pointers(const Time& time) const -> std::vector<Variable*> final;
 
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.
@@ -52,11 +52,11 @@ class IMU final : public Sensor {
 
   /// Gyroscope bias accessor.
   /// \return Gyroscope bias.
-  [[nodiscard]] auto gyroscopeBias() const -> const AbstractState&;
+  [[nodiscard]] auto gyroscopeBias() const -> const GyroscopeBias&;
 
   /// Gyroscope bias modifier.
   /// \return Gyroscope bias.
-  auto gyroscopeBias() -> AbstractState&;
+  auto gyroscopeBias() -> GyroscopeBias&;
 
   /// Gyroscope intrinsics accessor.
   /// \return Gyroscope intrinsics.
@@ -84,11 +84,11 @@ class IMU final : public Sensor {
 
   /// Accelerometer bias accessor.
   /// \return Accelerometer bias.
-  [[nodiscard]] auto accelerometerBias() const -> const AbstractState&;
+  [[nodiscard]] auto accelerometerBias() const -> const AccelerometerBias&;
 
   /// Accelerometer bias modifier.
   /// \return Accelerometer bias.
-  auto accelerometerBias() -> AbstractState&;
+  auto accelerometerBias() -> AccelerometerBias&;
 
   /// Accelerometer intrinsics accessor.
   /// \return Accelerometer intrinsics.
@@ -119,9 +119,9 @@ class IMU final : public Sensor {
   auto writeVariables(Emitter& emitter) const -> void final;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.
-  std::unique_ptr<AbstractState> gyroscope_bias_;          ///< Gyroscope bias.
+  GyroscopeBias gyroscope_bias_;                           ///< Gyroscope bias.
   AccelerometerNoiseDensity accelerometer_noise_density_;  ///< Accelerometer noise density.
-  std::unique_ptr<AbstractState> accelerometer_bias_;      ///< Accelerometer bias.
+  AccelerometerBias accelerometer_bias_;                   ///< Accelerometer bias.
 };
 
 }  // namespace hyper::sensors

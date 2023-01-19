@@ -47,7 +47,7 @@ auto ReadString(const Node& node, const Key& key) -> String;
 template <typename TVariable>
 auto ReadVariable(const Node& node, const Key& key) -> TVariable {
   const auto values = ReadAs<std::vector<typename TVariable::Scalar>>(node, key);
-  CHECK_EQ(values.size(), Traits<TVariable>::kNumParameters);
+  CHECK_EQ(values.size(), TVariable::kNumParameters);
   return TVariable{values.data()};
 }
 

@@ -7,7 +7,7 @@
 
 namespace hyper::messages {
 
-VisualTracks::VisualTracks(const Stamp& stamp, const Camera& camera) : AbstractMessage{stamp, camera}, tracks{}, identifiers{}, positions{}, lengths{} {
+VisualTracks::VisualTracks(const Time& time, const Camera& camera) : AbstractMessage{time, camera}, tracks{}, identifiers{}, positions{}, lengths{} {
   // Add track.
   addTrack(camera);
 }
@@ -36,7 +36,7 @@ auto VisualTracks::getTrack(const Camera& camera) -> Entry& {
   return const_cast<Entry&>(std::as_const(*this).getTrack(camera));
 }
 
-StereoVisualTracks::StereoVisualTracks(const Stamp& stamp, const Camera& camera, const Camera& other_camera) : VisualTracks{stamp, camera}, other_sensor_{&other_camera} {
+StereoVisualTracks::StereoVisualTracks(const Time& time, const Camera& camera, const Camera& other_camera) : VisualTracks{time, camera}, other_sensor_{&other_camera} {
   // Add track.
   addTrack(other_camera);
 }

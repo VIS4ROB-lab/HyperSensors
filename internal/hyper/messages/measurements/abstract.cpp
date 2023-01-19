@@ -5,6 +5,6 @@
 
 namespace hyper::messages {
 
-AbstractMeasurement::AbstractMeasurement(const Stamp& stamp, const Sensor& sensor) : AbstractMessage{stamp, sensor} {}
+AbstractMeasurement::AbstractMeasurement(const Time& time, const Sensor& sensor) : AbstractMessage{time, sensor} {}
 
 }  // namespace hyper::messages

@@ -5,7 +5,6 @@
 
 #include "hyper/sensors/forward.hpp"
 
-#include "hyper/definitions.hpp"
 #include "hyper/variables/groups/se3.hpp"
 #include "hyper/yaml/yaml.hpp"
 
@@ -18,13 +17,18 @@ class Sensor {
   static constexpr auto kNumParameters = kTransformationOffset + 1;
 
   // Definitions.
-  using Rate = Scalar;
-  using Size = std::size_t;
+  using Index = Eigen::Index;
   using Node = YAML::Node;
   using Emitter = YAML::Emitter;
-  using Parameter = AbstractVariable<Scalar>;
-  using Variables = std::vector<std::unique_ptr<Parameter>>;
-  using Transformation = SE3<Scalar>;
+
+  using Time = double;
+  using Scalar = double;
+  using Rate = Scalar;
+
+  using Variable = variables::Variable<Scalar>;
+  using Variables = std::vector<std::unique_ptr<Variable>>;
+
+  using Transformation = variables::SE3<Scalar>;
 
   /// Constructor from YAML file.
   /// \param node Input YAML node.
@@ -61,14 +65,14 @@ class Sensor {
   /// \return Variables.
   [[nodiscard]] auto variables() const -> const Variables&;
 
-  /// Parameters accessor.
-  /// \return Parameters.
-  [[nodiscard]] virtual auto parameters() const -> Pointers<Parameter>;
+  /// Pointers accessor.
+  /// \return Pointers.
+  [[nodiscard]] virtual auto pointers() const -> std::vector<Variable*>;
 
-  /// Parameters accessor (stamp-based).
-  /// \param stamp Query stamp.
-  /// \return Parameters.
-  [[nodiscard]] virtual auto parameters(const Stamp& stamp) const -> Pointers<Parameter>;
+  /// Pointers accessor (time-based).
+  /// \param time Query time.
+  /// \return Pointers.
+  [[nodiscard]] virtual auto pointers(const Time& time) const -> std::vector<Variable*>;
 
   /// Accesses the transformation.
   /// \return Transformation.
@@ -88,12 +92,12 @@ class Sensor {
   /// Constructor from number of variables and YAML file.
   /// \param num_variables Number of variables.
   /// \param node Input YAML node.
-  Sensor(const Size& num_variables, const Node& node);
+  Sensor(const Index& num_variables, const Node& node);
 
   /// Maps a variable in vector form.
   /// \param index Index of variable.
   /// \return Variable as vector.
-  [[nodiscard]] auto variableAsVector(const Size& index) const -> Eigen::Map<DynamicVector<Scalar>>;
+  [[nodiscard]] auto variableAsVector(const Index& index) const -> Eigen::Ref<VectorX<Scalar>>;
 
   /// Outputs all sensor variables to a YAML emitter.
   /// \param emitter Output YAML emitter.

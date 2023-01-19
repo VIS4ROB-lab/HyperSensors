@@ -33,15 +33,15 @@ auto Sensor::variables() const -> const Variables& {
   return variables_;
 }
 
-auto Sensor::parameters() const -> Pointers<Parameter> {
-  Pointers<Parameter> pointers;
+auto Sensor::pointers() const -> std::vector<Variable*> {
+  std::vector<Variable*> pointers;
   pointers.reserve(variables_.size());
   std::transform(variables_.begin(), variables_.end(), std::back_inserter(pointers), [](const auto& arg) { return arg.get(); });
   return pointers;
 }
 
-auto Sensor::parameters(const Stamp& /* stamp */) const -> Pointers<Parameter> {
-  return Sensor::parameters();
+auto Sensor::pointers(const Time& /* time */) const -> std::vector<Variable*> {
+  return Sensor::pointers();
 }
 
 auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
@@ -61,14 +61,14 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Size& num_variables, const Node& node) : rate_{kDefaultRate}, variables_{num_variables} {
+Sensor::Sensor(const Index& num_variables, const Node& node) : rate_{kDefaultRate}, variables_{num_variables} {
   initializeVariables();
   if (!node.IsNull()) {
     readVariables(node);
   }
 }
 
-auto Sensor::variableAsVector(const Size& index) const -> Eigen::Map<DynamicVector<Scalar>> {
+auto Sensor::variableAsVector(const Index& index) const -> Eigen::Ref<VectorX<Scalar>> {
   DCHECK_LT(index, variables_.size());
   DCHECK(variables_[index] != nullptr);
   return variables_[index]->asVector();
