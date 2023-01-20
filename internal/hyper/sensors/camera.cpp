@@ -22,7 +22,7 @@ constexpr auto kDefaultShutterDelta = 0;
 
 }  // namespace
 
-auto Camera::ProjectToPlane(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l) -> Pixel {
+auto Camera::LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l) -> Pixel {
   const auto inverse_z = Scalar{1} / landmark.z();
 
   if (J_l) {
@@ -40,7 +40,7 @@ auto Camera::ProjectToPlane(const Eigen::Ref<const Landmark>& landmark, Scalar* 
   return {landmark.x() * inverse_z, landmark.y() * inverse_z};
 }
 
-auto Camera::ProjectToSphere(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l) -> Bearing {
+auto Camera::LandmarkToBearing(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l) -> Bearing {
   const auto i_n2 = Scalar{1} / landmark.squaredNorm();
   const auto i_n = std::sqrt(i_n2);
 
@@ -52,7 +52,7 @@ auto Camera::ProjectToSphere(const Eigen::Ref<const Landmark>& landmark, Scalar*
   return landmark * i_n;
 }
 
-auto Camera::LiftToSphere(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p) -> Bearing {
+auto Camera::PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p) -> Bearing {
   const auto x = pixel.x();
   const auto y = pixel.y();
   const auto x2 = x * x;
@@ -85,18 +85,25 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
   return c2 / (c2 + c3) * (T_ab.translation() + (c3 / c1) * (b_a + c0));
 }
 
-Camera::Camera(const Node& node) : Sensor{kNumVariables, node}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
+auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
+  const auto distortion_node = yaml::Read(node, kDistortionName);
+  const auto distortion_type_string = yaml::ReadAs<std::string>(distortion_node, "type");
+  if (distortion_type_string == "radial_tangential") {
+    using RadialTangentialDistortion = variables::RadialTangentialDistortion<Scalar, 2>;
+    const auto distortion = yaml::ReadVariable<RadialTangentialDistortion>(distortion_node, "parameters");
+    return std::make_unique<RadialTangentialDistortion>(distortion);
+  } else {
+    LOG(FATAL) << "Unknown distortion type.";
+    return nullptr;
+  }
+}
+
+Camera::Camera(std::unique_ptr<Distortion>&& distortion) : Sensor{kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics>();
-  variables_[kDistortionOffset] = nullptr;
   parameters_[kIntrinsicsOffset] = variables_[kIntrinsicsOffset]->asVector().data();
-  parameters_[kDistortionOffset] = nullptr;
-
-  // Read YAML node.
-  if (!node.IsNull()) {
-    read(node);
-  }
+  setDistortion(std::move(distortion));
 }
 
 auto Camera::sensorSize() const -> const SensorSize& {
@@ -132,7 +139,6 @@ auto Camera::intrinsics() -> Eigen::Map<Intrinsics> {
 }
 
 auto Camera::distortion() const -> const Distortion& {
-  DCHECK(variables_[kDistortionOffset] != nullptr);
   return static_cast<const Distortion&>(*variables_[kDistortionOffset]);  // NOLINT
 }
 
@@ -141,7 +147,7 @@ auto Camera::distortion() -> Distortion& {
 }
 
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
-  DCHECK(distortion.get() != nullptr);
+  CHECK(distortion != nullptr);
   variables_[kDistortionOffset] = std::move(distortion);
   parameters_[kDistortionOffset] = variables_[kDistortionOffset]->asVector().data();
 }
@@ -172,7 +178,7 @@ auto Camera::convertPixelsToBearings(const std::vector<Pixel>& pixels, const Sca
   for (const auto& pixel : pixels) {
     const auto normalized_pixel = intrinsics().normalize(pixel);
     const auto undistorted_pixel = distortion().undistort(normalized_pixel, nullptr, nullptr, parameters);
-    bearings.emplace_back(LiftToSphere(undistorted_pixel));
+    bearings.emplace_back(PixelToBearing(undistorted_pixel));
   }
 
   return bearings;
@@ -207,20 +213,8 @@ auto Camera::ReadShutterDelta(const Node& node) -> ShutterDelta {
   return yaml::ReadAs<ShutterDelta>(node, kShutterDeltaName);
 }
 
-auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
-  const auto distortion_node = yaml::Read(node, kDistortionName);
-  const auto distortion_type_string = yaml::ReadAs<std::string>(distortion_node, "type");
-  if (distortion_type_string == "radial_tangential") {
-    using RadialTangentialDistortion = variables::RadialTangentialDistortion<Scalar, 2>;
-    const auto distortion = yaml::ReadVariable<RadialTangentialDistortion>(distortion_node, "parameters");
-    return std::make_unique<RadialTangentialDistortion>(distortion);
-  } else {
-    LOG(FATAL) << "Unknown distortion type.";
-    return nullptr;
-  }
-}
-
 auto Camera::read(const Node& node) -> void {
+  Sensor::read(node);
   sensor_size_ = ReadSensorSize(node);
   shutter_type_ = ReadShutterType(node);
   shutter_delta_ = (shutterType() != ShutterType::GLOBAL) ? ReadShutterDelta(node) : kDefaultShutterDelta;

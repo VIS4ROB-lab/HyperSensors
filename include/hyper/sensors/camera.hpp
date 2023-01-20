@@ -6,6 +6,7 @@
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/variables/bearing.hpp"
 #include "hyper/variables/distortions/distortion.hpp"
+#include "hyper/variables/intrinsics.hpp"
 
 namespace hyper::sensors {
 
@@ -32,23 +33,23 @@ class Camera final : public Sensor {
   using Intrinsics = variables::Intrinsics<Scalar>;
   using Distortion = variables::Distortion<Scalar>;
 
-  /// Projects landmarks to the (normalized) image plane.
-  /// \param landmark Landmark to project.
-  /// \param J_l Jacobian of the projection.
-  /// \return Projected pixel coordinates.
-  static auto ProjectToPlane(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Pixel;
+  /// Converts a landmark to a (normalized) pixel coordinate.
+  /// \param landmark Landmark.
+  /// \param J_l Jacobian (optional).
+  /// \return Pixel.
+  static auto LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Pixel;
 
-  /// Projects landmarks to the unit sphere.
-  /// \param landmark Landmark to project.
-  /// \param J_l Jacobian of the projection.
-  /// \return Projected bearing coordinates.
-  static auto ProjectToSphere(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Bearing;
+  /// Converts a landmark to a bearing.
+  /// \param landmark Landmark.
+  /// \param J_l Jacobian (optional).
+  /// \return Bearing.
+  static auto LandmarkToBearing(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Bearing;
 
-  /// Lifts (normalized) pixel coordinates to the unit sphere.
-  /// \param pixel Pixel to lift.
-  /// \param J_p Jacobian of the lift.
-  /// \return Bearing of lifted pixel coordinates.
-  static auto LiftToSphere(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p = nullptr) -> Bearing;
+  /// Converts a (normalized) pixel coordinate to a bearing.
+  /// \param pixel Pixel.
+  /// \param J_p Jacobian (optional).
+  /// \return Bearing.
+  static auto PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p = nullptr) -> Bearing;
 
   /// Triangulates a landmark from relative a transformation and bearings.
   /// \param T_ab Input transformation.
@@ -57,9 +58,13 @@ class Camera final : public Sensor {
   /// \return Triangulated landmark.
   static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
 
-  /// Constructor from YAML file.
-  /// \param node Input YAML node.
-  explicit Camera(const Node& node = {});
+  /// Reads the distortion.
+  /// \param node Node
+  /// \return Distortion
+  static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
+
+  /// Default constructor.
+  explicit Camera(std::unique_ptr<Distortion>&& distortion);
 
   /// Sensor size accessor.
   /// \return Reference to sensor size.
@@ -127,47 +132,42 @@ class Camera final : public Sensor {
 
  private:
   /// Reads the sensor size.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Sensor size.
   static auto ReadSensorSize(const Node& node) -> SensorSize;
 
   /// Reads the shutter type.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Shutter type.
   static auto ReadShutterType(const Node& node) -> ShutterType;
 
   /// Reads the shutter delta.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Shutter delta.
   static auto ReadShutterDelta(const Node& node) -> ShutterDelta;
 
-  /// Reads the distortion.
-  /// \param node Input YAML node.
-  /// \return Distortion
-  static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
-
-  /// Reads the sensor information from a YAML node.
-  /// \param node Input YAML node.
-  auto read(const Node& node) -> void;
+  /// Reads a sensor from a YAML node.
+  /// \param node YAML node.
+  auto read(const Node& node) -> void final;
 
   /// Writes the sensor size.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeSensorSize(Emitter& emitter) const -> void;
 
   /// Write the shutter type.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeShutterType(Emitter& emitter) const -> void;
 
   /// Writes the shutter delta.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeShutterDelta(Emitter& emitter) const -> void;
 
   /// Writes the distortion.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeDistortion(Emitter& emitter) const -> void;
 
-  /// Writes the sensor information to a YAML emitter.
-  /// \param emitter Output YAML emitter.
+  /// Writes a sensor to a YAML emitter.
+  /// \param emitter YAML emitter.
   auto write(Emitter& emitter) const -> void final;
 
   SensorSize sensor_size_;      ///< Sensor size.

@@ -29,9 +29,8 @@ class IMU final : public Sensor {
   using AccelerometerAxesOffsets = variables::Cartesian<Scalar, 9>;
   using AccelerometerBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
 
-  /// Constructor from YAML file.
-  /// \param node Input YAML node.
-  explicit IMU(const Node& node = {});
+  /// Default constructor.
+  IMU();
 
   /// Pointers accessor.
   /// \return Pointers.
@@ -116,12 +115,12 @@ class IMU final : public Sensor {
   auto accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets>;
 
  private:
-  /// Reads the sensor information from a YAML node.
-  /// \param node Input YAML node.
-  auto read(const Node& node) -> void;
+  /// Reads a sensor from a YAML node.
+  /// \param node YAML node.
+  auto read(const Node& node) -> void final;
 
-  /// Writes the sensor information to a YAML emitter.
-  /// \param emitter Output YAML emitter.
+  /// Writes a sensor to a YAML emitter.
+  /// \param emitter YAML emitter.
   auto write(Emitter& emitter) const -> void final;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.

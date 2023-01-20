@@ -31,9 +31,8 @@ class Sensor {
   using Offset = variables::Cartesian<Scalar, 1>;
   using Transformation = variables::SE3<Scalar>;
 
-  /// Constructor from YAML file.
-  /// \param node Input YAML node.
-  explicit Sensor(const Node& node = {});
+  /// Default constructor.
+  Sensor();
 
   /// Default destructor.
   virtual ~Sensor() = default;
@@ -100,9 +99,15 @@ class Sensor {
   /// \return Transformation.
   [[nodiscard]] auto transformation() -> Eigen::Map<Transformation>;
 
-  /// Emits a sensor to YAML.
-  /// \param emitter Modifiable YAML emitter.
-  /// \param sensor Sensor to output.
+  /// Reads a sensor from a YAML file.
+  /// \param node YAML node.
+  /// \param sensor Sensor to read.
+  /// \return YAML node.
+  friend auto operator>>(const Node& node, Sensor& sensor) -> const Node&;
+
+  /// Emits a sensor to a YAML file.
+  /// \param emitter YAML emitter.
+  /// \param sensor Sensor to emit.
   /// \return Modified YAML emitter.
   friend auto operator<<(Emitter& emitter, const Sensor& sensor) -> Emitter&;
 
@@ -110,23 +115,21 @@ class Sensor {
   // Definitions.
   using Index = std::size_t;
 
-  /// Constructor from number of variables and YAML file.
+  /// Constructor from number of variables.
   /// \param num_variables Number of variables.
-  /// \param node Input YAML node.
-  Sensor(const Index& num_variables, const Node& node);
+  explicit Sensor(const Index& num_variables);
 
-  /// Writes the sensor information to a YAML emitter.
-  /// \param emitter Output YAML emitter.
+  /// Reads a sensor from a YAML node.
+  /// \param node YAML node.
+  virtual auto read(const Node& node) -> void;
+
+  /// Writes a sensor to a YAML emitter.
+  /// \param emitter YAML emitter.
   virtual auto write(Emitter& emitter) const -> void;
 
   Rate rate_;                        ///< Rate.
   Variables variables_;              ///< Variables.
   std::vector<Scalar*> parameters_;  ///< Parameters (i.e. pointer to variable memory).
-
- private:
-  /// Reads the sensor information from a YAML node.
-  /// \param node Input YAML node.
-  auto read(const Node& node) -> void;
 };
 
 }  // namespace hyper::sensors

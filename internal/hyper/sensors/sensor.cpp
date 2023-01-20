@@ -20,7 +20,7 @@ constexpr auto kDefaultRate = -1;
 
 }  // namespace
 
-Sensor::Sensor(const Node& node) : Sensor{kNumVariables, node} {}
+Sensor::Sensor() : Sensor{kNumVariables} {}
 
 auto Sensor::rate() const -> const Rate& {
   return rate_;
@@ -69,6 +69,12 @@ auto Sensor::transformation() -> Eigen::Map<Transformation> {
   return Eigen::Map<Transformation>{parameters_[kTransformationOffset]};
 }
 
+auto operator>>(const YAML::Node& node, Sensor& sensor) -> const YAML::Node& {
+  CHECK(!node.IsNull());
+  sensor.read(node);
+  return node;
+}
+
 auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& {
   emitter << YAML::BeginMap;
   sensor.write(emitter);
@@ -76,7 +82,7 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Index& num_variables, const Node& node) : rate_{kDefaultRate}, variables_{num_variables}, parameters_{num_variables} {
+Sensor::Sensor(const Index& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameters_{num_variables} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   DCHECK_LE(kNumVariables, parameters_.size());
@@ -84,23 +90,18 @@ Sensor::Sensor(const Index& num_variables, const Node& node) : rate_{kDefaultRat
   variables_[kTransformationOffset] = std::make_unique<Transformation>();
   parameters_[kOffsetOffset] = variables_[kOffsetOffset]->asVector().data();
   parameters_[kTransformationOffset] = variables_[kTransformationOffset]->asVector().data();
-
-  // Read YAML node.
-  if (!node.IsNull()) {
-    read(node);
-  }
-}
-
-auto Sensor::write(Emitter& emitter) const -> void {
-  yaml::Write(emitter, kRateName, rate());
-  yaml::WriteVariable(emitter, kOffsetName, offset());
-  yaml::WriteVariable(emitter, kTransformationName, transformation());
 }
 
 auto Sensor::read(const Node& node) -> void {
   rate_ = yaml::ReadAs<Rate>(node, kRateName);
   offset() = yaml::ReadVariable<Offset>(node, kOffsetName);
   transformation() = yaml::ReadVariable<Transformation>(node, kTransformationName);
+}
+
+auto Sensor::write(Emitter& emitter) const -> void {
+  yaml::Write(emitter, kRateName, rate());
+  yaml::WriteVariable(emitter, kOffsetName, offset());
+  yaml::WriteVariable(emitter, kTransformationName, transformation());
 }
 
 }  // namespace hyper::sensors

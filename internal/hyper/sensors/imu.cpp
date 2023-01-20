@@ -4,8 +4,7 @@
 #include <glog/logging.h>
 
 #include "hyper/sensors/imu.hpp"
-#include "hyper/state/interpolators/spatial/spatial.hpp"
-#include "hyper/state/interpolators/temporal/basis.hpp"
+#include "hyper/state/interpolators/interpolators.hpp"
 
 namespace hyper::sensors {
 
@@ -44,7 +43,7 @@ auto concatVectors(const TArgs&... args) {
 
 }  // namespace
 
-IMU::IMU(const Node& node) : Sensor{kNumVariables, node}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
+IMU::IMU() : Sensor{kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   variables_[kGyroscopeIntrinsicsOffset] = std::make_unique<GyroscopeIntrinsics>();
@@ -60,10 +59,6 @@ IMU::IMU(const Node& node) : Sensor{kNumVariables, node}, gyroscope_noise_densit
   static auto interpolator = state::BasisInterpolator<Scalar, 4>{};
   gyroscope_bias_.setInterpolator(&interpolator);
   accelerometer_bias_.setInterpolator(&interpolator);
-
-  if (!node.IsNull()) {
-    read(node);
-  }
 }
 
 auto IMU::pointers() const -> std::vector<Variable*> {
@@ -147,6 +142,7 @@ auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
 }
 
 auto IMU::read(const Node& node) -> void {
+  Sensor::read(node);
   gyroscopeIntrinsics() = yaml::ReadVariable<GyroscopeIntrinsics>(node, kGyroscopeIntrinsicsName);
   gyroscopeSensitivity() = yaml::ReadVariable<GyroscopeSensitivity>(node, kGyroscopeSensitivityName);
   gyroscopeNoiseDensity() = yaml::ReadAs<GyroscopeNoiseDensity>(node, kGyroscopeNoiseDensityName);
