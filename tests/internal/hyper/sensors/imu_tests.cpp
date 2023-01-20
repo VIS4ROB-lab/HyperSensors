@@ -5,38 +5,38 @@
 
 #include <gtest/gtest.h>
 
-#include "hyper/sensors/sensor.hpp"
+#include "hyper/sensors/imu.hpp"
 #include "hyper/utils.hpp"
 
 namespace hyper::sensors::tests {
 
-class SensorTests : public testing::Test {
+class IMUTests : public testing::Test {
  protected:
   // Constants.
   static constexpr auto kFilePath = __FILE__;
-  static constexpr auto kInputFileName = "sensor.yaml";
-  static constexpr auto kOutputFileName = "sensor_out.yaml";
+  static constexpr auto kInputFileName = "imu.yaml";
+  static constexpr auto kOutputFileName = "imu_out.yaml";
 
   // Definitions.
   using Path = std::filesystem::path;
 
   using Scalar = double;
-  using Sensor = sensors::Sensor;
+  using IMU = sensors::IMU;
 
   /// Setup.
   auto SetUp() -> void final {
     input_ = Path{kFilePath}.parent_path() /= kInputFileName;
-    YAML::LoadFile(input_) >> sensor_;
+    YAML::LoadFile(input_) >> imu_;
   }
 
   Path input_;
-  Sensor sensor_;
+  IMU imu_;
 };
 
-TEST_F(SensorTests, ReadWrite) {
+TEST_F(IMUTests, ReadWrite) {
   YAML::Emitter emitter;
   const auto output = Path{kFilePath}.parent_path() /= kOutputFileName;
-  std::ofstream{output} << (emitter << sensor_).c_str();
+  std::ofstream{output} << (emitter << imu_).c_str();
   EXPECT_TRUE(internal::CompareFiles(input_, output));
   std::remove(output.c_str());
 }

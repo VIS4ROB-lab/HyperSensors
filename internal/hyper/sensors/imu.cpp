@@ -143,22 +143,22 @@ auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
 
 auto IMU::read(const Node& node) -> void {
   Sensor::read(node);
+  gyroscopeNoiseDensity() = yaml::ReadAs<GyroscopeNoiseDensity>(node, kGyroscopeNoiseDensityName);
   gyroscopeIntrinsics() = yaml::ReadVariable<GyroscopeIntrinsics>(node, kGyroscopeIntrinsicsName);
   gyroscopeSensitivity() = yaml::ReadVariable<GyroscopeSensitivity>(node, kGyroscopeSensitivityName);
-  gyroscopeNoiseDensity() = yaml::ReadAs<GyroscopeNoiseDensity>(node, kGyroscopeNoiseDensityName);
+  accelerometerNoiseDensity() = yaml::ReadAs<AccelerometerNoiseDensity>(node, kAccelerometerNoiseDensityName);
   accelerometerIntrinsics() = yaml::ReadVariable<AccelerometerIntrinsics>(node, kAccelerometerIntrinsicsName);
   accelerometerAxesOffsets() = yaml::ReadVariable<AccelerometerAxesOffsets>(node, kAccelerometerAxesOffsetsName);
-  accelerometerNoiseDensity() = yaml::ReadAs<AccelerometerNoiseDensity>(node, kAccelerometerNoiseDensityName);
 }
 
 auto IMU::write(Emitter& emitter) const -> void {
   Sensor::write(emitter);
+  yaml::Write(emitter, kGyroscopeNoiseDensityName, gyroscopeNoiseDensity());
   yaml::WriteVariable(emitter, kGyroscopeIntrinsicsName, gyroscopeIntrinsics());
   yaml::WriteVariable(emitter, kGyroscopeSensitivityName, gyroscopeSensitivity());
-  yaml::Write(emitter, kGyroscopeNoiseDensityName, gyroscopeNoiseDensity());
+  yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
   yaml::WriteVariable(emitter, kAccelerometerIntrinsicsName, accelerometerIntrinsics());
   yaml::WriteVariable(emitter, kAccelerometerAxesOffsetsName, accelerometerAxesOffsets());
-  yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
 }
 
 }  // namespace hyper::sensors
