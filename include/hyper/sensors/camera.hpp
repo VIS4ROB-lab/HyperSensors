@@ -60,13 +60,8 @@ class Camera final : public Sensor {
   /// \return Triangulated landmark.
   static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
 
-  /// Reads the distortion.
-  /// \param node Node
-  /// \return Distortion
-  static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
-
   /// Default constructor.
-  explicit Camera(std::unique_ptr<Distortion>&& distortion);
+  explicit Camera();
 
   /// Sensor size accessor.
   /// \return Reference to sensor size.
@@ -155,6 +150,11 @@ class Camera final : public Sensor {
   /// \param node Node
   /// \return Shutter delta.
   static auto ReadShutterDelta(const Node& node) -> ShutterDelta;
+
+  /// Reads the distortion.
+  /// \param node Node
+  /// \return Distortion
+  static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
 
   /// Reads a sensor from a YAML node.
   /// \param node YAML node.

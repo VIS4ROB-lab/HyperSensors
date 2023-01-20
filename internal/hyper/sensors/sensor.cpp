@@ -70,7 +70,7 @@ auto Sensor::transformation() -> Eigen::Map<Transformation> {
 }
 
 auto operator>>(const YAML::Node& node, Sensor& sensor) -> const YAML::Node& {
-  CHECK(!node.IsNull());
+  CHECK(node);
   sensor.read(node);
   return node;
 }

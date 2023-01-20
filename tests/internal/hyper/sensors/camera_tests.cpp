@@ -1,12 +1,67 @@
 /// This file is subject to the terms and conditions defined in
 /// the 'LICENSE' file, which is part of this repository.
 
+#include <filesystem>
+#include <fstream>
+#include <string>
+
+#include <gtest/gtest.h>
+
 #include "hyper/sensors/camera.hpp"
-#include "hyper/variables/distortions/distortions.hpp"
 
-/* namespace hyper::test {
+namespace hyper::test {
 
-auto TestHelper<Camera>::RandomPosition() -> Position {
+class CameraTests : public testing::Test {
+ protected:
+  // Constants.
+  static constexpr auto kFilePath = __FILE__;
+  static constexpr auto kInputFileName = "camera.yaml";
+  static constexpr auto kOutputFileName = "camera_out.yaml";
+
+  // Definitions.
+  using Path = std::filesystem::path;
+  using Camera = sensors::Camera;
+
+  /// Setup.
+  auto SetUp() -> void final {
+    input_ = Path{kFilePath}.parent_path() /= kInputFileName;
+    YAML::LoadFile(input_) >> camera_;
+  }
+
+  /// Compares to files.
+  /// \param p1 Path to first file.
+  /// \param p2 Path to second file.
+  /// \return True if files are identical.
+  static auto CompareFiles(const Path& p1, const Path& p2) -> bool {
+    std::ifstream f1(p1, std::ifstream::binary | std::ifstream::ate);
+    std::ifstream f2(p2, std::ifstream::binary | std::ifstream::ate);
+
+    if (f1.fail() || f2.fail()) {
+      return false;
+    }
+
+    if (f1.tellg() != f2.tellg()) {
+      return false;
+    }
+
+    f1.seekg(0, std::ifstream::beg);
+    f2.seekg(0, std::ifstream::beg);
+    return std::equal(std::istreambuf_iterator<char>(f1.rdbuf()), std::istreambuf_iterator<char>(), std::istreambuf_iterator<char>(f2.rdbuf()));
+  }
+
+  Path input_;
+  Camera camera_;
+};
+
+TEST_F(CameraTests, ReadWrite) {
+  YAML::Emitter emitter;
+  const auto output = Path{kFilePath}.parent_path() /= kOutputFileName;
+  std::ofstream{output} << (emitter << camera_).c_str();
+  EXPECT_TRUE(CompareFiles(input_, output));
+  std::remove(output.c_str());
+}
+
+/* auto TestHelper<Camera>::RandomPosition() -> Position {
   Position position = Position::Random();
   if (position.z() < Scalar{0})
     position.z() = -position.z();
@@ -148,6 +203,6 @@ TEST(CameraTests, FullDuality) {  // NOLINT
       EXPECT_TRUE(Traits::ApproximateNormalizedEquality(normalized_pixel_1, normalized_pixel_0));
     }
   }
-}
+} */
 
-}  // namespace hyper::test */
+}  // namespace hyper::test
