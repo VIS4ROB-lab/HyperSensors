@@ -2,8 +2,6 @@
 /// the 'LICENSE' file, which is part of this repository.
 
 #include "hyper/sensors/camera.hpp"
-#include "hyper/variables/distortions/radial_tangential.hpp"
-#include "hyper/variables/intrinsics.hpp"
 #include "hyper/variables/jacobian.hpp"
 
 namespace hyper::sensors {
@@ -152,16 +150,36 @@ auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
   parameters_[kDistortionOffset] = variables_[kDistortionOffset]->asVector().data();
 }
 
+auto Camera::randomPixel() const -> Pixel {
+  Pixel pixel;
+  pixel.x() = static_cast<Scalar>(sensor_size_.width - 1) * Eigen::internal::random<Scalar>(0, 1);
+  pixel.y() = static_cast<Scalar>(sensor_size_.height - 1) * Eigen::internal::random<Scalar>(0, 1);
+  return pixel;
+}
+
+auto Camera::randomNormalizedPixel(bool distort) const -> Pixel {
+  if (distort) {
+    const auto normalized_pixel = intrinsics().normalize(randomPixel());
+    return distortion().distort(normalized_pixel, nullptr, nullptr, nullptr);
+  } else {
+    return intrinsics().normalize(randomPixel());
+  }
+}
+
+auto Camera::randomBearing(bool distorted) -> Bearing {
+  return PixelToBearing(randomNormalizedPixel(distorted));
+}
+
 auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time> {
   std::vector<Time> times;
   times.reserve(pixels.size());
   if (shutterType() == ShutterType::HORIZONTAL) {
-    const auto h_2 = Scalar{0.5} * static_cast<Scalar>(sensorSize().height);
+    const auto h_2 = Scalar{0.5} * static_cast<Scalar>(sensorSize().height - 1);
     for (const auto& pixel : pixels) {
       times.emplace_back(time + shutter_delta_ * (pixel.y() - h_2));
     }
   } else {  // Vertical rolling shutter.
-    const auto w_2 = Scalar{0.5} * static_cast<Scalar>(sensorSize().width);
+    const auto w_2 = Scalar{0.5} * static_cast<Scalar>(sensorSize().width - 1);
     for (const auto& pixel : pixels) {
       times.emplace_back(time + shutter_delta_ * (pixel.x() - w_2));
     }
@@ -169,7 +187,7 @@ auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pix
   return times;
 }
 
-auto Camera::convertPixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters) const -> std::vector<Bearing> {
+auto Camera::pixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters) const -> std::vector<Bearing> {
   // Allocate memory.
   std::vector<Bearing> bearings;
   bearings.reserve(pixels.size());
@@ -182,11 +200,6 @@ auto Camera::convertPixelsToBearings(const std::vector<Pixel>& pixels, const Sca
   }
 
   return bearings;
-}
-
-auto Camera::triangulate(const Camera& other, const Eigen::Ref<const Bearing>& b_this, const Eigen::Ref<const Bearing>& b_other) -> Landmark {
-  const auto T_this_other = transformation().groupInverse().groupPlus(other.transformation());
-  return Triangulate(T_this_other, b_this, b_other);
 }
 
 auto Camera::ReadSensorSize(const Node& node) -> SensorSize {

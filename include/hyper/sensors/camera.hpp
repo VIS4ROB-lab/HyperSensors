@@ -5,7 +5,7 @@
 
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/variables/bearing.hpp"
-#include "hyper/variables/distortions/distortion.hpp"
+#include "hyper/variables/distortions/distortions.hpp"
 #include "hyper/variables/intrinsics.hpp"
 
 namespace hyper::sensors {
@@ -17,6 +17,16 @@ class Camera final : public Sensor {
   static constexpr auto kDistortionOffset = kIntrinsicsOffset + 1;
   static constexpr auto kNumVariables = kDistortionOffset + 1;
 
+  // Definitions.
+  using Index = Eigen::Index;
+
+  using ShutterDelta = Time;  // Shutter delta (i.e. increment between readouts).
+  using Pixel = variables::Pixel<Scalar>;
+  using Bearing = variables::Bearing<Scalar>;
+  using Landmark = variables::Position<Scalar, 3>;
+  using Intrinsics = variables::Intrinsics<Scalar>;
+  using Distortion = variables::Distortion<Scalar>;
+
   // Sensor size.
   struct SensorSize {
     Index width, height;
@@ -24,14 +34,6 @@ class Camera final : public Sensor {
 
   // Shutter type.
   enum class ShutterType { GLOBAL, VERTICAL, HORIZONTAL, DEFAULT = GLOBAL };
-
-  // Shutter delta (i.e. increment between readouts).
-  using ShutterDelta = Time;
-  using Pixel = variables::Pixel<Scalar>;
-  using Bearing = variables::Bearing<Scalar>;
-  using Landmark = variables::Position<Scalar, 3>;
-  using Intrinsics = variables::Intrinsics<Scalar>;
-  using Distortion = variables::Distortion<Scalar>;
 
   /// Converts a landmark to a (normalized) pixel coordinate.
   /// \param landmark Landmark.
@@ -111,24 +113,32 @@ class Camera final : public Sensor {
   /// \param distortion Distortion to be set.
   auto setDistortion(std::unique_ptr<Distortion>&& distortion) -> void;
 
+  /// Retrieves a random pixel on the image sensor.
+  /// \return Random pixel.
+  [[nodiscard]] auto randomPixel() const -> Pixel;
+
+  /// Retrieves a random (normalized) pixel on the image sensor.
+  /// \param distorted True if pixel is distorted.
+  /// \return Random (normalized) pixel.
+  [[nodiscard]] auto randomNormalizedPixel(bool distort = false) const -> Pixel;
+
+  /// Retrieves a random (visible) bearing.
+  /// \param distorted True if bearing is distorted.
+  /// \return Random bearing.
+  auto randomBearing(bool distorted = false) -> Bearing;
+
   /// Corrects the shutter times.
   /// \param time Global shutter time.
   /// \param pixels Input pixels.
   /// \return Corrected shutter times.
   [[nodiscard]] auto correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time>;
 
-  /// Converts pixels to bearings.
+  /// Converts (non-normalized) pixels to
+  /// bearings (by normalization and undistortion).
   /// \param pixels Input pixels.
   /// \param parameters External distortion parameters (optional).
   /// \return Bearings.
-  [[nodiscard]] auto convertPixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
-
-  /// Triangulates a landmark from bearings.
-  /// \param other Other camera.
-  /// \param b_this Bearing in this frame.
-  /// \param b_other Bearing in other frame.
-  /// \return Triangulated landmark.
-  auto triangulate(const Camera& other, const Eigen::Ref<const Bearing>& b_this, const Eigen::Ref<const Bearing>& b_other) -> Landmark;
+  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
 
  private:
   /// Reads the sensor size.

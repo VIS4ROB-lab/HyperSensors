@@ -113,11 +113,11 @@ class Sensor {
 
  protected:
   // Definitions.
-  using Index = std::size_t;
+  using Size = std::size_t;
 
   /// Constructor from number of variables.
   /// \param num_variables Number of variables.
-  explicit Sensor(const Index& num_variables);
+  explicit Sensor(const Size& num_variables);
 
   /// Reads a sensor from a YAML node.
   /// \param node YAML node.

@@ -82,7 +82,7 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Index& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameters_{num_variables} {
+Sensor::Sensor(const Size& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameters_{num_variables} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   DCHECK_LE(kNumVariables, parameters_.size());
