@@ -19,13 +19,14 @@ class Camera final : public Sensor {
 
   // Definitions.
   using Index = Eigen::Index;
-
-  using ShutterDelta = Time;  // Shutter delta (i.e. increment between readouts).
   using Pixel = variables::Pixel<Scalar>;
   using Bearing = variables::Bearing<Scalar>;
   using Landmark = variables::Position<Scalar, 3>;
   using Intrinsics = variables::Intrinsics<Scalar>;
   using Distortion = variables::Distortion<Scalar>;
+
+  // Shutter delta (i.e. increment between readouts).
+  using ShutterDelta = Scalar;
 
   // Sensor size.
   struct SensorSize {
@@ -64,11 +65,11 @@ class Camera final : public Sensor {
   explicit Camera();
 
   /// Sensor size accessor.
-  /// \return Reference to sensor size.
+  /// \return Sensor size.
   [[nodiscard]] auto sensorSize() const -> const SensorSize&;
 
   /// Sensor size modifier.
-  /// \return Reference to sensor size.
+  /// \return Sensor size.
   [[nodiscard]] auto sensorSize() -> SensorSize&;
 
   /// Shutter type accessor.
@@ -88,19 +89,19 @@ class Camera final : public Sensor {
   [[nodiscard]] auto shutterDelta() -> ShutterDelta&;
 
   /// Intrinsics accessor.
-  /// \return Reference to intrinsics.
+  /// \return Intrinsics.
   [[nodiscard]] auto intrinsics() const -> Eigen::Map<const Intrinsics>;
 
   /// Intrinsics modifier.
-  /// \return Reference to intrinsics.
+  /// \return Intrinsics.
   auto intrinsics() -> Eigen::Map<Intrinsics>;
 
   /// Distortion accessor.
-  /// \return Reference to distortion.
+  /// \return Distortion.
   [[nodiscard]] auto distortion() const -> const Distortion&;
 
   /// Distortion modifier.
-  /// \return Reference to distortion.
+  /// \return Distortion.
   auto distortion() -> Distortion&;
 
   /// Sets the distortion.
