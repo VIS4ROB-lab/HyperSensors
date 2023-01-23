@@ -53,20 +53,20 @@ auto Sensor::parameters(const Time& /* time */) const -> std::vector<Scalar*> {
   return Sensor::parameters();
 }
 
-auto Sensor::offset() const -> Eigen::Map<const Offset> {
-  return Eigen::Map<const Offset>{parameters_[kOffsetOffset]};
+auto Sensor::offset() const -> const Offset& {
+  return static_cast<const Offset&>(*variables_[kOffsetOffset]);  // NOLINT
 }
 
-auto Sensor::offset() -> Eigen::Map<Offset> {
-  return Eigen::Map<Offset>{parameters_[kOffsetOffset]};
+auto Sensor::offset() -> Offset& {
+  return const_cast<Offset&>(std::as_const(*this).offset());
 }
 
-auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
-  return Eigen::Map<const Transformation>{parameters_[kTransformationOffset]};
+auto Sensor::transformation() const -> const Transformation& {
+  return static_cast<const Transformation&>(*variables_[kTransformationOffset]);  // NOLINT
 }
 
-auto Sensor::transformation() -> Eigen::Map<Transformation> {
-  return Eigen::Map<Transformation>{parameters_[kTransformationOffset]};
+auto Sensor::transformation() -> Transformation& {
+  return const_cast<Transformation&>(std::as_const(*this).transformation());
 }
 
 auto operator>>(const YAML::Node& node, Sensor& sensor) -> const YAML::Node& {

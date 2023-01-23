@@ -90,11 +90,11 @@ class Camera final : public Sensor {
 
   /// Intrinsics accessor.
   /// \return Intrinsics.
-  [[nodiscard]] auto intrinsics() const -> Eigen::Map<const Intrinsics>;
+  [[nodiscard]] auto intrinsics() const -> const Intrinsics&;
 
   /// Intrinsics modifier.
   /// \return Intrinsics.
-  auto intrinsics() -> Eigen::Map<Intrinsics>;
+  auto intrinsics() -> Intrinsics&;
 
   /// Distortion accessor.
   /// \return Distortion.

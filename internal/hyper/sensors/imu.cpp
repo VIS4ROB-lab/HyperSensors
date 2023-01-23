@@ -93,20 +93,20 @@ auto IMU::gyroscopeBias() -> GyroscopeBias& {
   return const_cast<GyroscopeBias&>(std::as_const(*this).gyroscopeBias());
 }
 
-auto IMU::gyroscopeIntrinsics() const -> Eigen::Map<const GyroscopeIntrinsics> {
-  return Eigen::Map<const GyroscopeIntrinsics>{parameters_[kGyroscopeIntrinsicsOffset]};
+auto IMU::gyroscopeIntrinsics() const -> const GyroscopeIntrinsics& {
+  return static_cast<const GyroscopeIntrinsics&>(*variables_[kGyroscopeIntrinsicsOffset]);  // NOLINT
 }
 
-auto IMU::gyroscopeIntrinsics() -> Eigen::Map<GyroscopeIntrinsics> {
-  return Eigen::Map<GyroscopeIntrinsics>{parameters_[kGyroscopeIntrinsicsOffset]};
+auto IMU::gyroscopeIntrinsics() -> GyroscopeIntrinsics& {
+  return const_cast<GyroscopeIntrinsics&>(std::as_const(*this).gyroscopeIntrinsics());
 }
 
-auto IMU::gyroscopeSensitivity() const -> Eigen::Map<const GyroscopeSensitivity> {
-  return Eigen::Map<const GyroscopeSensitivity>{parameters_[kGyroscopeSensitivityOffset]};
+auto IMU::gyroscopeSensitivity() const -> const GyroscopeSensitivity& {
+  return static_cast<const GyroscopeSensitivity&>(*variables_[kGyroscopeSensitivityOffset]);  // NOLINT
 }
 
-auto IMU::gyroscopeSensitivity() -> Eigen::Map<GyroscopeSensitivity> {
-  return Eigen::Map<GyroscopeSensitivity>{parameters_[kGyroscopeSensitivityOffset]};
+auto IMU::gyroscopeSensitivity() -> GyroscopeSensitivity& {
+  return const_cast<GyroscopeSensitivity&>(std::as_const(*this).gyroscopeSensitivity());
 }
 
 auto IMU::accelerometerNoiseDensity() const -> const AccelerometerNoiseDensity& {
@@ -125,20 +125,20 @@ auto IMU::accelerometerBias() -> AccelerometerBias& {
   return const_cast<AccelerometerBias&>(std::as_const(*this).accelerometerBias());
 }
 
-auto IMU::accelerometerIntrinsics() const -> Eigen::Map<const AccelerometerIntrinsics> {
-  return Eigen::Map<const AccelerometerIntrinsics>{parameters_[kAccelerometerIntrinsicsOffset]};
+auto IMU::accelerometerIntrinsics() const -> const AccelerometerIntrinsics& {
+  return static_cast<const AccelerometerIntrinsics&>(*variables_[kAccelerometerIntrinsicsOffset]);  // NOLINT
 }
 
-auto IMU::accelerometerIntrinsics() -> Eigen::Map<AccelerometerIntrinsics> {
-  return Eigen::Map<AccelerometerIntrinsics>{parameters_[kAccelerometerIntrinsicsOffset]};
+auto IMU::accelerometerIntrinsics() -> AccelerometerIntrinsics& {
+  return const_cast<AccelerometerIntrinsics&>(std::as_const(*this).accelerometerIntrinsics());
 }
 
-auto IMU::accelerometerAxesOffsets() const -> Eigen::Map<const AccelerometerAxesOffsets> {
-  return Eigen::Map<const AccelerometerAxesOffsets>{parameters_[kAccelerometerAxesOffsetsOffset]};
+auto IMU::accelerometerAxesOffsets() const -> const AccelerometerAxesOffsets& {
+  return static_cast<AccelerometerAxesOffsets&>(*variables_[kAccelerometerAxesOffsetsOffset]);  //NOLINT
 }
 
-auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
-  return Eigen::Map<AccelerometerAxesOffsets>{parameters_[kAccelerometerAxesOffsetsOffset]};
+auto IMU::accelerometerAxesOffsets() -> AccelerometerAxesOffsets& {
+  return const_cast<AccelerometerAxesOffsets&>(std::as_const(*this).accelerometerAxesOffsets());
 }
 
 auto IMU::read(const Node& node) -> void {

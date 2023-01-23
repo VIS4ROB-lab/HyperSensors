@@ -68,19 +68,19 @@ class IMU final : public Sensor {
 
   /// Gyroscope intrinsics accessor.
   /// \return Gyroscope intrinsics.
-  [[nodiscard]] auto gyroscopeIntrinsics() const -> Eigen::Map<const GyroscopeIntrinsics>;
+  [[nodiscard]] auto gyroscopeIntrinsics() const -> const GyroscopeIntrinsics&;
 
   /// Gyroscope intrinsics modifier.
   /// \return Gyroscope intrinsics.
-  auto gyroscopeIntrinsics() -> Eigen::Map<GyroscopeIntrinsics>;
+  auto gyroscopeIntrinsics() -> GyroscopeIntrinsics&;
 
   /// Gyroscope sensitivity accessor.
   /// \return Gyroscope sensitivity.
-  [[nodiscard]] auto gyroscopeSensitivity() const -> Eigen::Map<const GyroscopeSensitivity>;
+  [[nodiscard]] auto gyroscopeSensitivity() const -> const GyroscopeSensitivity&;
 
   /// Gyroscope sensitivity modifier.
   /// \return Gyroscope sensitivity.
-  auto gyroscopeSensitivity() -> Eigen::Map<GyroscopeSensitivity>;
+  auto gyroscopeSensitivity() -> GyroscopeSensitivity&;
 
   /// \brief Accelerometer noise density accessor.
   /// \return Accelerometer noise density.
@@ -100,19 +100,19 @@ class IMU final : public Sensor {
 
   /// Accelerometer intrinsics accessor.
   /// \return Accelerometer intrinsics.
-  [[nodiscard]] auto accelerometerIntrinsics() const -> Eigen::Map<const AccelerometerIntrinsics>;
+  [[nodiscard]] auto accelerometerIntrinsics() const -> const AccelerometerIntrinsics&;
 
   /// Accelerometer intrinsics modifier.
   /// \return Accelerometer intrinsics.
-  auto accelerometerIntrinsics() -> Eigen::Map<AccelerometerIntrinsics>;
+  auto accelerometerIntrinsics() -> AccelerometerIntrinsics&;
 
   /// Accelerometer axes offsets accessor.
   /// \return Accelerometer axes offsets.
-  [[nodiscard]] auto accelerometerAxesOffsets() const -> Eigen::Map<const AccelerometerAxesOffsets>;
+  [[nodiscard]] auto accelerometerAxesOffsets() const -> const AccelerometerAxesOffsets&;
 
   /// Accelerometer axes offsets modifier.
   /// \return Accelerometer axes offsets.
-  auto accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets>;
+  auto accelerometerAxesOffsets() -> AccelerometerAxesOffsets&;
 
  private:
   /// Reads a sensor from a YAML node.

@@ -85,19 +85,19 @@ class Sensor {
 
   /// Offset accessor.
   /// \return Offset.
-  [[nodiscard]] auto offset() const -> Eigen::Map<const Offset>;
+  [[nodiscard]] auto offset() const -> const Offset&;
 
   /// Offset modifier.
   /// \return Offset.
-  [[nodiscard]] auto offset() -> Eigen::Map<Offset>;
+  [[nodiscard]] auto offset() -> Offset&;
 
   /// Transformation accessor.
   /// \return Transformation.
-  [[nodiscard]] auto transformation() const -> Eigen::Map<const Transformation>;
+  [[nodiscard]] auto transformation() const -> const Transformation&;
 
   /// Transformation modifier.
   /// \return Transformation.
-  [[nodiscard]] auto transformation() -> Eigen::Map<Transformation>;
+  [[nodiscard]] auto transformation() -> Transformation&;
 
   /// Reads a sensor from a YAML file.
   /// \param node YAML node.

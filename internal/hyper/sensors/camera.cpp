@@ -114,12 +114,12 @@ auto Camera::shutterDelta() -> ShutterDelta& {
   return const_cast<ShutterDelta&>(std::as_const(*this).shutterDelta());
 }
 
-auto Camera::intrinsics() const -> Eigen::Map<const Intrinsics> {
-  return Eigen::Map<const Intrinsics>{parameters_[kIntrinsicsOffset]};
+auto Camera::intrinsics() const -> const Intrinsics& {
+  return static_cast<const Intrinsics&>(*variables_[kIntrinsicsOffset]);  // NOLINT
 }
 
-auto Camera::intrinsics() -> Eigen::Map<Intrinsics> {
-  return Eigen::Map<Intrinsics>{parameters_[kIntrinsicsOffset]};
+auto Camera::intrinsics() -> Intrinsics& {
+  return const_cast<Intrinsics&>(std::as_const(*this).intrinsics());
 }
 
 auto Camera::distortion() const -> const Distortion& {
