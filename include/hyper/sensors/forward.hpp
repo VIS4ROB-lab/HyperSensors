@@ -11,4 +11,8 @@ class Camera;
 
 class IMU;
 
+using Absolute = Sensor;
+
+using GPS = Sensor;
+
 }  // namespace hyper::sensors

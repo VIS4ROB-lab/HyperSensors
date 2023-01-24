@@ -126,6 +126,4 @@ class Sensor {
   std::vector<Scalar*> parameter_blocks_;  ///< Parameter blocks.
 };
 
-using Absolute = Sensor;
-
 }  // namespace hyper::sensors

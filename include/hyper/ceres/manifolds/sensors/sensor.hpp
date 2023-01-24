@@ -7,7 +7,7 @@
 
 #include <ceres/manifold.h>
 
-#include "hyper/ceres/manifolds/sensors/forward.hpp"
+#include "hyper/ceres/manifolds/forward.hpp"
 
 #include "hyper/sensors/sensor.hpp"
 
@@ -35,7 +35,7 @@ class Manifold<sensors::Sensor> {
   /// Default destructor.
   virtual ~Manifold();
 
-  auto submanifolds() const -> const Submanifolds& { return submanifolds_; }
+  [[nodiscard]] auto submanifolds() const -> const Submanifolds& { return submanifolds_; }
 
   /// Sensor accessor.
   /// \return Sensor.
