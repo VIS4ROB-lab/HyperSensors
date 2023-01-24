@@ -6,6 +6,7 @@
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/state/continuous.hpp"
 #include "hyper/variables/orthonormality_alignment.hpp"
+#include "hyper/variables/sensitivity.hpp"
 
 namespace hyper::sensors {
 
@@ -21,7 +22,7 @@ class IMU final : public Sensor {
   // Definitions.
   using GyroscopeNoiseDensity = Scalar;
   using GyroscopeIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
-  using GyroscopeSensitivity = variables::Cartesian<Scalar, 9>;
+  using GyroscopeSensitivity = variables::Sensitivity<Scalar, 3>;
   using GyroscopeBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
 
   using AccelerometerNoiseDensity = Scalar;
@@ -32,23 +33,21 @@ class IMU final : public Sensor {
   /// Default constructor.
   IMU();
 
-  /// Pointers accessor.
-  /// \return Pointers.
-  [[nodiscard]] auto pointers() const -> std::vector<Variable*> final;
+  /// Variable pointers accessor.
+  /// \return Pointers to variables.
+  [[nodiscard]] auto variables() const -> std::vector<Variable*> final;
 
-  /// Pointers accessor (time-based).
-  /// \param time Query time.
-  /// \return Pointers.
-  [[nodiscard]] auto pointers(const Time& time) const -> std::vector<Variable*> final;
+  /// Time-based variable pointers accessor.
+  /// \return Time-based pointers to variables.
+  [[nodiscard]] auto variables(const Time& time) const -> std::vector<Variable*> final;
 
-  /// Parameters accessor.
-  /// \return Parameters.
-  [[nodiscard]] auto parameters() const -> std::vector<Scalar*> final;
+  /// Parameter blocks accessor.
+  /// \return Pointers to parameter blocks.
+  [[nodiscard]] auto parameterBlocks() const -> std::vector<Scalar*> final;
 
-  /// Parameters accessor (time-based).
-  /// \param time Query time.
-  /// \return Parameters.
-  [[nodiscard]] auto parameters(const Time& time) const -> std::vector<Scalar*> final;
+  /// Time-based parameter blocks accessor.
+  /// \return Time-based pointers to parameter blocks.
+  [[nodiscard]] auto parameterBlocks(const Time& time) const -> std::vector<Scalar*> final;
 
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.

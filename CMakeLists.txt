@@ -7,20 +7,22 @@ include(FetchContent)
 # Define projects.
 project(HyperSensors VERSION 23.01.19 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperSensors LANGUAGES CXX)
 
-# Define libraries and aliases.
-add_library(${PROJECT_NAME} SHARED)
-add_library(Hyper::Sensors ALIAS ${PROJECT_NAME})
-
 # Set properties.
 if (PROJECT_IS_TOP_LEVEL)
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED YES)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -fconcepts -Wall -Wextra -Wnon-virtual-dtor -pedantic")
+    option(HYPER_BUILD_WITH_CERES "Build with Ceres." FALSE)
     option(HYPER_BUILD_TESTS "Build tests." TRUE)
 endif ()
 
+# Define libraries and aliases.
+file(GLOB_RECURSE PROJECT_SOURCE_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/internal/*.hpp ${PROJECT_SOURCE_DIR}/internal/*.cpp)
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
+add_library(Hyper::Sensors ALIAS ${PROJECT_NAME})
+
 # Fetch (external) content.
-FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG f5cc354a5a554c4ab4bfe2985316110230dca518)
+FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG 88838ad65d6fae8b4e2d0f2e69732bacbb594a97)
 FetchContent_MakeAvailable(HyperState)
 
 # Find Eigen target if not present.
@@ -48,25 +50,16 @@ if (NOT TARGET yaml-cpp)
     find_package(yaml-cpp REQUIRED)
 endif ()
 
+if (HYPER_BUILD_WITH_CERES)
+    # Find Ceres target if not present.
+    if (NOT TARGET Ceres::ceres)
+        find_package(Ceres REQUIRED)
+    endif ()
+endif ()
+
 # Add includes and link libraries.
-file(GLOB_RECURSE PROJECT_SOURCE_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/internal/*.hpp ${PROJECT_SOURCE_DIR}/internal/*.cpp)
-
-target_include_directories(
-        ${PROJECT_NAME}
-        PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
-
-target_sources(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_FILES})
-
-target_link_libraries(
-        ${PROJECT_NAME}
-        PUBLIC
-        Hyper::State
-        cv_bridge::cv_bridge
-        yaml-cpp
-)
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_link_libraries(${PROJECT_NAME} PUBLIC Hyper::State PUBLIC cv_bridge::cv_bridge PUBLIC yaml-cpp)
 
 # Build tests.
 if (HYPER_BUILD_TESTS)

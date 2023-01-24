@@ -30,27 +30,23 @@ auto Sensor::hasVariableRate() const -> bool {
   return rate() < Scalar{0};
 }
 
-auto Sensor::variables() const -> const Variables& {
-  return variables_;
+auto Sensor::variables() const -> std::vector<Variable*> {
+  std::vector<Variable*> ptrs;
+  ptrs.reserve(variables_.size());
+  std::transform(variables_.begin(), variables_.end(), std::back_inserter(ptrs), [](const auto& arg) { return arg.get(); });
+  return ptrs;
 }
 
-auto Sensor::pointers() const -> std::vector<Variable*> {
-  std::vector<Variable*> pointers;
-  pointers.reserve(variables_.size());
-  std::transform(variables_.begin(), variables_.end(), std::back_inserter(pointers), [](const auto& arg) { return arg.get(); });
-  return pointers;
+auto Sensor::variables(const Time& /* time */) const -> std::vector<Variable*> {
+  return Sensor::variables();
 }
 
-auto Sensor::pointers(const Time& /* time */) const -> std::vector<Variable*> {
-  return Sensor::pointers();
+auto Sensor::parameterBlocks() const -> std::vector<Scalar*> {
+  return parameter_blocks_;
 }
 
-auto Sensor::parameters() const -> std::vector<Scalar*> {
-  return parameters_;
-}
-
-auto Sensor::parameters(const Time& /* time */) const -> std::vector<Scalar*> {
-  return Sensor::parameters();
+auto Sensor::parameterBlocks(const Time& /* time */) const -> std::vector<Scalar*> {
+  return Sensor::parameterBlocks();
 }
 
 auto Sensor::offset() const -> const Offset& {
@@ -82,14 +78,14 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Size& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameters_{num_variables} {
+Sensor::Sensor(const Size& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameter_blocks_{num_variables} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
-  DCHECK_LE(kNumVariables, parameters_.size());
+  DCHECK_LE(kNumVariables, parameter_blocks_.size());
   variables_[kOffsetOffset] = std::make_unique<Offset>();
   variables_[kTransformationOffset] = std::make_unique<Transformation>();
-  parameters_[kOffsetOffset] = variables_[kOffsetOffset]->asVector().data();
-  parameters_[kTransformationOffset] = variables_[kTransformationOffset]->asVector().data();
+  parameter_blocks_[kOffsetOffset] = variables_[kOffsetOffset]->asVector().data();
+  parameter_blocks_[kTransformationOffset] = variables_[kTransformationOffset]->asVector().data();
 }
 
 auto Sensor::read(const Node& node) -> void {

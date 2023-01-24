@@ -61,27 +61,21 @@ class Sensor {
   /// \return True if rate is variable.
   [[nodiscard]] auto hasVariableRate() const -> bool;
 
-  /// Variables accessor.
-  /// \return Variables.
-  [[nodiscard]] auto variables() const -> const Variables&;
+  /// Variable pointers accessor.
+  /// \return Pointers to variables.
+  [[nodiscard]] virtual auto variables() const -> std::vector<Variable*>;
 
-  /// Pointers accessor.
-  /// \return Pointers.
-  [[nodiscard]] virtual auto pointers() const -> std::vector<Variable*>;
+  /// Time-based variable pointers accessor.
+  /// \return Time-based pointers to variables.
+  [[nodiscard]] virtual auto variables(const Time& time) const -> std::vector<Variable*>;
 
-  /// Pointers accessor (time-based).
-  /// \param time Query time.
-  /// \return Pointers.
-  [[nodiscard]] virtual auto pointers(const Time& time) const -> std::vector<Variable*>;
+  /// Parameter blocks accessor.
+  /// \return Pointers to parameter blocks.
+  [[nodiscard]] virtual auto parameterBlocks() const -> std::vector<Scalar*>;
 
-  /// Parameters accessor.
-  /// \return Parameters.
-  [[nodiscard]] virtual auto parameters() const -> std::vector<Scalar*>;
-
-  /// Parameters accessor (time-based).
-  /// \param time Query time.
-  /// \return Parameters.
-  [[nodiscard]] virtual auto parameters(const Time& time) const -> std::vector<Scalar*>;
+  /// Time-based parameter blocks accessor.
+  /// \return Time-based pointers to parameter blocks.
+  [[nodiscard]] virtual auto parameterBlocks(const Time& time) const -> std::vector<Scalar*>;
 
   /// Offset accessor.
   /// \return Offset.
@@ -127,9 +121,9 @@ class Sensor {
   /// \param emitter YAML emitter.
   virtual auto write(Emitter& emitter) const -> void;
 
-  Rate rate_;                        ///< Rate.
-  Variables variables_;              ///< Variables.
-  std::vector<Scalar*> parameters_;  ///< Parameters (i.e. pointer to variable memory).
+  Rate rate_;                              ///< Rate.
+  Variables variables_;                    ///< Variables.
+  std::vector<Scalar*> parameter_blocks_;  ///< Parameter blocks.
 };
 
 }  // namespace hyper::sensors

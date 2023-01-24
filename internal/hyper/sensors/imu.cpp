@@ -50,10 +50,10 @@ IMU::IMU() : Sensor{kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{
   variables_[kGyroscopeSensitivityOffset] = std::make_unique<GyroscopeSensitivity>();
   variables_[kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();
   variables_[kAccelerometerAxesOffsetsOffset] = std::make_unique<AccelerometerAxesOffsets>();
-  parameters_[kGyroscopeIntrinsicsOffset] = variables_[kGyroscopeIntrinsicsOffset]->asVector().data();
-  parameters_[kGyroscopeSensitivityOffset] = variables_[kGyroscopeSensitivityOffset]->asVector().data();
-  parameters_[kAccelerometerIntrinsicsOffset] = variables_[kAccelerometerIntrinsicsOffset]->asVector().data();
-  parameters_[kAccelerometerAxesOffsetsOffset] = variables_[kAccelerometerAxesOffsetsOffset]->asVector().data();
+  parameter_blocks_[kGyroscopeIntrinsicsOffset] = variables_[kGyroscopeIntrinsicsOffset]->asVector().data();
+  parameter_blocks_[kGyroscopeSensitivityOffset] = variables_[kGyroscopeSensitivityOffset]->asVector().data();
+  parameter_blocks_[kAccelerometerIntrinsicsOffset] = variables_[kAccelerometerIntrinsicsOffset]->asVector().data();
+  parameter_blocks_[kAccelerometerAxesOffsetsOffset] = variables_[kAccelerometerAxesOffsetsOffset]->asVector().data();
 
   // Initialize gyroscope and accelerometer bias.
   static auto interpolator = state::BasisInterpolator<Scalar, 4>{};
@@ -61,20 +61,20 @@ IMU::IMU() : Sensor{kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{
   accelerometer_bias_.setInterpolator(&interpolator);
 }
 
-auto IMU::pointers() const -> std::vector<Variable*> {
-  return concatVectors(Sensor::pointers(), gyroscopeBias().pointers(), accelerometerBias().pointers());
+auto IMU::variables() const -> std::vector<Variable*> {
+  return concatVectors(Sensor::variables(), gyroscopeBias().variables(), accelerometerBias().variables());
 }
 
-auto IMU::pointers(const Time& time) const -> std::vector<Variable*> {
-  return concatVectors(Sensor::pointers(time), gyroscopeBias().pointers(time), accelerometerBias().pointers(time));
+auto IMU::variables(const Time& time) const -> std::vector<Variable*> {
+  return concatVectors(Sensor::variables(time), gyroscopeBias().variables(time), accelerometerBias().variables(time));
 }
 
-auto IMU::parameters() const -> std::vector<Scalar*> {
-  return concatVectors(Sensor::parameters(), gyroscopeBias().parameters(), accelerometerBias().parameters());
+auto IMU::parameterBlocks() const -> std::vector<Scalar*> {
+  return concatVectors(Sensor::parameterBlocks(), gyroscopeBias().parameterBlocks(), accelerometerBias().parameterBlocks());
 }
 
-auto IMU::parameters(const Time& time) const -> std::vector<Scalar*> {
-  return concatVectors(Sensor::parameters(time), gyroscopeBias().parameters(time), accelerometerBias().parameters(time));
+auto IMU::parameterBlocks(const Time& time) const -> std::vector<Scalar*> {
+  return concatVectors(Sensor::parameterBlocks(time), gyroscopeBias().parameterBlocks(time), accelerometerBias().parameterBlocks(time));
 }
 
 auto IMU::gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity& {

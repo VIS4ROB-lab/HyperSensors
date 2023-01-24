@@ -87,7 +87,7 @@ Camera::Camera() : Sensor{kNumVariables}, sensor_size_{}, shutter_type_{ShutterT
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics>();
-  parameters_[kIntrinsicsOffset] = variables_[kIntrinsicsOffset]->asVector().data();
+  parameter_blocks_[kIntrinsicsOffset] = variables_[kIntrinsicsOffset]->asVector().data();
 }
 
 auto Camera::sensorSize() const -> const SensorSize& {
@@ -133,7 +133,7 @@ auto Camera::distortion() -> Distortion& {
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
   CHECK(distortion != nullptr);
   variables_[kDistortionOffset] = std::move(distortion);
-  parameters_[kDistortionOffset] = variables_[kDistortionOffset]->asVector().data();
+  parameter_blocks_[kDistortionOffset] = variables_[kDistortionOffset]->asVector().data();
 }
 
 auto Camera::randomPixel() const -> Pixel {
