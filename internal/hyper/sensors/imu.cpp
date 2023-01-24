@@ -85,14 +85,6 @@ auto IMU::gyroscopeNoiseDensity() -> GyroscopeNoiseDensity& {
   return const_cast<GyroscopeNoiseDensity&>(std::as_const(*this).gyroscopeNoiseDensity());
 }
 
-auto IMU::gyroscopeBias() const -> const GyroscopeBias& {
-  return gyroscope_bias_;
-}
-
-auto IMU::gyroscopeBias() -> GyroscopeBias& {
-  return const_cast<GyroscopeBias&>(std::as_const(*this).gyroscopeBias());
-}
-
 auto IMU::gyroscopeIntrinsics() const -> const GyroscopeIntrinsics& {
   return static_cast<const GyroscopeIntrinsics&>(*variables_[kGyroscopeIntrinsicsOffset]);  // NOLINT
 }
@@ -109,20 +101,20 @@ auto IMU::gyroscopeSensitivity() -> GyroscopeSensitivity& {
   return const_cast<GyroscopeSensitivity&>(std::as_const(*this).gyroscopeSensitivity());
 }
 
+auto IMU::gyroscopeBias() const -> const GyroscopeBias& {
+  return gyroscope_bias_;
+}
+
+auto IMU::gyroscopeBias() -> GyroscopeBias& {
+  return const_cast<GyroscopeBias&>(std::as_const(*this).gyroscopeBias());
+}
+
 auto IMU::accelerometerNoiseDensity() const -> const AccelerometerNoiseDensity& {
   return accelerometer_noise_density_;
 }
 
 auto IMU::accelerometerNoiseDensity() -> AccelerometerNoiseDensity& {
   return const_cast<AccelerometerNoiseDensity&>(std::as_const(*this).accelerometerNoiseDensity());
-}
-
-auto IMU::accelerometerBias() const -> const AccelerometerBias& {
-  return accelerometer_bias_;
-}
-
-auto IMU::accelerometerBias() -> AccelerometerBias& {
-  return const_cast<AccelerometerBias&>(std::as_const(*this).accelerometerBias());
 }
 
 auto IMU::accelerometerIntrinsics() const -> const AccelerometerIntrinsics& {
@@ -139,6 +131,14 @@ auto IMU::accelerometerAxesOffsets() const -> const AccelerometerAxesOffsets& {
 
 auto IMU::accelerometerAxesOffsets() -> AccelerometerAxesOffsets& {
   return const_cast<AccelerometerAxesOffsets&>(std::as_const(*this).accelerometerAxesOffsets());
+}
+
+auto IMU::accelerometerBias() const -> const AccelerometerBias& {
+  return accelerometer_bias_;
+}
+
+auto IMU::accelerometerBias() -> AccelerometerBias& {
+  return const_cast<AccelerometerBias&>(std::as_const(*this).accelerometerBias());
 }
 
 auto IMU::read(const Node& node) -> void {

@@ -14,10 +14,10 @@ class IMU final : public Sensor {
  public:
   // Constants.
   static constexpr auto kGyroscopeIntrinsicsOffset = Sensor::kNumVariables;
-  static constexpr auto kAccelerometerIntrinsicsOffset = kGyroscopeIntrinsicsOffset + 1;
+  static constexpr auto kGyroscopeSensitivityOffset = kGyroscopeIntrinsicsOffset + 1;
+  static constexpr auto kAccelerometerIntrinsicsOffset = kGyroscopeSensitivityOffset + 1;
   static constexpr auto kAccelerometerAxesOffsetsOffset = kAccelerometerIntrinsicsOffset + 1;
-  static constexpr auto kGyroscopeSensitivityOffset = kAccelerometerAxesOffsetsOffset + 1;
-  static constexpr auto kNumVariables = kGyroscopeSensitivityOffset + 1;
+  static constexpr auto kNumVariables = kAccelerometerAxesOffsetsOffset + 1;
 
   // Definitions.
   using GyroscopeNoiseDensity = Scalar;
@@ -57,14 +57,6 @@ class IMU final : public Sensor {
   /// \return Gyroscope noise density.
   auto gyroscopeNoiseDensity() -> GyroscopeNoiseDensity&;
 
-  /// Gyroscope bias accessor.
-  /// \return Gyroscope bias.
-  [[nodiscard]] auto gyroscopeBias() const -> const GyroscopeBias&;
-
-  /// Gyroscope bias modifier.
-  /// \return Gyroscope bias.
-  auto gyroscopeBias() -> GyroscopeBias&;
-
   /// Gyroscope intrinsics accessor.
   /// \return Gyroscope intrinsics.
   [[nodiscard]] auto gyroscopeIntrinsics() const -> const GyroscopeIntrinsics&;
@@ -81,6 +73,14 @@ class IMU final : public Sensor {
   /// \return Gyroscope sensitivity.
   auto gyroscopeSensitivity() -> GyroscopeSensitivity&;
 
+  /// Gyroscope bias accessor.
+  /// \return Gyroscope bias.
+  [[nodiscard]] auto gyroscopeBias() const -> const GyroscopeBias&;
+
+  /// Gyroscope bias modifier.
+  /// \return Gyroscope bias.
+  auto gyroscopeBias() -> GyroscopeBias&;
+
   /// \brief Accelerometer noise density accessor.
   /// \return Accelerometer noise density.
   [[nodiscard]] auto accelerometerNoiseDensity() const -> const AccelerometerNoiseDensity&;
@@ -88,14 +88,6 @@ class IMU final : public Sensor {
   /// \brief Accelerometer noise density modifier.
   /// \return Accelerometer noise density.
   auto accelerometerNoiseDensity() -> AccelerometerNoiseDensity&;
-
-  /// Accelerometer bias accessor.
-  /// \return Accelerometer bias.
-  [[nodiscard]] auto accelerometerBias() const -> const AccelerometerBias&;
-
-  /// Accelerometer bias modifier.
-  /// \return Accelerometer bias.
-  auto accelerometerBias() -> AccelerometerBias&;
 
   /// Accelerometer intrinsics accessor.
   /// \return Accelerometer intrinsics.
@@ -112,6 +104,14 @@ class IMU final : public Sensor {
   /// Accelerometer axes offsets modifier.
   /// \return Accelerometer axes offsets.
   auto accelerometerAxesOffsets() -> AccelerometerAxesOffsets&;
+
+  /// Accelerometer bias accessor.
+  /// \return Accelerometer bias.
+  [[nodiscard]] auto accelerometerBias() const -> const AccelerometerBias&;
+
+  /// Accelerometer bias modifier.
+  /// \return Accelerometer bias.
+  auto accelerometerBias() -> AccelerometerBias&;
 
  private:
   /// Reads a sensor from a YAML node.
