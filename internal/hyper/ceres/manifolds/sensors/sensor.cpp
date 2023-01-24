@@ -15,8 +15,8 @@ Manifold<Sensor>::Manifold(const Sensor* sensor, const bool constant) : Manifold
 
 Manifold<Sensor>::~Manifold() = default;
 
-auto Manifold<Sensor>::sensor() const -> const Sensor& {
-  return *sensor_;
+auto Manifold<Sensor>::sensor() const -> const Sensor* {
+  return sensor_;
 }
 
 auto Manifold<Sensor>::offsetSubmanifold() const -> Submanifold* {

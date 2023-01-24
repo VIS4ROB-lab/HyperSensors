@@ -18,6 +18,7 @@ class Manifold<sensors::Sensor> {
  public:
   // Definitions.
   using Time = double;
+  using Scalar = double;
   using Sensor = sensors::Sensor;
   using Submanifold = ::ceres::Manifold;
 
@@ -34,7 +35,7 @@ class Manifold<sensors::Sensor> {
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] virtual auto sensor() const -> const Sensor&;
+  [[nodiscard]] virtual auto sensor() const -> const Sensor*;
 
   /// Offset submanifold accessor.
   /// \return Offset submanifold.
