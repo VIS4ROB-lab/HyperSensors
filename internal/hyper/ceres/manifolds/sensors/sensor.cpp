@@ -45,17 +45,6 @@ auto Manifold<Sensor>::setTransformationConstant(bool constant) -> void {
   submanifolds_[Sensor::kTransformationOffset] = std::make_unique<Manifold<Sensor::Transformation>>(constant, constant);
 }
 
-auto Manifold<Sensor>::submanifolds() const -> std::vector<Submanifold*> {
-  std::vector<Submanifold*> ptrs;
-  ptrs.reserve(submanifolds_.size());
-  std::transform(submanifolds_.begin(), submanifolds_.end(), std::back_inserter(ptrs), [](const auto& submanifold) -> Submanifold* { return submanifold.get(); });
-  return ptrs;
-}
-
-auto Manifold<Sensor>::submanifolds(const Time& /* time */) const -> std::vector<Submanifold*> {
-  return Manifold<Sensor>::submanifolds();
-}
-
 Manifold<Sensor>::Manifold(const Sensor* sensor, const Size& num_submanifolds, const bool constant) : sensor_{sensor}, submanifolds_{num_submanifolds} {
   DCHECK(sensor != nullptr);
   setOffsetConstant(constant);

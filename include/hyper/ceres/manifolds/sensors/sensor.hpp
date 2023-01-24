@@ -17,10 +17,12 @@ template <>
 class Manifold<sensors::Sensor> {
  public:
   // Definitions.
+  using Size = std::size_t;
   using Time = double;
   using Scalar = double;
   using Sensor = sensors::Sensor;
   using Submanifold = ::ceres::Manifold;
+  using Submanifolds = std::vector<std::unique_ptr<Submanifold>>;
 
   // Constants.
   static constexpr auto kNumSubmanifolds = Sensor::kNumVariables;
@@ -32,6 +34,8 @@ class Manifold<sensors::Sensor> {
 
   /// Default destructor.
   virtual ~Manifold();
+
+  auto submanifolds() const -> const Submanifolds& { return submanifolds_; }
 
   /// Sensor accessor.
   /// \return Sensor.
@@ -61,20 +65,7 @@ class Manifold<sensors::Sensor> {
   /// \param constant Constancy flag.
   auto setTransformationConstant(bool constant) -> void;
 
-  /// Retrieves all submanifolds.
-  /// \return Submanifolds.
-  [[nodiscard]] virtual auto submanifolds() const -> std::vector<Submanifold*>;
-
-  /// Retrieves all submanifolds (time-based).
-  /// \param time Query time.
-  /// \return Submanifolds.
-  [[nodiscard]] virtual auto submanifolds(const Time& time) const -> std::vector<Submanifold*>;
-
  protected:
-  // Definitions.
-  using Size = std::size_t;
-  using Submanifolds = std::vector<std::unique_ptr<Submanifold>>;
-
   /// Constructor from sensor, number of submanifolds and constancy flag.
   /// \param sensor Input sensor.
   /// \param num_submanifolds Number of submanifolds.
