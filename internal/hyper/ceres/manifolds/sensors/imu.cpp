@@ -79,6 +79,20 @@ auto Manifold<IMU>::setAccelerometerIntrinsicsConstant(const bool constant) -> v
   setAccelerometerIntrinsicsSubmanifold(std::move(submanifold));
 }
 
+auto Manifold<IMU>::accelerometerOffsetSubmanifold() const -> Submanifold* {
+  return submanifolds_[IMU::kAccelerometerOffsetIndex].get();
+}
+
+auto Manifold<IMU>::setAccelerometerOffsetSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
+  DCHECK_EQ(submanifold->AmbientSize(), IMU::AccelerometerOffset::kNumParameters);
+  submanifolds_[IMU::kAccelerometerOffsetIndex] = std::move(submanifold);
+}
+
+auto Manifold<IMU>::setAccelerometerOffsetConstant(bool constant) -> void {
+  auto submanifold = std::make_unique<Manifold<IMU::AccelerometerOffset>>(constant);
+  setAccelerometerOffsetSubmanifold(std::move(submanifold));
+}
+
 auto Manifold<IMU>::accelerometerBiasSubmanifold() const -> Submanifold* {
   return submanifolds_[kAccelerometerBiasSubmanifoldIndex].get();
 }

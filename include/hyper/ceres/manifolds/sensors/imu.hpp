@@ -74,6 +74,17 @@ class Manifold<sensors::IMU> final : public Manifold<sensors::Sensor> {
   /// \param constant Constancy flag.
   auto setAccelerometerIntrinsicsConstant(bool constant) -> void;
 
+  /// Accelerometer offset submanifold accessor.
+  [[nodiscard]] auto accelerometerOffsetSubmanifold() const -> Submanifold*;
+
+  /// Sets the accelerometer offset submanifold.
+  /// \param submanifold Input submanifold.
+  auto setAccelerometerOffsetSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void;
+
+  /// Sets the sensor's accelerometer offset constant or variable.
+  /// \param constant Constancy flag.
+  auto setAccelerometerOffsetConstant(bool constant) -> void;
+
   /// Accelerometer bias submanifold accessor.
   [[nodiscard]] auto accelerometerBiasSubmanifold() const -> Submanifold*;
 
