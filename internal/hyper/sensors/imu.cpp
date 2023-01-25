@@ -4,20 +4,19 @@
 #include <glog/logging.h>
 
 #include "hyper/sensors/imu.hpp"
-#include "hyper/state/interpolators/basis.hpp"
-#include "hyper/state/policies/cartesian.hpp"
+#include "hyper/state/interpolators/interpolators.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 namespace {
 
-// Parameter names.
+// Variable names.
 constexpr auto kGyroscopeNoiseDensityName = "gyroscope_noise_density";
 constexpr auto kGyroscopeIntrinsicsName = "gyroscope_intrinsics";
 constexpr auto kGyroscopeSensitivityName = "gyroscope_sensitivity";
 constexpr auto kAccelerometerNoiseDensityName = "accelerometer_noise_density";
 constexpr auto kAccelerometerIntrinsicsName = "accelerometer_intrinsics";
-constexpr auto kAccelerometerAxesOffsetsName = "accelerometer_axes_offsets";
+constexpr auto kAccelerometerOffsetName = "accelerometer_offset";
 
 /// Appends a vector and existing one.
 /// \tparam TElement Element type.
@@ -42,26 +41,40 @@ auto concatVectors(const TArgs&... args) {
   return output;
 }
 
-} // namespace
+}  // namespace
 
-IMU::IMU(const Node& node)
-    : Sensor{Traits<IMU>::kNumParameters, node},
-      gyroscope_noise_density_{},
-      gyroscope_bias_{},
-      accelerometer_noise_density_{},
-      accelerometer_bias_{} {
-  initializeVariables();
-  if (!node.IsNull()) {
-    readVariables(node);
-  }
+IMU::IMU() : Sensor{kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
+  // Initialize variables.
+  DCHECK_LE(kNumVariables, variables_.size());
+  variables_[kGyroscopeIntrinsicsIndex] = std::make_unique<GyroscopeIntrinsics>();
+  variables_[kGyroscopeSensitivityIndex] = std::make_unique<GyroscopeSensitivity>();
+  variables_[kAccelerometerIntrinsicsIndex] = std::make_unique<AccelerometerIntrinsics>();
+  variables_[kAccelerometerOffsetIndex] = std::make_unique<AccelerometerOffset>();
+  parameter_blocks_[kGyroscopeIntrinsicsIndex] = variables_[kGyroscopeIntrinsicsIndex]->asVector().data();
+  parameter_blocks_[kGyroscopeSensitivityIndex] = variables_[kGyroscopeSensitivityIndex]->asVector().data();
+  parameter_blocks_[kAccelerometerIntrinsicsIndex] = variables_[kAccelerometerIntrinsicsIndex]->asVector().data();
+  parameter_blocks_[kAccelerometerOffsetIndex] = variables_[kAccelerometerOffsetIndex]->asVector().data();
+
+  // Initialize gyroscope and accelerometer bias.
+  static auto interpolator = state::BasisInterpolator<Scalar, 4>{};
+  gyroscope_bias_.setInterpolator(&interpolator);
+  accelerometer_bias_.setInterpolator(&interpolator);
 }
 
-auto IMU::parameters() const -> Pointers<Parameter> {
-  return concatVectors(Sensor::parameters(), gyroscopeBias().parameters(), accelerometerBias().parameters());
+auto IMU::variables() const -> std::vector<Variable*> {
+  return concatVectors(Sensor::variables(), gyroscopeBias().variables(), accelerometerBias().variables());
 }
 
-auto IMU::parameters(const Stamp& stamp) const -> Pointers<Parameter> {
-  return concatVectors(Sensor::parameters(stamp), gyroscopeBias().parameters(stamp), accelerometerBias().parameters(stamp));
+auto IMU::variables(const Time& time) const -> std::vector<Variable*> {
+  return concatVectors(Sensor::variables(time), gyroscopeBias().variables(time), accelerometerBias().variables(time));
+}
+
+auto IMU::parameterBlocks() const -> std::vector<Scalar*> {
+  return concatVectors(Sensor::parameterBlocks(), gyroscopeBias().parameterBlocks(), accelerometerBias().parameterBlocks());
+}
+
+auto IMU::parameterBlocks(const Time& time) const -> std::vector<Scalar*> {
+  return concatVectors(Sensor::parameterBlocks(time), gyroscopeBias().parameterBlocks(time), accelerometerBias().parameterBlocks(time));
 }
 
 auto IMU::gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity& {
@@ -72,33 +85,28 @@ auto IMU::gyroscopeNoiseDensity() -> GyroscopeNoiseDensity& {
   return const_cast<GyroscopeNoiseDensity&>(std::as_const(*this).gyroscopeNoiseDensity());
 }
 
-auto IMU::gyroscopeBias() const -> const AbstractState& {
-  DCHECK(gyroscope_bias_ != nullptr);
-  return *gyroscope_bias_;
+auto IMU::gyroscopeIntrinsics() const -> const GyroscopeIntrinsics& {
+  return static_cast<const GyroscopeIntrinsics&>(*variables_[kGyroscopeIntrinsicsIndex]);  // NOLINT
 }
 
-auto IMU::gyroscopeBias() -> AbstractState& {
-  return const_cast<AbstractState&>(std::as_const(*this).gyroscopeBias());
+auto IMU::gyroscopeIntrinsics() -> GyroscopeIntrinsics& {
+  return const_cast<GyroscopeIntrinsics&>(std::as_const(*this).gyroscopeIntrinsics());
 }
 
-auto IMU::gyroscopeIntrinsics() const -> Eigen::Map<const GyroscopeIntrinsics> {
-  const auto vector = variableAsVector(Traits<IMU>::kGyroscopeIntrinsicsOffset);
-  return Eigen::Map<const GyroscopeIntrinsics>{vector.data()};
+auto IMU::gyroscopeSensitivity() const -> const GyroscopeSensitivity& {
+  return static_cast<const GyroscopeSensitivity&>(*variables_[kGyroscopeSensitivityIndex]);  // NOLINT
 }
 
-auto IMU::gyroscopeIntrinsics() -> Eigen::Map<GyroscopeIntrinsics> {
-  auto vector = variableAsVector(Traits<IMU>::kGyroscopeIntrinsicsOffset);
-  return Eigen::Map<GyroscopeIntrinsics>{vector.data()};
+auto IMU::gyroscopeSensitivity() -> GyroscopeSensitivity& {
+  return const_cast<GyroscopeSensitivity&>(std::as_const(*this).gyroscopeSensitivity());
 }
 
-auto IMU::gyroscopeSensitivity() const -> Eigen::Map<const GyroscopeSensitivity> {
-  const auto vector = variableAsVector(Traits<IMU>::kGyroscopeSensitivityOffset);
-  return Eigen::Map<const GyroscopeSensitivity>{vector.data()};
+auto IMU::gyroscopeBias() const -> const GyroscopeBias& {
+  return gyroscope_bias_;
 }
 
-auto IMU::gyroscopeSensitivity() -> Eigen::Map<GyroscopeSensitivity> {
-  auto vector = variableAsVector(Traits<IMU>::kGyroscopeSensitivityOffset);
-  return Eigen::Map<GyroscopeSensitivity>{vector.data()};
+auto IMU::gyroscopeBias() -> GyroscopeBias& {
+  return const_cast<GyroscopeBias&>(std::as_const(*this).gyroscopeBias());
 }
 
 auto IMU::accelerometerNoiseDensity() const -> const AccelerometerNoiseDensity& {
@@ -109,70 +117,48 @@ auto IMU::accelerometerNoiseDensity() -> AccelerometerNoiseDensity& {
   return const_cast<AccelerometerNoiseDensity&>(std::as_const(*this).accelerometerNoiseDensity());
 }
 
-auto IMU::accelerometerBias() const -> const AbstractState& {
-  DCHECK(accelerometer_bias_ != nullptr);
-  return *accelerometer_bias_;
+auto IMU::accelerometerIntrinsics() const -> const AccelerometerIntrinsics& {
+  return static_cast<const AccelerometerIntrinsics&>(*variables_[kAccelerometerIntrinsicsIndex]);  // NOLINT
 }
 
-auto IMU::accelerometerBias() -> AbstractState& {
-  return const_cast<AbstractState&>(std::as_const(*this).accelerometerBias());
+auto IMU::accelerometerIntrinsics() -> AccelerometerIntrinsics& {
+  return const_cast<AccelerometerIntrinsics&>(std::as_const(*this).accelerometerIntrinsics());
 }
 
-auto IMU::accelerometerIntrinsics() const -> Eigen::Map<const AccelerometerIntrinsics> {
-  const auto vector = variableAsVector(Traits<IMU>::kAccelerometerIntrinsicsOffset);
-  return Eigen::Map<const AccelerometerIntrinsics>{vector.data()};
+auto IMU::accelerometerOffset() const -> const AccelerometerOffset& {
+  return static_cast<AccelerometerOffset&>(*variables_[kAccelerometerOffsetIndex]);  //NOLINT
 }
 
-auto IMU::accelerometerIntrinsics() -> Eigen::Map<AccelerometerIntrinsics> {
-  auto vector = variableAsVector(Traits<IMU>::kAccelerometerIntrinsicsOffset);
-  return Eigen::Map<AccelerometerIntrinsics>{vector.data()};
+auto IMU::accelerometerOffset() -> AccelerometerOffset& {
+  return const_cast<AccelerometerOffset&>(std::as_const(*this).accelerometerOffset());
 }
 
-auto IMU::accelerometerAxesOffsets() const -> Eigen::Map<const AccelerometerAxesOffsets> {
-  const auto vector = variableAsVector(Traits<IMU>::kAccelerometerAxesOffsetsOffset);
-  return Eigen::Map<const AccelerometerAxesOffsets>{vector.data()};
+auto IMU::accelerometerBias() const -> const AccelerometerBias& {
+  return accelerometer_bias_;
 }
 
-auto IMU::accelerometerAxesOffsets() -> Eigen::Map<AccelerometerAxesOffsets> {
-  auto vector = variableAsVector(Traits<IMU>::kAccelerometerAxesOffsetsOffset);
-  return Eigen::Map<AccelerometerAxesOffsets>{vector.data()};
+auto IMU::accelerometerBias() -> AccelerometerBias& {
+  return const_cast<AccelerometerBias&>(std::as_const(*this).accelerometerBias());
 }
 
-auto IMU::initializeVariables() -> void {
-  DCHECK_LE(Traits<IMU>::kNumParameters, variables_.size());
-  variables_[Traits<IMU>::kGyroscopeIntrinsicsOffset] = std::make_unique<GyroscopeIntrinsics>();
-  variables_[Traits<IMU>::kGyroscopeSensitivityOffset] = std::make_unique<GyroscopeSensitivity>();
-  variables_[Traits<IMU>::kAccelerometerIntrinsicsOffset] = std::make_unique<AccelerometerIntrinsics>();
-  variables_[Traits<IMU>::kAccelerometerAxesOffsetsOffset] = std::make_unique<AccelerometerAxesOffsets>();
-
-  // Initialize gyroscope bias.
-  auto gyroscope_bias_interpolator = std::make_unique<BasisInterpolator>(3, true);
-  auto gyroscope_bias_policy = std::make_unique<CartesianPolicy<GyroscopeBias>>();
-  gyroscope_bias_ = std::make_unique<AbstractState>(std::move(gyroscope_bias_interpolator), std::move(gyroscope_bias_policy));
-
-  // Initialize accelerometer bias.
-  auto accelerometer_bias_interpolator = std::make_unique<BasisInterpolator>(3, true);
-  auto accelerometer_bias_policy = std::make_unique<CartesianPolicy<AccelerometerBias>>();
-  accelerometer_bias_ = std::make_unique<AbstractState>(std::move(accelerometer_bias_interpolator), std::move(accelerometer_bias_policy));
-}
-
-auto IMU::readVariables(const Node& node) -> void {
+auto IMU::read(const Node& node) -> void {
+  Sensor::read(node);
+  gyroscopeNoiseDensity() = yaml::ReadAs<GyroscopeNoiseDensity>(node, kGyroscopeNoiseDensityName);
   gyroscopeIntrinsics() = yaml::ReadVariable<GyroscopeIntrinsics>(node, kGyroscopeIntrinsicsName);
   gyroscopeSensitivity() = yaml::ReadVariable<GyroscopeSensitivity>(node, kGyroscopeSensitivityName);
-  gyroscopeNoiseDensity() = yaml::ReadAs<GyroscopeNoiseDensity>(node, kGyroscopeNoiseDensityName);
-  accelerometerIntrinsics() = yaml::ReadVariable<AccelerometerIntrinsics>(node, kAccelerometerIntrinsicsName);
-  accelerometerAxesOffsets() = yaml::ReadVariable<AccelerometerAxesOffsets>(node, kAccelerometerAxesOffsetsName);
   accelerometerNoiseDensity() = yaml::ReadAs<AccelerometerNoiseDensity>(node, kAccelerometerNoiseDensityName);
+  accelerometerIntrinsics() = yaml::ReadVariable<AccelerometerIntrinsics>(node, kAccelerometerIntrinsicsName);
+  accelerometerOffset() = yaml::ReadVariable<AccelerometerOffset>(node, kAccelerometerOffsetName);
 }
 
-auto IMU::writeVariables(Emitter& emitter) const -> void {
-  Sensor::writeVariables(emitter);
+auto IMU::write(Emitter& emitter) const -> void {
+  Sensor::write(emitter);
+  yaml::Write(emitter, kGyroscopeNoiseDensityName, gyroscopeNoiseDensity());
   yaml::WriteVariable(emitter, kGyroscopeIntrinsicsName, gyroscopeIntrinsics());
   yaml::WriteVariable(emitter, kGyroscopeSensitivityName, gyroscopeSensitivity());
-  yaml::Write(emitter, kGyroscopeNoiseDensityName, gyroscopeNoiseDensity());
-  yaml::WriteVariable(emitter, kAccelerometerIntrinsicsName, accelerometerIntrinsics());
-  yaml::WriteVariable(emitter, kAccelerometerAxesOffsetsName, accelerometerAxesOffsets());
   yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
+  yaml::WriteVariable(emitter, kAccelerometerIntrinsicsName, accelerometerIntrinsics());
+  yaml::WriteVariable(emitter, kAccelerometerOffsetName, accelerometerOffset());
 }
 
-} // namespace hyper
+}  // namespace hyper::sensors

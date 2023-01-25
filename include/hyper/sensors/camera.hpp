@@ -5,52 +5,71 @@
 
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/variables/bearing.hpp"
-#include "hyper/variables/distortions/abstract.hpp"
+#include "hyper/variables/distortions/distortions.hpp"
+#include "hyper/variables/intrinsics.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 class Camera final : public Sensor {
  public:
+  // Constants.
+  static constexpr auto kIntrinsicsIndex = Sensor::kNumVariables;
+  static constexpr auto kDistortionIndex = kIntrinsicsIndex + 1;
+  static constexpr auto kNumVariables = kDistortionIndex + 1;
+
   // Definitions.
-  using SensorSize = Traits<Camera>::SensorSize;
-  using ShutterType = Traits<Camera>::ShutterType;
-  using ShutterDelta = Traits<Camera>::ShutterDelta;
+  using Index = Eigen::Index;
+  using Pixel = variables::Pixel<Scalar>;
+  using Bearing = variables::Bearing<Scalar>;
+  using Landmark = variables::Position<Scalar, 3>;
+  using Intrinsics = variables::Intrinsics<Scalar>;
+  using Distortion = variables::Distortion<Scalar>;
 
-  /// Projects positions to the (normalized) image plane.
-  /// \param position Position to project.
-  /// \param raw_J Jacobian of the projection.
-  /// \return Projected pixel coordinates.
-  static auto ProjectToPlane(const Eigen::Ref<const Position<Scalar>>& position, Scalar* raw_J = nullptr) -> Pixel<Scalar>;
+  // Shutter delta (i.e. increment between readouts).
+  using ShutterDelta = Scalar;
 
-  /// Projects positions to the unit sphere.
-  /// \param position Position to project.
-  /// \param raw_J Jacobian of the projection.
-  /// \return Projected bearing coordinates.
-  static auto ProjectToSphere(const Eigen::Ref<const Position<Scalar>>& position, Scalar* raw_J = nullptr) -> Bearing<Scalar>;
+  // Sensor size.
+  struct SensorSize {
+    Index width, height;
+  };
 
-  /// Lifts (normalized) pixel coordinates to the unit sphere.
-  /// \param pixel Pixel to lift.
-  /// \param raw_J Jacobian of the lift.
-  /// \return Bearing of lifted pixel coordinates.
-  static auto LiftToSphere(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J = nullptr) -> Bearing<Scalar>;
+  // Shutter type.
+  enum class ShutterType { GLOBAL, VERTICAL, HORIZONTAL, DEFAULT = GLOBAL };
 
-  /// Triangulates a position from relative a transformation and bearings.
+  /// Converts a landmark to a (normalized) pixel coordinate.
+  /// \param landmark Landmark.
+  /// \param J_l Jacobian (optional).
+  /// \return Pixel.
+  static auto LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Pixel;
+
+  /// Converts a landmark to a bearing.
+  /// \param landmark Landmark.
+  /// \param J_l Jacobian (optional).
+  /// \return Bearing.
+  static auto LandmarkToBearing(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Bearing;
+
+  /// Converts a (normalized) pixel coordinate to a bearing.
+  /// \param pixel Pixel.
+  /// \param J_p Jacobian (optional).
+  /// \return Bearing.
+  static auto PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p = nullptr) -> Bearing;
+
+  /// Triangulates a landmark from relative a transformation and bearings.
   /// \param T_ab Input transformation.
   /// \param b_a Input bearing in frame a.
   /// \param b_b Input bearing in frame b.
-  /// \return Triangulated position.
-  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing<Scalar>>& b_a, const Eigen::Ref<const Bearing<Scalar>>& b_b) -> Position<Scalar>;
+  /// \return Triangulated landmark.
+  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
 
-  /// Constructor from YAML file.
-  /// \param node Input YAML node.
-  explicit Camera(const Node& node = {});
+  /// Default constructor.
+  explicit Camera();
 
   /// Sensor size accessor.
-  /// \return Reference to sensor size.
+  /// \return Sensor size.
   [[nodiscard]] auto sensorSize() const -> const SensorSize&;
 
   /// Sensor size modifier.
-  /// \return Reference to sensor size.
+  /// \return Sensor size.
   [[nodiscard]] auto sensorSize() -> SensorSize&;
 
   /// Shutter type accessor.
@@ -70,95 +89,101 @@ class Camera final : public Sensor {
   [[nodiscard]] auto shutterDelta() -> ShutterDelta&;
 
   /// Intrinsics accessor.
-  /// \return Reference to intrinsics.
-  [[nodiscard]] auto intrinsics() const -> Eigen::Map<const Intrinsics<Scalar>>;
+  /// \return Intrinsics.
+  [[nodiscard]] auto intrinsics() const -> const Intrinsics&;
 
   /// Intrinsics modifier.
-  /// \return Reference to intrinsics.
-  auto intrinsics() -> Eigen::Map<Intrinsics<Scalar>>;
+  /// \return Intrinsics.
+  auto intrinsics() -> Intrinsics&;
 
   /// Distortion accessor.
-  /// \return Reference to distortion.
-  [[nodiscard]] auto distortion() const -> const AbstractDistortion<Scalar>&;
+  /// \return Distortion.
+  [[nodiscard]] auto distortion() const -> const Distortion&;
 
   /// Distortion modifier.
-  /// \return Reference to distortion.
-  auto distortion() -> AbstractDistortion<Scalar>&;
+  /// \return Distortion.
+  auto distortion() -> Distortion&;
 
   /// Sets the distortion.
   /// \tparam DistortionType Distortion type.
   /// \param distortion Distortion to be set.
-  auto setDistortion(std::unique_ptr<AbstractDistortion<Scalar>>&& distortion) -> void;
+  auto setDistortion(std::unique_ptr<Distortion>&& distortion) -> void;
 
-  /// Corrects the shutter stamps.
-  /// \param stamp Global shutter stamp.
-  /// \param pixels Input pixels.
-  /// \return Corrected shutter stamps.
-  [[nodiscard]] auto correctShutterStamps(const Stamp& stamp, const std::vector<Pixel<Scalar>>& pixels) const -> Stamps;
+  /// Retrieves a random pixel on the image sensor.
+  /// \return Random pixel.
+  [[nodiscard]] auto randomPixel() const -> Pixel;
 
-  /// Converts pixels to bearings.
+  /// Retrieves a random (normalized) pixel on the image sensor.
+  /// \param distorted True if pixel is distorted.
+  /// \return Random (normalized) pixel.
+  [[nodiscard]] auto randomNormalizedPixel(bool distort = false) const -> Pixel;
+
+  /// Retrieves a random (visible) bearing.
+  /// \param distorted True if bearing is distorted.
+  /// \return Random bearing.
+  auto randomBearing(bool distorted = false) -> Bearing;
+
+  /// Corrects the shutter times.
+  /// \param time Global shutter time.
   /// \param pixels Input pixels.
+  /// \return Corrected shutter times.
+  [[nodiscard]] auto correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time>;
+
+  /// Converts (non-normalized) pixels to
+  /// bearings (by normalization and undistortion).
+  /// \param pixels Input pixels.
+  /// \param parameters External distortion parameters (optional).
   /// \return Bearings.
-  [[nodiscard]] auto convertPixelsToBearings(const std::vector<Pixel<Scalar>>& pixels) const -> std::vector<Bearing<Scalar>>;
-
-  /// Triangulates a position from bearings.
-  /// \param other Other camera.
-  /// \param b_this Bearing in this frame.
-  /// \param b_other Bearing in other frame.
-  /// \return Triangulated position.
-  auto triangulate(const Camera& other, const Eigen::Ref<const Bearing<Scalar>>& b_this, const Eigen::Ref<const Bearing<Scalar>>& b_other) -> Position<Scalar>;
+  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
 
  private:
-  /// Initializes the variables.
-  auto initializeVariables() -> void;
-
   /// Reads the sensor size.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Sensor size.
   static auto ReadSensorSize(const Node& node) -> SensorSize;
 
   /// Reads the shutter type.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Shutter type.
   static auto ReadShutterType(const Node& node) -> ShutterType;
 
   /// Reads the shutter delta.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Shutter delta.
   static auto ReadShutterDelta(const Node& node) -> ShutterDelta;
 
   /// Reads the distortion.
-  /// \param node Input YAML node.
+  /// \param node Node
   /// \return Distortion
-  static auto ReadDistortion(const Node& node) -> std::unique_ptr<AbstractDistortion<Scalar>>;
+  static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
 
-  /// Reads all sensor variables from a YAML node.
-  /// \param node Input YAML node.
-  auto readVariables(const Node& node) -> void;
+  /// Reads a sensor from a YAML node.
+  /// \param node YAML node.
+  auto read(const Node& node) -> void final;
 
   /// Writes the sensor size.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeSensorSize(Emitter& emitter) const -> void;
 
   /// Write the shutter type.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeShutterType(Emitter& emitter) const -> void;
 
   /// Writes the shutter delta.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeShutterDelta(Emitter& emitter) const -> void;
 
   /// Writes the distortion.
-  /// \param emitter Modifiable emitter.
+  /// \param emitter Emitter.
   auto writeDistortion(Emitter& emitter) const -> void;
 
-  /// Outputs all sensor variables to a YAML emitter.
-  /// \param emitter Output YAML emitter.
-  auto writeVariables(Emitter& emitter) const -> void final;
+  /// Writes a sensor to a YAML emitter.
+  /// \param emitter YAML emitter.
+  auto write(Emitter& emitter) const -> void final;
 
-  SensorSize sensor_size_;     ///< Sensor size.
-  ShutterType shutter_type_;   ///< Shutter type.
-  ShutterDelta shutter_delta_; ///< Shutter delta.
+  SensorSize sensor_size_;      ///< Sensor size.
+  ShutterType shutter_type_;    ///< Shutter type.
+  ShutterDelta shutter_delta_;  ///< Shutter delta.
 };
 
-} // namespace hyper
+}  // namespace hyper::sensors

@@ -6,21 +6,21 @@
 #include "hyper/sensors/sensor.hpp"
 #include "hyper/variables/groups/se3.hpp"
 
-namespace hyper {
+namespace hyper::sensors {
 
 namespace {
 
-// Parameter names.
+// Variable names.
 constexpr auto kRateName = "rate";
+constexpr auto kOffsetName = "offset";
 constexpr auto kTransformationName = "transformation";
 
 // Default parameters.
 constexpr auto kDefaultRate = -1;
 
-} // namespace
+}  // namespace
 
-Sensor::Sensor(const Node& node)
-    : Sensor{Traits<Sensor>::kNumParameters, node} {}
+Sensor::Sensor() : Sensor{kNumVariables} {}
 
 auto Sensor::rate() const -> const Rate& {
   return rate_;
@@ -30,66 +30,74 @@ auto Sensor::hasVariableRate() const -> bool {
   return rate() < Scalar{0};
 }
 
-auto Sensor::variables() const -> const Variables& {
-  return variables_;
+auto Sensor::variables() const -> std::vector<Variable*> {
+  std::vector<Variable*> ptrs;
+  ptrs.reserve(variables_.size());
+  std::transform(variables_.begin(), variables_.end(), std::back_inserter(ptrs), [](const auto& arg) { return arg.get(); });
+  return ptrs;
 }
 
-auto Sensor::parameters() const -> Pointers<Parameter> {
-  Pointers<Parameter> pointers;
-  pointers.reserve(variables_.size());
-  std::transform(variables_.begin(), variables_.end(), std::back_inserter(pointers), [](const auto& arg) { return arg.get(); });
-  return pointers;
+auto Sensor::variables(const Time& /* time */) const -> std::vector<Variable*> {
+  return Sensor::variables();
 }
 
-auto Sensor::parameters(const Stamp& /* stamp */) const -> Pointers<Parameter> {
-  return Sensor::parameters();
+auto Sensor::parameterBlocks() const -> std::vector<Scalar*> {
+  return parameter_blocks_;
 }
 
-auto Sensor::transformation() const -> Eigen::Map<const Transformation> {
-  const auto vector = variableAsVector(Traits<Sensor>::kTransformationOffset);
-  return Eigen::Map<const Transformation>{vector.data()};
+auto Sensor::parameterBlocks(const Time& /* time */) const -> std::vector<Scalar*> {
+  return Sensor::parameterBlocks();
 }
 
-auto Sensor::transformation() -> Eigen::Map<Transformation> {
-  auto vector = variableAsVector(Traits<Sensor>::kTransformationOffset);
-  return Eigen::Map<Transformation>{vector.data()};
+auto Sensor::offset() const -> const Offset& {
+  return static_cast<const Offset&>(*variables_[kOffsetIndex]);  // NOLINT
+}
+
+auto Sensor::offset() -> Offset& {
+  return const_cast<Offset&>(std::as_const(*this).offset());
+}
+
+auto Sensor::transformation() const -> const Transformation& {
+  return static_cast<const Transformation&>(*variables_[kTransformationIndex]);  // NOLINT
+}
+
+auto Sensor::transformation() -> Transformation& {
+  return const_cast<Transformation&>(std::as_const(*this).transformation());
+}
+
+auto operator>>(const YAML::Node& node, Sensor& sensor) -> const YAML::Node& {
+  CHECK(node);
+  sensor.read(node);
+  return node;
 }
 
 auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& {
   emitter << YAML::BeginMap;
-  sensor.writeVariables(emitter);
+  sensor.write(emitter);
   emitter << YAML::EndMap;
   return emitter;
 }
 
-Sensor::Sensor(const Size& num_variables, const Node& node)
-    : rate_{kDefaultRate},
-      variables_{num_variables} {
-  initializeVariables();
-  if (!node.IsNull()) {
-    readVariables(node);
-  }
+Sensor::Sensor(const Size& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameter_blocks_{num_variables} {
+  // Initialize variables.
+  DCHECK_LE(kNumVariables, variables_.size());
+  DCHECK_LE(kNumVariables, parameter_blocks_.size());
+  variables_[kOffsetIndex] = std::make_unique<Offset>();
+  variables_[kTransformationIndex] = std::make_unique<Transformation>();
+  parameter_blocks_[kOffsetIndex] = variables_[kOffsetIndex]->asVector().data();
+  parameter_blocks_[kTransformationIndex] = variables_[kTransformationIndex]->asVector().data();
 }
 
-auto Sensor::variableAsVector(const Size& index) const -> Eigen::Map<DynamicVector<Scalar>> {
-  DCHECK_LT(index, variables_.size());
-  DCHECK(variables_[index] != nullptr);
-  return variables_[index]->asVector();
-}
-
-auto Sensor::writeVariables(Emitter& emitter) const -> void {
-  yaml::Write(emitter, kRateName, rate());
-  yaml::WriteVariable(emitter, kTransformationName, transformation());
-}
-
-auto Sensor::initializeVariables() -> void {
-  DCHECK_LE(Traits<Sensor>::kNumParameters, variables_.size());
-  variables_[Traits<Sensor>::kTransformationOffset] = std::make_unique<Transformation>();
-}
-
-auto Sensor::readVariables(const Node& node) -> void {
+auto Sensor::read(const Node& node) -> void {
   rate_ = yaml::ReadAs<Rate>(node, kRateName);
+  offset() = yaml::ReadVariable<Offset>(node, kOffsetName);
   transformation() = yaml::ReadVariable<Transformation>(node, kTransformationName);
 }
 
-} // namespace hyper
+auto Sensor::write(Emitter& emitter) const -> void {
+  yaml::Write(emitter, kRateName, rate());
+  yaml::WriteVariable(emitter, kOffsetName, offset());
+  yaml::WriteVariable(emitter, kTransformationName, transformation());
+}
+
+}  // namespace hyper::sensors

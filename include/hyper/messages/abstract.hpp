@@ -3,13 +3,20 @@
 
 #pragma once
 
+#include <utility>
+
 #include "hyper/messages/forward.hpp"
 #include "hyper/sensors/forward.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
 class AbstractMessage {
  public:
+  // Definitions.
+  using Time = double;
+  using Scalar = double;
+  using Sensor = sensors::Sensor;
+
   /// Default destructor.
   virtual ~AbstractMessage() = default;
 
@@ -29,26 +36,26 @@ class AbstractMessage {
     return const_cast<TDerived_&>(std::as_const(*this).template as<TDerived_>());
   }
 
-  /// Stamp accessor.
-  /// \return Stamp.
-  [[nodiscard]] auto stamp() const -> const Stamp&;
+  /// Time accessor.
+  /// \return Time.
+  [[nodiscard]] auto time() const -> const Time&;
 
-  /// Stamp modifier.
-  /// \return Stamp.
-  auto stamp() -> Stamp&;
+  /// Time modifier.
+  /// \return Time.
+  auto time() -> Time&;
 
   /// Sensor accessor.
   /// \return Sensor.
   [[nodiscard]] virtual auto sensor() const -> const Sensor&;
 
  protected:
-  /// Constructor from stamp and sensor.
-  /// \param stamp Stamp.
+  /// Constructor from time and sensor.
+  /// \param time Time.
   /// \param sensor Sensor.
-  explicit AbstractMessage(const Stamp& stamp, const Sensor& sensor);
+  explicit AbstractMessage(const Time& time, const Sensor& sensor);
 
-  Stamp stamp_;          ///< Stamp.
-  const Sensor* sensor_; ///< Sensor.
+  Time time_;             ///< Time.
+  const Sensor* sensor_;  ///< Sensor.
 };
 
-} // namespace hyper
+}  // namespace hyper::messages

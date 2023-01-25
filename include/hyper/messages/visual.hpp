@@ -9,24 +9,30 @@
 #include "hyper/sensors/camera.hpp"
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
-class VisualTracks
-    : public AbstractMessage {
+class VisualTracks : public AbstractMessage {
  public:
   // Definitions.
   using Image = cv_bridge::CvImageConstPtr;
+
+  using Camera = sensors::Camera;
+
   using Points = std::vector<cv::Point2f>;
   using Entry = std::tuple<Image, Points>;
   using Tracks = std::map<const Camera*, Entry>;
-  using Identifiers = std::vector<Identifier>;
-  using Positions = std::vector<Position<Scalar>>;
-  using Lengths = std::vector<std::size_t>;
+
+  using Index = Eigen::Index;
+  using Identifiers = std::vector<Index>;
+  using Lengths = std::vector<Index>;
+
+  using Position = variables::Position<Scalar>;
+  using Positions = std::vector<Position>;
 
   /// Constructor from time and sensor.
-  /// \param stamp Stamp.
+  /// \param time Time.
   /// \param camera Camera.
-  VisualTracks(const Stamp& stamp, const Camera& camera);
+  VisualTracks(const Time& time, const Camera& camera);
 
   /// Sensor accessor.
   /// \return Sensor.
@@ -50,19 +56,18 @@ class VisualTracks
   /// \return Entry containing the associated image and tracked points.
   auto getTrack(const Camera& camera) -> Entry&;
 
-  Tracks tracks;           ///< Tracks.
-  Identifiers identifiers; ///< Track identifiers.
-  Positions positions;     ///< Track positions (optional).
-  Lengths lengths;         ///< Track lengths.
+  Tracks tracks;            ///< Tracks.
+  Identifiers identifiers;  ///< Track identifiers.
+  Positions positions;      ///< Track positions (optional).
+  Lengths lengths;          ///< Track lengths.
 };
 
-class StereoVisualTracks
-    : public VisualTracks {
+class StereoVisualTracks : public VisualTracks {
   /// Constructor from time and sensor.
-  /// \param stamp Stamp.
+  /// \param time Time.
   /// \param camera Camera.
   /// \param other_camera Other camera.
-  StereoVisualTracks(const Stamp& stamp, const Camera& camera, const Camera& other_camera);
+  StereoVisualTracks(const Time& time, const Camera& camera, const Camera& other_camera);
 
   /// Other sensor accessor.
   /// \return Other sensor.
@@ -73,7 +78,7 @@ class StereoVisualTracks
   auto setOtherSensor(const Camera& other_camera) -> void;
 
  private:
-  const Sensor* other_sensor_; ///< Other sensor.
+  const Sensor* other_sensor_;  ///< Other sensor.
 };
 
-} // namespace hyper
+}  // namespace hyper::messages

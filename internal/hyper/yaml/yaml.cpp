@@ -17,4 +17,4 @@ auto ReadString(const Node& node, const Key& key) -> String {
   return string;
 }
 
-} // namespace hyper::yaml
+}  // namespace hyper::yaml

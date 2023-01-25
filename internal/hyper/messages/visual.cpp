@@ -5,20 +5,15 @@
 
 #include "hyper/messages/visual.hpp"
 
-namespace hyper {
+namespace hyper::messages {
 
-VisualTracks::VisualTracks(const Stamp& stamp, const Camera& camera)
-    : AbstractMessage{stamp, camera},
-      tracks{},
-      identifiers{},
-      positions{},
-      lengths{} {
+VisualTracks::VisualTracks(const Time& time, const Camera& camera) : AbstractMessage{time, camera}, tracks{}, identifiers{}, positions{}, lengths{} {
   // Add track.
   addTrack(camera);
 }
 
 auto VisualTracks::sensor() const -> const Camera& {
-  return static_cast<const Camera&>(*sensor_); // NOLINT
+  return static_cast<const Camera&>(*sensor_);  // NOLINT
 }
 
 auto VisualTracks::setSensor(const Camera& camera) -> void {
@@ -41,19 +36,17 @@ auto VisualTracks::getTrack(const Camera& camera) -> Entry& {
   return const_cast<Entry&>(std::as_const(*this).getTrack(camera));
 }
 
-StereoVisualTracks::StereoVisualTracks(const Stamp& stamp, const Camera& camera, const Camera& other_camera)
-    : VisualTracks{stamp, camera},
-      other_sensor_{&other_camera} {
+StereoVisualTracks::StereoVisualTracks(const Time& time, const Camera& camera, const Camera& other_camera) : VisualTracks{time, camera}, other_sensor_{&other_camera} {
   // Add track.
   addTrack(other_camera);
 }
 
 auto StereoVisualTracks::otherSensor() const -> const Camera& {
-  return static_cast<const Camera&>(*other_sensor_); // NOLINT
+  return static_cast<const Camera&>(*other_sensor_);  // NOLINT
 }
 
 auto StereoVisualTracks::setOtherSensor(const Camera& other_camera) -> void {
   other_sensor_ = &other_camera;
 }
 
-} // namespace hyper
+}  // namespace hyper::messages

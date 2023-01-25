@@ -1,10 +1,11 @@
 #!/bin/sh
 
-sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt update && sudo apt install curl
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
 sudo apt update
-sudo apt install libgflags-dev libeigen3-dev libopencv-dev libyaml-cpp-dev ros-noetic-ros-base ros-noetic-cv-bridge
+sudo apt install libgflags-dev libeigen3-dev libopencv-dev libyaml-cpp-dev ros-humble-ros-base ros-humble-cv-bridge
 
 mkdir install && cd install || exit
 wget -O gtest.tar.gz https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz

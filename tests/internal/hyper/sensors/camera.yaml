@@ -1,0 +1,9 @@
+rate: 20
+offset: [0]
+transformation: [0, 0, 0, 1, 0, 0, 0]
+sensor_size: [752, 480]
+shutter_type: GLOBAL
+intrinsics: [367.21499999999997, 248.375, 458.654, 457.29599999999999]
+distortion:
+  type: RADIAL_TANGENTIAL_2
+  parameters: [-0.28340810999999999, 0.073959070000000002, 1.7618711400000001e-05, 0.00019358999999999999]

@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace hyper {
+namespace hyper::messages {
 
 class AbstractMessage;
 
@@ -11,4 +11,4 @@ class VisualTracks;
 
 class StereoVisualTracks;
 
-} // namespace hyper
+}  // namespace hyper::messages

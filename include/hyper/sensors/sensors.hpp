@@ -3,9 +3,5 @@
 
 #pragma once
 
-namespace YAML {
-
-class Node;
-class Emitter;
-
-}  // namespace YAML
+#include "hyper/sensors/camera.hpp"
+#include "hyper/sensors/imu.hpp"
