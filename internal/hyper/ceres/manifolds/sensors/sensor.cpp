@@ -20,29 +20,29 @@ auto Manifold<Sensor>::sensor() const -> const Sensor* {
 }
 
 auto Manifold<Sensor>::offsetSubmanifold() const -> Submanifold* {
-  return submanifolds_[Sensor::kOffsetOffset].get();
+  return submanifolds_[Sensor::kOffsetIndex].get();
 }
 
 auto Manifold<Sensor>::setOffsetSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
   DCHECK_EQ(submanifold->AmbientSize(), Sensor::Offset::kNumParameters);
-  submanifolds_[Sensor::kOffsetOffset] = std::move(submanifold);
+  submanifolds_[Sensor::kOffsetIndex] = std::move(submanifold);
 }
 
 auto Manifold<Sensor>::setOffsetConstant(bool constant) -> void {
-  submanifolds_[Sensor::kOffsetOffset] = std::make_unique<Manifold<Sensor::Offset>>(constant);
+  submanifolds_[Sensor::kOffsetIndex] = std::make_unique<Manifold<Sensor::Offset>>(constant);
 }
 
 auto Manifold<Sensor>::transformationSubmanifold() const -> Submanifold* {
-  return submanifolds_[Sensor::kTransformationOffset].get();
+  return submanifolds_[Sensor::kTransformationIndex].get();
 }
 
 auto Manifold<Sensor>::setTransformationSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
   DCHECK_EQ(submanifold->AmbientSize(), Sensor::Transformation::kNumParameters);
-  submanifolds_[Sensor::kTransformationOffset] = std::move(submanifold);
+  submanifolds_[Sensor::kTransformationIndex] = std::move(submanifold);
 }
 
 auto Manifold<Sensor>::setTransformationConstant(bool constant) -> void {
-  submanifolds_[Sensor::kTransformationOffset] = std::make_unique<Manifold<Sensor::Transformation>>(constant, constant);
+  submanifolds_[Sensor::kTransformationIndex] = std::make_unique<Manifold<Sensor::Transformation>>(constant, constant);
 }
 
 Manifold<Sensor>::Manifold(const Sensor* sensor, const Size& num_submanifolds, const bool constant) : sensor_{sensor}, submanifolds_{num_submanifolds} {

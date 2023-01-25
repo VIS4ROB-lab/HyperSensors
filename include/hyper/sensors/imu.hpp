@@ -13,11 +13,11 @@ namespace hyper::sensors {
 class IMU final : public Sensor {
  public:
   // Constants.
-  static constexpr auto kGyroscopeIntrinsicsOffset = Sensor::kNumVariables;
-  static constexpr auto kGyroscopeSensitivityOffset = kGyroscopeIntrinsicsOffset + 1;
-  static constexpr auto kAccelerometerIntrinsicsOffset = kGyroscopeSensitivityOffset + 1;
-  static constexpr auto kAccelerometerAxesOffsetsOffset = kAccelerometerIntrinsicsOffset + 1;
-  static constexpr auto kNumVariables = kAccelerometerAxesOffsetsOffset + 1;
+  static constexpr auto kGyroscopeIntrinsicsIndex = Sensor::kNumVariables;
+  static constexpr auto kGyroscopeSensitivityIndex = kGyroscopeIntrinsicsIndex + 1;
+  static constexpr auto kAccelerometerIntrinsicsIndex = kGyroscopeSensitivityIndex + 1;
+  static constexpr auto kAccelerometerOffsetIndex = kAccelerometerIntrinsicsIndex + 1;
+  static constexpr auto kNumVariables = kAccelerometerOffsetIndex + 1;
 
   // Definitions.
   using GyroscopeNoiseDensity = Scalar;
@@ -27,7 +27,7 @@ class IMU final : public Sensor {
 
   using AccelerometerNoiseDensity = Scalar;
   using AccelerometerIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
-  using AccelerometerAxesOffsets = variables::Cartesian<Scalar, 9>;
+  using AccelerometerOffset = variables::Cartesian<Scalar, 9>;
   using AccelerometerBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
 
   /// Default constructor.
@@ -97,13 +97,13 @@ class IMU final : public Sensor {
   /// \return Accelerometer intrinsics.
   auto accelerometerIntrinsics() -> AccelerometerIntrinsics&;
 
-  /// Accelerometer axes offsets accessor.
-  /// \return Accelerometer axes offsets.
-  [[nodiscard]] auto accelerometerAxesOffsets() const -> const AccelerometerAxesOffsets&;
+  /// Accelerometer offset (of individual axes) accessor.
+  /// \return Accelerometer offset.
+  [[nodiscard]] auto accelerometerOffset() const -> const AccelerometerOffset&;
 
-  /// Accelerometer axes offsets modifier.
-  /// \return Accelerometer axes offsets.
-  auto accelerometerAxesOffsets() -> AccelerometerAxesOffsets&;
+  /// Accelerometer offset (of individual axes) modifier.
+  /// \return Accelerometer offset.
+  auto accelerometerOffset() -> AccelerometerOffset&;
 
   /// Accelerometer bias accessor.
   /// \return Accelerometer bias.

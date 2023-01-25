@@ -6,4 +6,4 @@ gyroscope_intrinsics: [1, 1, 1, 0, 0, 0]
 gyroscope_sensitivity: [0, 0, 0, 0, 0, 0, 0, 0, 0]
 accelerometer_noise_density: 0.001
 accelerometer_intrinsics: [1, 1, 1, 0, 0, 0]
-accelerometer_axes_offsets: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+accelerometer_offset: [0, 0, 0, 0, 0, 0, 0, 0, 0]

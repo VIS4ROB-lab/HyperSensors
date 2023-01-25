@@ -13,9 +13,9 @@ namespace hyper::sensors {
 class Sensor {
  public:
   // Constants.
-  static constexpr auto kOffsetOffset = 0;
-  static constexpr auto kTransformationOffset = kOffsetOffset + 1;
-  static constexpr auto kNumVariables = kTransformationOffset + 1;
+  static constexpr auto kOffsetIndex = 0;
+  static constexpr auto kTransformationIndex = kOffsetIndex + 1;
+  static constexpr auto kNumVariables = kTransformationIndex + 1;
 
   // Definitions.
   using Node = YAML::Node;

@@ -19,12 +19,12 @@ auto Manifold<Camera>::sensor() const -> const Camera* {
 }
 
 auto Manifold<Camera>::intrinsicsSubmanifold() const -> Submanifold* {
-  return submanifolds_[Camera::kIntrinsicsOffset].get();
+  return submanifolds_[Camera::kIntrinsicsIndex].get();
 }
 
 auto Manifold<Camera>::setIntrinsicsSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
   DCHECK_EQ(submanifold->AmbientSize(), Camera::Intrinsics::kNumParameters);
-  submanifolds_[Camera::kIntrinsicsOffset] = std::move(submanifold);
+  submanifolds_[Camera::kIntrinsicsIndex] = std::move(submanifold);
 }
 
 auto Manifold<Camera>::setIntrinsicsConstant(const bool constant) -> void {
@@ -33,12 +33,12 @@ auto Manifold<Camera>::setIntrinsicsConstant(const bool constant) -> void {
 }
 
 auto Manifold<Camera>::distortionSubmanifold() const -> Submanifold* {
-  return submanifolds_[Camera::kDistortionOffset].get();
+  return submanifolds_[Camera::kDistortionIndex].get();
 }
 
 auto Manifold<Camera>::setDistortionSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
   DCHECK_EQ(submanifold->AmbientSize(), sensor()->distortion().asVector().size());
-  submanifolds_[Camera::kDistortionOffset] = std::move(submanifold);
+  submanifolds_[Camera::kDistortionIndex] = std::move(submanifold);
 }
 
 auto Manifold<Camera>::setDistortionConstant(const bool constant) -> void {

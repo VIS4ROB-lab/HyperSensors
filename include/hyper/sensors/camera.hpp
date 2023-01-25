@@ -13,9 +13,9 @@ namespace hyper::sensors {
 class Camera final : public Sensor {
  public:
   // Constants.
-  static constexpr auto kIntrinsicsOffset = Sensor::kNumVariables;
-  static constexpr auto kDistortionOffset = kIntrinsicsOffset + 1;
-  static constexpr auto kNumVariables = kDistortionOffset + 1;
+  static constexpr auto kIntrinsicsIndex = Sensor::kNumVariables;
+  static constexpr auto kDistortionIndex = kIntrinsicsIndex + 1;
+  static constexpr auto kNumVariables = kDistortionIndex + 1;
 
   // Definitions.
   using Index = Eigen::Index;

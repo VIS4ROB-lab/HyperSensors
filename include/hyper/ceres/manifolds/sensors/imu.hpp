@@ -17,9 +17,9 @@ class Manifold<sensors::IMU> final : public Manifold<sensors::Sensor> {
   using IMU = sensors::IMU;
 
   // Constants.
-  static constexpr auto kGyroscopeBiasSubmanifoldOffset = IMU::kNumVariables;
-  static constexpr auto kAccelerometerBiasSubmanifoldOffset = kGyroscopeBiasSubmanifoldOffset + 1;
-  static constexpr auto kNumSubmanifolds = kAccelerometerBiasSubmanifoldOffset + 1;
+  static constexpr auto kGyroscopeBiasSubmanifoldIndex = IMU::kNumVariables;
+  static constexpr auto kAccelerometerBiasSubmanifoldIndex = kGyroscopeBiasSubmanifoldIndex + 1;
+  static constexpr auto kNumSubmanifolds = kAccelerometerBiasSubmanifoldIndex + 1;
 
   /// Default constructor.
   /// \param imu IMU to parametrize.

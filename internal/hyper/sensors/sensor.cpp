@@ -50,7 +50,7 @@ auto Sensor::parameterBlocks(const Time& /* time */) const -> std::vector<Scalar
 }
 
 auto Sensor::offset() const -> const Offset& {
-  return static_cast<const Offset&>(*variables_[kOffsetOffset]);  // NOLINT
+  return static_cast<const Offset&>(*variables_[kOffsetIndex]);  // NOLINT
 }
 
 auto Sensor::offset() -> Offset& {
@@ -58,7 +58,7 @@ auto Sensor::offset() -> Offset& {
 }
 
 auto Sensor::transformation() const -> const Transformation& {
-  return static_cast<const Transformation&>(*variables_[kTransformationOffset]);  // NOLINT
+  return static_cast<const Transformation&>(*variables_[kTransformationIndex]);  // NOLINT
 }
 
 auto Sensor::transformation() -> Transformation& {
@@ -82,10 +82,10 @@ Sensor::Sensor(const Size& num_variables) : rate_{kDefaultRate}, variables_{num_
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   DCHECK_LE(kNumVariables, parameter_blocks_.size());
-  variables_[kOffsetOffset] = std::make_unique<Offset>();
-  variables_[kTransformationOffset] = std::make_unique<Transformation>();
-  parameter_blocks_[kOffsetOffset] = variables_[kOffsetOffset]->asVector().data();
-  parameter_blocks_[kTransformationOffset] = variables_[kTransformationOffset]->asVector().data();
+  variables_[kOffsetIndex] = std::make_unique<Offset>();
+  variables_[kTransformationIndex] = std::make_unique<Transformation>();
+  parameter_blocks_[kOffsetIndex] = variables_[kOffsetIndex]->asVector().data();
+  parameter_blocks_[kTransformationIndex] = variables_[kTransformationIndex]->asVector().data();
 }
 
 auto Sensor::read(const Node& node) -> void {

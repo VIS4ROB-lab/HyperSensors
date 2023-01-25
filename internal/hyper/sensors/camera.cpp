@@ -86,8 +86,8 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
 Camera::Camera() : Sensor{kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
-  variables_[kIntrinsicsOffset] = std::make_unique<Intrinsics>();
-  parameter_blocks_[kIntrinsicsOffset] = variables_[kIntrinsicsOffset]->asVector().data();
+  variables_[kIntrinsicsIndex] = std::make_unique<Intrinsics>();
+  parameter_blocks_[kIntrinsicsIndex] = variables_[kIntrinsicsIndex]->asVector().data();
 }
 
 auto Camera::sensorSize() const -> const SensorSize& {
@@ -115,7 +115,7 @@ auto Camera::shutterDelta() -> ShutterDelta& {
 }
 
 auto Camera::intrinsics() const -> const Intrinsics& {
-  return static_cast<const Intrinsics&>(*variables_[kIntrinsicsOffset]);  // NOLINT
+  return static_cast<const Intrinsics&>(*variables_[kIntrinsicsIndex]);  // NOLINT
 }
 
 auto Camera::intrinsics() -> Intrinsics& {
@@ -123,7 +123,7 @@ auto Camera::intrinsics() -> Intrinsics& {
 }
 
 auto Camera::distortion() const -> const Distortion& {
-  return static_cast<const Distortion&>(*variables_[kDistortionOffset]);  // NOLINT
+  return static_cast<const Distortion&>(*variables_[kDistortionIndex]);  // NOLINT
 }
 
 auto Camera::distortion() -> Distortion& {
@@ -132,8 +132,8 @@ auto Camera::distortion() -> Distortion& {
 
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
   CHECK(distortion != nullptr);
-  variables_[kDistortionOffset] = std::move(distortion);
-  parameter_blocks_[kDistortionOffset] = variables_[kDistortionOffset]->asVector().data();
+  variables_[kDistortionIndex] = std::move(distortion);
+  parameter_blocks_[kDistortionIndex] = variables_[kDistortionIndex]->asVector().data();
 }
 
 auto Camera::randomPixel() const -> Pixel {
