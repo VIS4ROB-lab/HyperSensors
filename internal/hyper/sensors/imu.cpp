@@ -62,11 +62,11 @@ IMU::IMU() : Sensor{kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{
 }
 
 auto IMU::variables() const -> std::vector<Variable*> {
-  return concatVectors(Sensor::variables(), gyroscopeBias().variables(), accelerometerBias().variables());
+  return concatVectors(Sensor::variables(), gyroscopeBias().inputs(), accelerometerBias().inputs());
 }
 
 auto IMU::variables(const Time& time) const -> std::vector<Variable*> {
-  return concatVectors(Sensor::variables(time), gyroscopeBias().variables(time), accelerometerBias().variables(time));
+  return concatVectors(Sensor::variables(time), gyroscopeBias().inputs(time), accelerometerBias().inputs(time));
 }
 
 auto IMU::parameterBlocks() const -> std::vector<Scalar*> {

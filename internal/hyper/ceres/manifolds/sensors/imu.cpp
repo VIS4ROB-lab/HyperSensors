@@ -56,12 +56,12 @@ auto Manifold<IMU>::gyroscopeBiasSubmanifold() const -> Submanifold* {
 }
 
 auto Manifold<IMU>::setGyroscopeBiasSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
-  DCHECK_EQ(submanifold->AmbientSize(), IMU::GyroscopeBias::StampedVariable::kNumParameters);
+  DCHECK_EQ(submanifold->AmbientSize(), IMU::GyroscopeBias::StampedInput::kNumParameters);
   submanifolds_[kGyroscopeBiasSubmanifoldIndex] = std::move(submanifold);
 }
 
 auto Manifold<IMU>::setGyroscopeBiasConstant(const bool constant) -> void {
-  auto submanifold = std::make_unique<Manifold<IMU::GyroscopeBias::StampedVariable>>(true, constant);
+  auto submanifold = std::make_unique<Manifold<IMU::GyroscopeBias::StampedInput>>(true, constant);
   setGyroscopeBiasSubmanifold(std::move(submanifold));
 }
 
@@ -98,12 +98,12 @@ auto Manifold<IMU>::accelerometerBiasSubmanifold() const -> Submanifold* {
 }
 
 auto Manifold<IMU>::setAccelerometerBiasSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
-  DCHECK_EQ(submanifold->AmbientSize(), IMU::AccelerometerBias::StampedVariable::kNumParameters);
+  DCHECK_EQ(submanifold->AmbientSize(), IMU::AccelerometerBias::StampedInput::kNumParameters);
   submanifolds_[kAccelerometerBiasSubmanifoldIndex] = std::move(submanifold);
 }
 
 auto Manifold<IMU>::setAccelerometerBiasConstant(const bool constant) -> void {
-  auto submanifold = std::make_unique<Manifold<IMU::AccelerometerBias::StampedVariable>>(true, constant);
+  auto submanifold = std::make_unique<Manifold<IMU::AccelerometerBias::StampedInput>>(true, constant);
   setAccelerometerBiasSubmanifold(std::move(submanifold));
 }
 
