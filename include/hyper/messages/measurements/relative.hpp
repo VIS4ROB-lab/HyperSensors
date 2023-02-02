@@ -11,9 +11,8 @@ template <typename TSensor, typename TVariable>
 class RelativeMeasurement final : public MeasurementBase<TVariable> {
  public:
   // Definitions.
-  using Sensor = TSensor;
-  using Variable = TVariable;
   using Base = MeasurementBase<TVariable>;
+  using Type = typename Base::Type;
   using Time = typename Base::Time;
 
   /// Constructor from time, sensor and variable.
@@ -22,10 +21,10 @@ class RelativeMeasurement final : public MeasurementBase<TVariable> {
   /// \param other_time Other time.
   /// \param other_sensor Other sensor.
   /// \param variable Variable.
-  RelativeMeasurement(const Time& time, const Sensor& sensor,
-                      const Time& other_time, const Sensor& other_sensor,
+  RelativeMeasurement(const Time& time, const TSensor& sensor,
+                      const Time& other_time, const TSensor& other_sensor,
                       const TVariable& variable)
-      : Base{time, variable},
+      : Base{Type::RELATIVE_MEASUREMENT, time, variable},
         other_time_{other_time},
         sensor_{&sensor},
         other_sensor_{&other_sensor} {}
@@ -42,21 +41,21 @@ class RelativeMeasurement final : public MeasurementBase<TVariable> {
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] inline auto sensor() const -> const Sensor& final { *sensor_; }
+  [[nodiscard]] inline auto sensor() const -> const TSensor& final { *sensor_; }
 
   /// Sets the associated sensor.
   /// \param camera Sensor to set.
-  inline auto setSensor(const Sensor& sensor) -> void { sensor_ = &sensor; }
+  inline auto setSensor(const TSensor& sensor) -> void { sensor_ = &sensor; }
 
   /// Other sensor accessor.
   /// \return Other sensor.
-  [[nodiscard]] inline auto otherSensor() const -> const Sensor& {
+  [[nodiscard]] inline auto otherSensor() const -> const TSensor& {
     return *other_sensor_;
   }
 
   /// Sets the associated other sensor.
   /// \param camera Other sensor to set.
-  inline auto setOtherSensor(const Sensor& other_sensor) -> void {
+  inline auto setOtherSensor(const TSensor& other_sensor) -> void {
     other_sensor_ = &other_sensor;
   }
 

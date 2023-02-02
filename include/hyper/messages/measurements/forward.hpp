@@ -7,10 +7,11 @@
 
 namespace hyper::messages {
 
+template <typename TScalar>
 class Measurement;
 
 template <typename TVariable>
-class VariableMeasurement;
+class AbsoluteMeasurement;
 
 template <typename TVariable>
 class VisualMeasurement;

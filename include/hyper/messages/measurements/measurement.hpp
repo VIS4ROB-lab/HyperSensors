@@ -37,7 +37,6 @@ template <typename TVariable>
 class MeasurementBase : public Measurement<typename TVariable::Scalar> {
  public:
   // Definitions.
-  using Variable = TVariable;
   using Base = Measurement<typename TVariable::Scalar>;
   using Type = typename Base::Type;
   using Time = typename Base::Time;

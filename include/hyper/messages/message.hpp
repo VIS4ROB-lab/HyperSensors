@@ -63,7 +63,7 @@ class Message {
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] virtual auto sensor() const -> const Sensor& = 0;
+  [[nodiscard]] virtual auto sensor() const -> const Sensor* = 0;
 
  protected:
   /// Constructor from type and time.

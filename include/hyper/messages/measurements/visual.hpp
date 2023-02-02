@@ -13,8 +13,8 @@ template <typename TVariable>
 class VisualMeasurement final : public MeasurementBase<TVariable> {
  public:
   // Definitions.
-  using Variable = TVariable;
   using Base = MeasurementBase<TVariable>;
+  using Type = typename Base::Type;
   using Time = typename Base::Time;
 
   using Camera = sensors::Camera;
@@ -23,17 +23,19 @@ class VisualMeasurement final : public MeasurementBase<TVariable> {
   /// \param time Time.
   /// \param camera Camera.
   /// \param variable Variable.
-  VisualMeasurement(const Time& time, const Camera& camera,
+  VisualMeasurement(const Time& time, const Camera* camera,
                     const TVariable& variable)
-      : Base{time, variable}, camera_{&camera} {}
+      : Base{Type::VISUAL_MEASUREMENT, time, variable}, camera_{camera} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] inline auto sensor() const -> const Camera& final { *camera_; }
+  [[nodiscard]] inline auto sensor() const -> const Camera* final {
+    return camera_;
+  }
 
   /// Sets the associated sensor.
   /// \param camera Sensor to set.
-  inline auto setSensor(const Camera& camera) -> void { camera_ = &camera; }
+  inline auto setSensor(const Camera* camera) -> void { camera_ = camera; }
 
  private:
   const Camera* camera_;  ///< Camera.

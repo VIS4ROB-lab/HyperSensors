@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "hyper/messages/measurements/absolute.hpp"
 #include "hyper/messages/measurements/inertial.hpp"
 #include "hyper/messages/measurements/relative.hpp"
 #include "hyper/messages/measurements/visual.hpp"

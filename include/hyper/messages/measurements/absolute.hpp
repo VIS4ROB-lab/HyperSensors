@@ -12,8 +12,8 @@ template <typename TVariable>
 class AbsoluteMeasurement final : public MeasurementBase<TVariable> {
  public:
   // Definitions.
-  using Variable = TVariable;
   using Base = MeasurementBase<TVariable>;
+  using Type = typename Base::Type;
   using Time = typename Base::Time;
 
   using Sensor = sensors::Sensor;
@@ -22,17 +22,19 @@ class AbsoluteMeasurement final : public MeasurementBase<TVariable> {
   /// \param time Time.
   /// \param sensor Sensor.
   /// \param variable Variable.
-  AbsoluteMeasurement(const Time& time, const Sensor& sensor,
+  AbsoluteMeasurement(const Time& time, const Sensor* sensor,
                       const TVariable& variable)
-      : Base{time, variable}, sensor_{&sensor} {}
+      : Base{Type::ABSOLUTE_MEASUREMENT, time, variable}, sensor_{sensor} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] inline auto sensor() const -> const Sensor& final { *sensor_; }
+  [[nodiscard]] inline auto sensor() const -> const Sensor* final {
+    return sensor_;
+  }
 
   /// Sets the associated sensor.
   /// \param sensor Sensor to set.
-  inline auto setSensor(const Sensor& sensor) -> void { sensor_ = &sensor; }
+  inline auto setSensor(const Sensor* sensor) -> void { sensor_ = sensor; }
 
  private:
   const Sensor* sensor_;  ///< Sensor.
