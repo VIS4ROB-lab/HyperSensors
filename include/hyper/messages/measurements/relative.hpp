@@ -3,17 +3,17 @@
 
 #pragma once
 
-#include "hyper/messages/measurements/variable.hpp"
+#include "hyper/messages/measurements/measurement.hpp"
 
 namespace hyper::messages {
 
 template <typename TSensor, typename TVariable>
-class RelativeMeasurement final : public VariableMeasurement<TVariable> {
+class RelativeMeasurement final : public MeasurementBase<TVariable> {
  public:
   // Definitions.
   using Sensor = TSensor;
   using Variable = TVariable;
-  using Base = VariableMeasurement<TVariable>;
+  using Base = MeasurementBase<TVariable>;
   using Time = typename Base::Time;
 
   /// Constructor from time, sensor and variable.
@@ -25,7 +25,7 @@ class RelativeMeasurement final : public VariableMeasurement<TVariable> {
   RelativeMeasurement(const Time& time, const Sensor& sensor,
                       const Time& other_time, const Sensor& other_sensor,
                       const TVariable& variable)
-      : VariableMeasurement<TVariable>{time, variable},
+      : Base{time, variable},
         other_time_{other_time},
         sensor_{&sensor},
         other_sensor_{&other_sensor} {}

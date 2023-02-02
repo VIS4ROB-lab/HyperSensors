@@ -14,7 +14,14 @@ template <typename TScalar>
 class Message {
  public:
   // Enum.
-  enum class Type { MEASUREMENT, VISUAL_TRACKS, STEREO_VISUAL_TRACKS };
+  enum class Type {
+    VISUAL_TRACKS,
+    STEREO_VISUAL_TRACKS,
+    ABSOLUTE_MEASUREMENT,
+    VISUAL_MEASUREMENT,
+    INERTIAL_MEASUREMENT,
+    RELATIVE_MEASUREMENT,
+  };
 
   // Definitions.
   using Time = TScalar;

@@ -30,8 +30,40 @@ class Measurement : public Message<TScalar> {
   /// Constructor from type and time.
   /// \param type Message type.
   /// \param time Message time.
-  explicit Measurement(const Type& type, const Time& time)
-      : Base{type, time} {}
+  explicit Measurement(const Type& type, const Time& time) : Base{type, time} {}
+};
+
+template <typename TVariable>
+class MeasurementBase : public Measurement<typename TVariable::Scalar> {
+ public:
+  // Definitions.
+  using Variable = TVariable;
+  using Base = Measurement<typename TVariable::Scalar>;
+  using Type = typename Base::Type;
+  using Time = typename Base::Time;
+
+  /// Variable accessor.
+  /// \return Variable.
+  [[nodiscard]] inline auto variable() const -> const TVariable& final {
+    return variable_;
+  }
+
+  /// Variable modifier.
+  /// \return Variable.
+  inline auto variable() -> TVariable& final {
+    return const_cast<TVariable&>(std::as_const(*this).variable());
+  }
+
+ protected:
+  /// Constructor from type, time and variable.
+  /// \param type Message type.
+  /// \param time Message time.
+  /// \param variable Variable.
+  MeasurementBase(const Type& type, const Time& time, const TVariable& variable)
+      : Base{type, time}, variable_{variable} {}
+
+ private:
+  TVariable variable_;  ///< Variable.
 };
 
 }  // namespace hyper::messages

@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include "hyper/messages/measurements/variable.hpp"
+#include "hyper/messages/measurements/measurement.hpp"
 #include "hyper/sensors/camera.hpp"
 #include "hyper/variables/cartesian.hpp"
 
 namespace hyper::messages {
 
 template <typename TVariable>
-class CameraMeasurement final : public VariableMeasurement<TVariable> {
+class VisualMeasurement final : public MeasurementBase<TVariable> {
  public:
   // Definitions.
   using Variable = TVariable;
-  using Base = VariableMeasurement<TVariable>;
+  using Base = MeasurementBase<TVariable>;
   using Time = typename Base::Time;
 
   using Camera = sensors::Camera;
@@ -23,9 +23,9 @@ class CameraMeasurement final : public VariableMeasurement<TVariable> {
   /// \param time Time.
   /// \param camera Camera.
   /// \param variable Variable.
-  CameraMeasurement(const Time& time, const Camera& camera,
+  VisualMeasurement(const Time& time, const Camera& camera,
                     const TVariable& variable)
-      : VariableMeasurement<TVariable>{time, variable}, camera_{&camera} {}
+      : Base{time, variable}, camera_{&camera} {}
 
   /// Sensor accessor.
   /// \return Sensor.
@@ -40,9 +40,9 @@ class CameraMeasurement final : public VariableMeasurement<TVariable> {
 };
 
 template <typename TScalar>
-using PixelMeasurement = CameraMeasurement<variables::Pixel<TScalar>>;
+using PixelMeasurement = VisualMeasurement<variables::Pixel<TScalar>>;
 
 template <typename TScalar>
-using BearingMeasurement = CameraMeasurement<variables::Bearing<TScalar>>;
+using BearingMeasurement = VisualMeasurement<variables::Bearing<TScalar>>;
 
 }  // namespace hyper::messages

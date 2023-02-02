@@ -13,7 +13,7 @@ template <typename TVariable>
 class VariableMeasurement;
 
 template <typename TVariable>
-class CameraMeasurement;
+class VisualMeasurement;
 
 template <typename TManifold>
 class InertialMeasurement;
