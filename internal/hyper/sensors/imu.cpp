@@ -43,7 +43,7 @@ auto concatVectors(const TArgs&... args) {
 
 }  // namespace
 
-IMU::IMU() : Sensor{kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
+IMU::IMU() : Sensor{Type::IMU, kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   variables_[kGyroscopeIntrinsicsIndex] = std::make_unique<GyroscopeIntrinsics>();

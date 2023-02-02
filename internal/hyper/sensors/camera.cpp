@@ -83,7 +83,7 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
   return c2 / (c2 + c3) * (T_ab.translation() + (c3 / c1) * (b_a + c0));
 }
 
-Camera::Camera() : Sensor{kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
+Camera::Camera() : Sensor{Type::CAMERA, kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   variables_[kIntrinsicsIndex] = std::make_unique<Intrinsics>();
