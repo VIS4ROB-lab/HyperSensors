@@ -20,14 +20,13 @@ class VisualTracks : public Message<TScalar> {
   using Type = typename Base::Type;
   using Time = typename Base::Time;
 
-  using Index = Eigen::Index;
-  using ID = Index;
-  using IDs = std::vector<ID>;
   using Camera = sensors::Camera;
 
   using Image = cv_bridge::CvImageConstPtr;
   using Track = std::tuple<Image, variables::Pixel<TScalar>>;
-  using Lengths = std::vector<Index>;
+
+  using IDs = std::vector<typename Base::ID>;
+  using Lengths = std::vector<typename Base::Size>;
   using Positions = std::vector<variables::Position<TScalar>>;
 
   /// Constructor from time and sensor.

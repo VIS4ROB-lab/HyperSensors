@@ -5,6 +5,8 @@
 
 #include <utility>
 
+#include <Eigen/Core>
+
 #include "hyper/messages/forward.hpp"
 #include "hyper/sensors/forward.hpp"
 
@@ -24,7 +26,11 @@ class Message {
   };
 
   // Definitions.
+  using ID = Eigen::Index;
+  using Size = Eigen::Index;
+
   using Time = TScalar;
+  using Scalar = TScalar;
   using Sensor = sensors::Sensor;
 
   /// Default destructor.
