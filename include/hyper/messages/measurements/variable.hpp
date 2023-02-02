@@ -5,39 +5,47 @@
 
 #include "hyper/variables/forward.hpp"
 
-#include "hyper/messages/measurements/abstract.hpp"
+#include "hyper/messages/measurements/measurement.hpp"
 
 namespace hyper::messages {
 
 template <typename TVariable>
-class VariableMeasurement : public AbstractMeasurement {
+class VariableMeasurement : public Measurement<typename TVariable::Scalar> {
  public:
-  /// Constructor from stamp, sensor and variable.
-  /// \param stamp Stamp.
-  /// \param sensor Sensor.
-  /// \param variable Variable.
-  VariableMeasurement(const Stamp& stamp, const Sensor& sensor, const TVariable& variable) : AbstractMeasurement{stamp, sensor}, variable_{variable} {}
+  // Definitions.
+  using Variable = TVariable;
+  using Base = Measurement<typename TVariable::Scalar>;
+  using Time = typename Base::Time;
 
-  /// Sets the associated sensor.
-  /// \param sensor Sensor to set.
-  auto setSensor(const Sensor& sensor) -> void { sensor_ = &sensor; }
+  /// Constructor from time and variable.
+  /// \param time Time.
+  /// \param variable Variable.
+  VariableMeasurement(const Time& time, const TVariable& variable)
+      : Base{time}, variable_{variable} {}
 
   /// Variable accessor.
   /// \return Variable.
-  [[nodiscard]] auto variable() const -> const TVariable& final { return variable_; }
+  [[nodiscard]] inline auto variable() const -> const TVariable& final {
+    return variable_;
+  }
 
   /// Variable modifier.
   /// \return Variable.
-  auto variable() -> TVariable& final { return const_cast<TVariable&>(std::as_const(*this).variable()); }
+  inline auto variable() -> TVariable& final {
+    return const_cast<TVariable&>(std::as_const(*this).variable());
+  }
 
  private:
   TVariable variable_;  ///< Variable.
 };
 
 template <typename TManifold>
+using AbsoluteMeasurement = VariableMeasurement<TManifold>;
+
+template <typename TManifold>
 using ManifoldMeasurement = VariableMeasurement<TManifold>;
 
 template <typename TManifold>
-using TangentMeasurement = VariableMeasurement<Tangent<TManifold>>;
+using TangentMeasurement = VariableMeasurement<variables::Tangent<TManifold>>;
 
 }  // namespace hyper::messages

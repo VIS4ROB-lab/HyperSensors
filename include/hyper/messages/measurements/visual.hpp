@@ -5,31 +5,44 @@
 
 #include "hyper/messages/measurements/variable.hpp"
 #include "hyper/sensors/camera.hpp"
+#include "hyper/variables/cartesian.hpp"
 
 namespace hyper::messages {
 
 template <typename TVariable>
 class CameraMeasurement final : public VariableMeasurement<TVariable> {
  public:
-  /// Constructor from time, sensor and value.
-  /// \param stamp Stamp.
+  // Definitions.
+  using Variable = TVariable;
+  using Base = VariableMeasurement<TVariable>;
+  using Time = typename Base::Time;
+
+  using Camera = sensors::Camera;
+
+  /// Constructor from time, camera and variable.
+  /// \param time Time.
   /// \param camera Camera.
   /// \param variable Variable.
-  CameraMeasurement(const Stamp& stamp, const Camera& camera, const TVariable& variable) : VariableMeasurement<TVariable>{stamp, camera, variable} {}
+  CameraMeasurement(const Time& time, const Camera& camera,
+                    const TVariable& variable)
+      : VariableMeasurement<TVariable>{time, variable}, camera_{&camera} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] auto sensor() const -> const Camera& final {
-    return static_cast<const Camera&>(*this->sensor_);  // NOLINT
-  }
+  [[nodiscard]] inline auto sensor() const -> const Camera& final { *camera_; }
 
   /// Sets the associated sensor.
   /// \param camera Sensor to set.
-  auto setSensor(const Camera& camera) -> void { this->sensor_ = &camera; }
+  inline auto setSensor(const Camera& camera) -> void { camera_ = &camera; }
+
+ private:
+  const Camera* camera_;  ///< Camera.
 };
 
-using PixelMeasurement = CameraMeasurement<Pixel<Scalar>>;
+template <typename TScalar>
+using PixelMeasurement = CameraMeasurement<variables::Pixel<TScalar>>;
 
-using BearingMeasurement = CameraMeasurement<Bearing<Scalar>>;
+template <typename TScalar>
+using BearingMeasurement = CameraMeasurement<variables::Bearing<TScalar>>;
 
 }  // namespace hyper::messages

@@ -10,15 +10,18 @@
 
 namespace hyper::messages {
 
-class AbstractMessage {
+template <typename TScalar>
+class Message {
  public:
+  // Enum.
+  enum class Type { MEASUREMENT, VISUAL_TRACKS, STEREO_VISUAL_TRACKS };
+
   // Definitions.
-  using Time = double;
-  using Scalar = double;
+  using Time = TScalar;
   using Sensor = sensors::Sensor;
 
   /// Default destructor.
-  virtual ~AbstractMessage() = default;
+  virtual ~Message() = default;
 
   /// Downcasts this instance.
   /// \tparam TDerived_ Target type.
@@ -33,29 +36,38 @@ class AbstractMessage {
   /// \return Cast instance.
   template <typename TDerived_>
   inline auto as() -> TDerived_& {
-    return const_cast<TDerived_&>(std::as_const(*this).template as<TDerived_>());
+    return const_cast<TDerived_&>(
+        std::as_const(*this).template as<TDerived_>());
   }
+
+  /// Type accessor.
+  /// \return Message type.
+  [[nodiscard]] inline auto type() const -> const Type& { return type_; }
 
   /// Time accessor.
   /// \return Time.
-  [[nodiscard]] auto time() const -> const Time&;
+  [[nodiscard]] inline auto time() const -> const Time& { return time_; }
 
   /// Time modifier.
   /// \return Time.
-  auto time() -> Time&;
+  inline auto time() -> Time& {
+    return const_cast<Time&>(std::as_const(*this).time());
+  }
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] virtual auto sensor() const -> const Sensor&;
+  [[nodiscard]] virtual auto sensor() const -> const Sensor& = 0;
 
  protected:
-  /// Constructor from time and sensor.
-  /// \param time Time.
-  /// \param sensor Sensor.
-  explicit AbstractMessage(const Time& time, const Sensor& sensor);
+  /// Constructor from type and time.
+  /// \param type Message type.
+  /// \param time Message time.
+  explicit Message(const Type& type, const Time& time)
+      : type_{type}, time_{time} {}
 
-  Time time_;             ///< Time.
-  const Sensor* sensor_;  ///< Sensor.
+ private:
+  Type type_;  ///< Type.
+  Time time_;  ///< Time.
 };
 
 }  // namespace hyper::messages

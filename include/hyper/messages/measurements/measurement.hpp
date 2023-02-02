@@ -3,15 +3,20 @@
 
 #pragma once
 
-#include "hyper/messages/abstract.hpp"
+#include "hyper/messages/message.hpp"
 #include "hyper/variables/variable.hpp"
 
 namespace hyper::messages {
 
-class AbstractMeasurement : public AbstractMessage {
+template <typename TScalar>
+class Measurement : public Message<TScalar> {
  public:
   // Definitions.
-  using Variable = variables::Variable<Scalar>;
+  using Base = Message<TScalar>;
+  using Type = typename Base::Type;
+  using Time = typename Base::Time;
+
+  using Variable = variables::Variable<TScalar>;
 
   /// Variable accessor.
   /// \return Variable.
@@ -22,10 +27,11 @@ class AbstractMeasurement : public AbstractMessage {
   [[nodiscard]] virtual auto variable() -> Variable& = 0;
 
  protected:
-  /// Constructor from time and sensor.
-  /// \param time Time.
-  /// \param sensor Sensor.
-  explicit AbstractMeasurement(const Time& time, const Sensor& sensor);
+  /// Constructor from type and time.
+  /// \param type Message type.
+  /// \param time Message time.
+  explicit Measurement(const Type& type, const Time& time)
+      : Base{type, time} {}
 };
 
 }  // namespace hyper::messages
