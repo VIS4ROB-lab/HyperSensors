@@ -3,5 +3,4 @@
 
 #pragma once
 
-#include "hyper/messages/measurements/measurements.hpp"
 #include "hyper/messages/visual.hpp"
