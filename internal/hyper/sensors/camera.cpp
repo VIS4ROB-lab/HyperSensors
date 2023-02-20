@@ -90,6 +90,10 @@ Camera::Camera() : Sensor{Type::CAMERA, kNumVariables}, sensor_size_{}, shutter_
   parameter_blocks_[kIntrinsicsIndex] = variables_[kIntrinsicsIndex]->asVector().data();
 }
 
+Camera::Camera(const Node& node) : Camera{} {
+  node >> *this;
+}
+
 auto Camera::sensorSize() const -> const SensorSize& {
   return sensor_size_;
 }

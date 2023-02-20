@@ -22,6 +22,10 @@ constexpr auto kDefaultRate = -1;
 
 Sensor::Sensor() : Sensor{Type::ABSOLUTE, kNumVariables} {}
 
+Sensor::Sensor(const Node& node) : Sensor{} {
+  node >> *this;
+}
+
 auto Sensor::type() const -> const Type& {
   return type_;
 }

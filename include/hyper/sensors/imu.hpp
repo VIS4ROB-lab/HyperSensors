@@ -33,6 +33,10 @@ class IMU final : public Sensor {
   /// Default constructor.
   IMU();
 
+  /// Constructor from YAML node.
+  /// \param node YAML node.
+  explicit IMU(const Node& node);
+
   /// Variable pointers accessor.
   /// \return Pointers to variables.
   [[nodiscard]] auto variables() const -> std::vector<Variable*> final;

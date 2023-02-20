@@ -23,7 +23,8 @@ class VisualTracks : public Message<TScalar> {
   using Camera = sensors::Camera;
 
   using Image = cv_bridge::CvImageConstPtr;
-  using Track = std::tuple<Image, variables::Pixel<TScalar>>;
+  using Track = std::tuple<Image, std::vector<cv::Point2f>>;
+  using Tracks = std::map<const Camera*, Track>;
 
   using IDs = std::vector<typename Base::ID>;
   using Lengths = std::vector<typename Base::Size>;
@@ -65,9 +66,13 @@ class VisualTracks : public Message<TScalar> {
   /// Track modifier.
   /// \param camera Associated camera.
   /// \return Track containing the associated image and tracked points.
-  inline auto track(const Camera& camera) -> Track& {
-    return const_cast<Track&>(std::as_const(*this).getTrack(camera));
+  inline auto track(const Camera* camera) -> Track& {
+    return const_cast<Track&>(std::as_const(*this).track(camera));
   }
+
+  /// Tracks accessor.
+  /// \return Tracks.
+  inline auto tracks() const -> const Tracks& { return tracks_; }
 
   IDs ids;              ///< Track IDs.
   Lengths lengths;      ///< Track lengths.
@@ -84,14 +89,11 @@ class VisualTracks : public Message<TScalar> {
         lengths{},
         positions{},
         camera_{camera},
-        tracks_{} {
-    addTrack(camera);
-  }
+        tracks_{} {}
 
  private:
+  Tracks tracks_;         ///< Tracks.
   const Camera* camera_;  ///< Camera.
-
-  std::map<const Camera*, Track> tracks_;  ///< Tracks.
 };
 
 template <typename TScalar>
@@ -110,9 +112,7 @@ class StereoVisualTracks : public VisualTracks<TScalar> {
   StereoVisualTracks(const Time& time, const Camera* left_camera,
                      const Camera* right_camera)
       : Base{Type::STEREO_VISUAL_TRACKS, time, left_camera},
-        right_camera_{right_camera} {
-    this->addTrack(right_camera);
-  }
+        right_camera_{right_camera} {}
 
   /// Left sensor accessor.
   /// \return Left sensor.

@@ -61,6 +61,10 @@ IMU::IMU() : Sensor{Type::IMU, kNumVariables}, gyroscope_noise_density_{}, gyros
   accelerometer_bias_.setInterpolator(&interpolator);
 }
 
+IMU::IMU(const Node& node) : IMU{} {
+  node >> *this;
+}
+
 auto IMU::variables() const -> std::vector<Variable*> {
   return concatVectors(Sensor::variables(), gyroscopeBias().variables(), accelerometerBias().variables());
 }

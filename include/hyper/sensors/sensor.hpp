@@ -41,6 +41,10 @@ class Sensor {
   /// Default constructor.
   Sensor();
 
+  /// Constructor from YAML node.
+  /// \param node YAML node.
+  explicit Sensor(const Node& node);
+
   /// Default destructor.
   virtual ~Sensor() = default;
 
