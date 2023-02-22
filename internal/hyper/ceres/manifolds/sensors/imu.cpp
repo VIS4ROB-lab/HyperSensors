@@ -12,7 +12,7 @@ namespace hyper::ceres::manifolds {
 
 using namespace sensors;
 
-Manifold<IMU>::Manifold(const IMU* imu, const bool constant) : Manifold<Sensor>{imu, kNumSubmanifolds, constant} {
+Manifold<IMU>::Manifold(IMU* imu, const bool constant) : Manifold<Sensor>{imu, kNumSubmanifolds, constant} {
   setGyroscopeIntrinsicsConstant(constant);
   setAccelerometerIntrinsicsConstant(constant);
   setGyroscopeBiasConstant(constant);

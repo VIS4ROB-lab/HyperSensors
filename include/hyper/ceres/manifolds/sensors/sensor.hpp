@@ -30,7 +30,7 @@ class Manifold<sensors::Sensor> {
   /// Constructor from sensor and constancy flag.
   /// \param sensor Input sensor.
   /// \param constant Constancy flag.
-  explicit Manifold(const Sensor* sensor, bool constant = true);
+  explicit Manifold(Sensor* sensor, bool constant = true);
 
   /// Default destructor.
   virtual ~Manifold();
@@ -70,9 +70,9 @@ class Manifold<sensors::Sensor> {
   /// \param sensor Input sensor.
   /// \param num_submanifolds Number of submanifolds.
   /// \param constant Constancy flag.
-  Manifold(const Sensor* sensor, const Size& num_submanifolds, bool constant);
+  Manifold(Sensor* sensor, const Size& num_submanifolds, bool constant);
 
-  const Sensor* sensor_;       ///< Sensor.
+  Sensor* sensor_;             ///< Sensor.
   Submanifolds submanifolds_;  ///< Submanifolds.
 };
 
