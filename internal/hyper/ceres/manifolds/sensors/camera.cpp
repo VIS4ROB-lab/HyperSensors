@@ -11,7 +11,7 @@ namespace hyper::ceres::manifolds {
 
 using namespace sensors;
 
-Manifold<Camera>::Manifold(const Camera* camera, const bool constant) : Manifold<Sensor>{camera, kNumSubmanifolds, constant} {
+Manifold<Camera>::Manifold(Camera* camera, const bool constant) : Manifold<Sensor>{camera, kNumSubmanifolds, constant} {
   setIntrinsicsConstant(constant);
   setDistortionConstant(constant);
 }

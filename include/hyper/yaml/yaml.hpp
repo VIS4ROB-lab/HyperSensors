@@ -4,17 +4,11 @@
 #pragma once
 
 #include <glog/logging.h>
-#include <yaml-cpp/yaml.h>
 
 #include "hyper/variables/forward.hpp"
+#include "hyper/yaml/definitions.hpp"
 
 namespace hyper::yaml {
-
-using Key = std::string;
-using String = std::string;
-
-using Node = YAML::Node;
-using Emitter = YAML::Emitter;
 
 /// Safely reads a value from a YAML node with checks.
 /// \param node YAML node to read from.
@@ -72,7 +66,8 @@ template <typename TVariable>
 auto WriteVariable(Emitter& emitter, const Key& key, const TVariable& variable) -> Emitter& {
   const auto vector = variable.asVector();
   const auto data = vector.data();
-  return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<typename TVariable::Scalar>{data, data + vector.size()};
+  const auto size = vector.size();
+  return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<typename TVariable::Scalar>{data, data + size};
 }
 
 }  // namespace hyper::yaml

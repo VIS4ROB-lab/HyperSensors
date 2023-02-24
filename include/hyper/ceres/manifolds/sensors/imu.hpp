@@ -24,7 +24,7 @@ class Manifold<sensors::IMU> final : public Manifold<sensors::Sensor> {
   /// Default constructor.
   /// \param imu IMU to parametrize.
   /// \param constant Constancy flag.
-  explicit Manifold(const IMU* imu, bool constant = true);
+  explicit Manifold(IMU* imu, bool constant = true);
 
   /// Sensor accessor.
   /// \return Sensor.

@@ -12,6 +12,13 @@ namespace hyper::sensors {
 
 class Sensor {
  public:
+  // Enum.
+  enum class Type {
+    ABSOLUTE,
+    CAMERA,
+    IMU,
+  };
+
   // Constants.
   static constexpr auto kOffsetIndex = 0;
   static constexpr auto kTransformationIndex = kOffsetIndex + 1;
@@ -34,6 +41,10 @@ class Sensor {
   /// Default constructor.
   Sensor();
 
+  /// Constructor from YAML node.
+  /// \param node YAML node.
+  explicit Sensor(const Node& node);
+
   /// Default destructor.
   virtual ~Sensor() = default;
 
@@ -52,6 +63,10 @@ class Sensor {
   inline auto as() -> TDerived_& {
     return const_cast<TDerived_&>(std::as_const(*this).template as<TDerived_>());
   }
+
+  /// \brief Type accessor.
+  /// \return Sensor type.
+  [[nodiscard]] auto type() const -> const Type&;
 
   /// \brief Rate accessor.
   /// \return Acquisition rate.
@@ -109,9 +124,10 @@ class Sensor {
   // Definitions.
   using Size = std::size_t;
 
-  /// Constructor from number of variables.
+  /// Constructor from sensor type and number of variables.
+  /// \param type Sensor type.
   /// \param num_variables Number of variables.
-  explicit Sensor(const Size& num_variables);
+  explicit Sensor(const Type& type, const Size& num_variables);
 
   /// Reads a sensor from a YAML node.
   /// \param node YAML node.
@@ -121,6 +137,7 @@ class Sensor {
   /// \param emitter YAML emitter.
   virtual auto write(Emitter& emitter) const -> void;
 
+  Type type_;                              ///< Type.
   Rate rate_;                              ///< Rate.
   Variables variables_;                    ///< Variables.
   std::vector<Scalar*> parameter_blocks_;  ///< Parameter blocks.

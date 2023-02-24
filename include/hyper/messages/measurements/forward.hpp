@@ -7,18 +7,19 @@
 
 namespace hyper::messages {
 
-class AbstractMeasurement;
+template <typename TScalar>
+class Measurement;
 
-template <typename>
-class VariableMeasurement;
+template <typename TVariable>
+class AbsoluteMeasurement;
 
-template <typename>
-class CameraMeasurement;
+template <typename TVariable>
+class VisualMeasurement;
 
-template <typename>
+template <typename TManifold>
 class InertialMeasurement;
 
-template <typename>
+template <typename TSensor, typename TVariable>
 class RelativeMeasurement;
 
 }  // namespace hyper::messages

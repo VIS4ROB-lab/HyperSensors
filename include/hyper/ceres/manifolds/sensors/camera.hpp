@@ -22,7 +22,7 @@ class Manifold<sensors::Camera> final : public Manifold<sensors::Sensor> {
   /// Default constructor.
   /// \param camera Camera to parametrize.
   /// \param constant Constancy flag.
-  explicit Manifold(const Camera* camera, bool constant = true);
+  explicit Manifold(Camera* camera, bool constant = true);
 
   /// Sensor accessor.
   /// \return Sensor.

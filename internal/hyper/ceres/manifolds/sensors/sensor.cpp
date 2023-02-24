@@ -11,7 +11,7 @@ namespace hyper::ceres::manifolds {
 
 using namespace sensors;
 
-Manifold<Sensor>::Manifold(const Sensor* sensor, const bool constant) : Manifold{sensor, kNumSubmanifolds, constant} {}
+Manifold<Sensor>::Manifold(Sensor* sensor, const bool constant) : Manifold{sensor, kNumSubmanifolds, constant} {}
 
 Manifold<Sensor>::~Manifold() = default;
 
@@ -45,7 +45,7 @@ auto Manifold<Sensor>::setTransformationConstant(bool constant) -> void {
   submanifolds_[Sensor::kTransformationIndex] = std::make_unique<Manifold<Sensor::Transformation>>(constant, constant);
 }
 
-Manifold<Sensor>::Manifold(const Sensor* sensor, const Size& num_submanifolds, const bool constant) : sensor_{sensor}, submanifolds_{num_submanifolds} {
+Manifold<Sensor>::Manifold(Sensor* sensor, const Size& num_submanifolds, const bool constant) : sensor_{sensor}, submanifolds_{num_submanifolds} {
   DCHECK(sensor != nullptr);
   setOffsetConstant(constant);
   setTransformationConstant(constant);

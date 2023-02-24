@@ -62,7 +62,11 @@ class Camera final : public Sensor {
   static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
 
   /// Default constructor.
-  explicit Camera();
+  Camera();
+
+  /// Constructor from YAML node.
+  /// \param node YAML node.
+  explicit Camera(const Node& node);
 
   /// Sensor size accessor.
   /// \return Sensor size.

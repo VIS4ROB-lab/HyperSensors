@@ -20,7 +20,15 @@ constexpr auto kDefaultRate = -1;
 
 }  // namespace
 
-Sensor::Sensor() : Sensor{kNumVariables} {}
+Sensor::Sensor() : Sensor{Type::ABSOLUTE, kNumVariables} {}
+
+Sensor::Sensor(const Node& node) : Sensor{} {
+  node >> *this;
+}
+
+auto Sensor::type() const -> const Type& {
+  return type_;
+}
 
 auto Sensor::rate() const -> const Rate& {
   return rate_;
@@ -78,7 +86,7 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Size& num_variables) : rate_{kDefaultRate}, variables_{num_variables}, parameter_blocks_{num_variables} {
+Sensor::Sensor(const Type& type, const Size& num_variables) : type_{type}, rate_{kDefaultRate}, variables_{num_variables}, parameter_blocks_{num_variables} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   DCHECK_LE(kNumVariables, parameter_blocks_.size());

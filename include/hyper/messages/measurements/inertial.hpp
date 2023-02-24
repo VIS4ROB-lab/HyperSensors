@@ -3,29 +3,40 @@
 
 #pragma once
 
-#include "hyper/messages/measurements/variable.hpp"
+#include "hyper/messages/measurements/measurement.hpp"
 #include "hyper/sensors/imu.hpp"
 
 namespace hyper::messages {
 
 template <typename TManifold>
-class InertialMeasurement final : public TangentMeasurement<TManifold> {
+class InertialMeasurement final
+    : public MeasurementBase<variables::Tangent<TManifold>> {
  public:
-  /// Constructor from stamp, sensor and value.
-  /// \param stamp Stamp.
+  // Definitions.
+  using Base = MeasurementBase<variables::Tangent<TManifold>>;
+  using Type = typename Base::Type;
+  using Time = typename Base::Time;
+
+  using IMU = sensors::IMU;
+  using Tangent = variables::Tangent<TManifold>;
+
+  /// Constructor from time, sensor and value.
+  /// \param time Time.
   /// \param imu Sensor.
   /// \param tangent Tangent.
-  InertialMeasurement(const Stamp& stamp, const IMU& imu, const Tangent<TManifold>& tangent) : TangentMeasurement<TManifold>{stamp, imu, tangent} {}
+  InertialMeasurement(const Time& time, const IMU* imu, const Tangent& tangent)
+      : Base{Type::INERTIAL_MEASUREMENT, time, tangent}, imu_{imu} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] auto sensor() const -> const IMU& final {
-    return static_cast<const IMU&>(*this->sensor_);  // NOLINT
-  }
+  [[nodiscard]] inline auto sensor() const -> const IMU* final { return imu_; }
 
   /// Sets the associated sensor.
   /// \param imu Sensor to set.
-  auto setSensor(const IMU& imu) -> void { this->sensor_ = &imu; }
+  inline auto setSensor(const IMU* imu) -> void { imu_ = imu; }
+
+ private:
+  const IMU* imu_;  ///< IMU.
 };
 
 }  // namespace hyper::messages
