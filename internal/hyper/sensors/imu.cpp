@@ -43,7 +43,12 @@ auto concatVectors(const TArgs&... args) {
 
 }  // namespace
 
-IMU::IMU() : Sensor{Type::IMU, kNumVariables}, gyroscope_noise_density_{}, gyroscope_bias_{}, accelerometer_noise_density_{}, accelerometer_bias_{} {
+IMU::IMU(std::unique_ptr<BiasInterpolator>&& gyroscope_bias_interpolator, std::unique_ptr<BiasInterpolator>&& accelerometer_bias_interpolator)
+    : Sensor{Type::IMU, kNumVariables},
+      gyroscope_noise_density_{},
+      gyroscope_bias_{std::move(gyroscope_bias_interpolator)},
+      accelerometer_noise_density_{},
+      accelerometer_bias_{std::move(accelerometer_bias_interpolator)} {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   variables_[kGyroscopeIntrinsicsIndex] = std::make_unique<GyroscopeIntrinsics>();
@@ -54,11 +59,6 @@ IMU::IMU() : Sensor{Type::IMU, kNumVariables}, gyroscope_noise_density_{}, gyros
   parameter_blocks_[kGyroscopeSensitivityIndex] = variables_[kGyroscopeSensitivityIndex]->asVector().data();
   parameter_blocks_[kAccelerometerIntrinsicsIndex] = variables_[kAccelerometerIntrinsicsIndex]->asVector().data();
   parameter_blocks_[kAccelerometerOffsetIndex] = variables_[kAccelerometerOffsetIndex]->asVector().data();
-
-  // Initialize gyroscope and accelerometer bias.
-  static auto interpolator = state::BasisInterpolator<Scalar, 4>{};
-  gyroscope_bias_.setInterpolator(&interpolator);
-  accelerometer_bias_.setInterpolator(&interpolator);
 }
 
 IMU::IMU(const Node& node) : IMU{} {
