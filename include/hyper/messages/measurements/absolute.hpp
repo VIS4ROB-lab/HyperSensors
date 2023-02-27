@@ -8,29 +8,25 @@
 
 namespace hyper::messages {
 
-template <typename TVariable>
-class AbsoluteMeasurement final : public MeasurementBase<TVariable> {
+template <typename TValue>
+class AbsoluteMeasurement final : public MeasurementBase<TValue> {
  public:
   // Definitions.
-  using Base = MeasurementBase<TVariable>;
+  using Base = MeasurementBase<TValue>;
   using Type = typename Base::Type;
   using Time = typename Base::Time;
 
   using Sensor = sensors::Sensor;
 
-  /// Constructor from time, sensor and variable.
+  /// Constructor from time, sensor and value.
   /// \param time Time.
   /// \param sensor Sensor.
-  /// \param variable Variable.
-  AbsoluteMeasurement(const Time& time, const Sensor* sensor,
-                      const TVariable& variable)
-      : Base{Type::ABSOLUTE_MEASUREMENT, time, variable}, sensor_{sensor} {}
+  /// \param value Value.
+  AbsoluteMeasurement(const Time& time, const Sensor* sensor, const TValue& value) : Base{Type::ABSOLUTE_MEASUREMENT, time, value}, sensor_{sensor} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] inline auto sensor() const -> const Sensor* final {
-    return sensor_;
-  }
+  [[nodiscard]] inline auto sensor() const -> const Sensor* final { return sensor_; }
 
   /// Sets the associated sensor.
   /// \param sensor Sensor to set.

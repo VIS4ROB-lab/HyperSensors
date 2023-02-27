@@ -16,15 +16,15 @@ class Measurement : public Message<TScalar> {
   using Type = typename Base::Type;
   using Time = typename Base::Time;
 
-  using Variable = variables::Variable<TScalar>;
+  using Value = variables::Variable<TScalar>;
 
-  /// Variable accessor.
-  /// \return Variable.
-  [[nodiscard]] virtual auto variable() const -> const Variable& = 0;
+  /// Value accessor.
+  /// \return Value.
+  [[nodiscard]] virtual auto value() const -> const Value& = 0;
 
-  /// Variable modifier.
-  /// \return Variable.
-  [[nodiscard]] virtual auto variable() -> Variable& = 0;
+  /// Value modifier.
+  /// \return Value.
+  [[nodiscard]] virtual auto value() -> Value& = 0;
 
  protected:
   /// Constructor from type and time.
@@ -33,36 +33,33 @@ class Measurement : public Message<TScalar> {
   explicit Measurement(const Type& type, const Time& time) : Base{type, time} {}
 };
 
-template <typename TVariable>
-class MeasurementBase : public Measurement<typename TVariable::Scalar> {
+template <typename TValue>
+class MeasurementBase : public Measurement<typename TValue::Scalar> {
  public:
   // Definitions.
-  using Base = Measurement<typename TVariable::Scalar>;
+  using Base = Measurement<typename TValue::Scalar>;
   using Type = typename Base::Type;
   using Time = typename Base::Time;
 
-  /// Variable accessor.
-  /// \return Variable.
-  [[nodiscard]] inline auto variable() const -> const TVariable& final {
-    return variable_;
-  }
+  using Value = TValue;
 
-  /// Variable modifier.
-  /// \return Variable.
-  inline auto variable() -> TVariable& final {
-    return const_cast<TVariable&>(std::as_const(*this).variable());
-  }
+  /// Value accessor.
+  /// \return Value.
+  [[nodiscard]] inline auto value() const -> const TValue& final { return value_; }
+
+  /// Value modifier.
+  /// \return Value.
+  inline auto value() -> TValue& final { return const_cast<TValue&>(std::as_const(*this).value()); }
 
  protected:
-  /// Constructor from type, time and variable.
+  /// Constructor from type, time and value.
   /// \param type Message type.
   /// \param time Message time.
-  /// \param variable Variable.
-  MeasurementBase(const Type& type, const Time& time, const TVariable& variable)
-      : Base{type, time}, variable_{variable} {}
+  /// \param value Value.
+  MeasurementBase(const Type& type, const Time& time, const TValue& value) : Base{type, time}, value_{value} {}
 
  private:
-  TVariable variable_;  ///< Variable.
+  TValue value_;  ///< Value.
 };
 
 }  // namespace hyper::messages
