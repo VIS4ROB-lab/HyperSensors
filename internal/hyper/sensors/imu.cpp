@@ -18,29 +18,6 @@ constexpr auto kAccelerometerNoiseDensityName = "accelerometer_noise_density";
 constexpr auto kAccelerometerIntrinsicsName = "accelerometer_intrinsics";
 constexpr auto kAccelerometerOffsetName = "accelerometer_offset";
 
-/// Appends a vector and existing one.
-/// \tparam TElement Element type.
-/// \tparam TArgs Variadic argument types.
-/// \param output Vector to append to.
-/// \param args Vector to append.
-template <typename TElement, typename... TArgs>
-void appendVectors(std::vector<TElement>& output, const TArgs&... args) {
-  (output.insert(output.end(), std::begin(args), std::end(args)), ...);
-}
-
-/// Concatenates vectors.
-/// \tparam TArgs Variadic argument types.
-/// \param args Input arguments.
-/// \return Concatenated vectors.
-template <typename... TArgs>
-auto concatVectors(const TArgs&... args) {
-  using Output = typename std::tuple_element<0, std::tuple<TArgs...>>::type;
-  Output output;
-  output.reserve((... + args.size()));
-  appendVectors(output, args...);
-  return output;
-}
-
 }  // namespace
 
 IMU::IMU(std::unique_ptr<BiasInterpolator>&& gyroscope_bias_interpolator, std::unique_ptr<BiasInterpolator>&& accelerometer_bias_interpolator)
@@ -65,20 +42,28 @@ IMU::IMU(const Node& node) : IMU{} {
   node >> *this;
 }
 
-auto IMU::variables() const -> std::vector<Variable*> {
-  return concatVectors(Sensor::variables(), gyroscopeBias().variables(), accelerometerBias().variables());
+auto IMU::variables() const -> Partitions<Variable*> {
+  auto gyroscope_bias_variables = gyroscopeBias().variables();
+  auto accelerometer_bias_variables = accelerometerBias().variables();
+  return assembleVariables(gyroscope_bias_variables, accelerometer_bias_variables);
 }
 
-auto IMU::variables(const Time& time) const -> std::vector<Variable*> {
-  return concatVectors(Sensor::variables(time), gyroscopeBias().variables(time), accelerometerBias().variables(time));
+auto IMU::variables(const Time& time) const -> Partitions<Variable*> {
+  auto gyroscope_bias_variables = gyroscopeBias().variables(time);
+  auto accelerometer_bias_variables = accelerometerBias().variables(time);
+  return assembleVariables(gyroscope_bias_variables, accelerometer_bias_variables);
 }
 
-auto IMU::parameterBlocks() const -> std::vector<Scalar*> {
-  return concatVectors(Sensor::parameterBlocks(), gyroscopeBias().parameterBlocks(), accelerometerBias().parameterBlocks());
+auto IMU::parameterBlocks() const -> Partitions<Scalar*> {
+  auto gyroscope_bias_parameter_blocks = gyroscopeBias().parameterBlocks();
+  auto accelerometer_bias_parameter_blocks = accelerometerBias().parameterBlocks();
+  return assembleParameterBlocks(gyroscope_bias_parameter_blocks, accelerometer_bias_parameter_blocks);
 }
 
-auto IMU::parameterBlocks(const Time& time) const -> std::vector<Scalar*> {
-  return concatVectors(Sensor::parameterBlocks(time), gyroscopeBias().parameterBlocks(time), accelerometerBias().parameterBlocks(time));
+auto IMU::parameterBlocks(const Time& time) const -> Partitions<Scalar*> {
+  auto gyroscope_bias_parameter_blocks = gyroscopeBias().parameterBlocks(time);
+  auto accelerometer_bias_parameter_blocks = accelerometerBias().parameterBlocks(time);
+  return assembleParameterBlocks(gyroscope_bias_parameter_blocks, accelerometer_bias_parameter_blocks);
 }
 
 auto IMU::gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity& {
@@ -163,6 +148,48 @@ auto IMU::write(Emitter& emitter) const -> void {
   yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
   yaml::WriteVariable(emitter, kAccelerometerIntrinsicsName, accelerometerIntrinsics());
   yaml::WriteVariable(emitter, kAccelerometerOffsetName, accelerometerOffset());
+}
+
+auto IMU::assembleVariables(const std::vector<GyroscopeBias::StampedVariable*>& gyroscope_bias_variables,
+                            const std::vector<AccelerometerBias::StampedVariable*>& accelerometer_bias_variables) const -> Partitions<Variable*> {
+  const auto gyroscope_bias_offset = kSensorVariablesOffset + variables_.size();
+  const auto accelerometer_bias_offset = gyroscope_bias_offset + gyroscope_bias_variables.size();
+  const auto num_variables = accelerometer_bias_offset + accelerometer_bias_variables.size();
+
+  Partitions<Variable*> partitions;
+  auto& [idxs, variables] = partitions;
+
+  idxs.reserve(kNumPartitions);
+  idxs.emplace_back(kSensorVariablesOffset);
+  idxs.emplace_back(gyroscope_bias_offset);
+  idxs.emplace_back(accelerometer_bias_offset);
+
+  variables.reserve(num_variables);
+  std::transform(variables_.begin(), variables_.end(), std::back_inserter(variables), [](const auto& arg) { return arg.get(); });
+  std::transform(gyroscope_bias_variables.begin(), gyroscope_bias_variables.end(), std::back_inserter(variables), [](const auto& arg) { return arg; });
+  std::transform(accelerometer_bias_variables.begin(), accelerometer_bias_variables.end(), std::back_inserter(variables), [](const auto& arg) { return arg; });
+  return partitions;
+}
+
+auto IMU::assembleParameterBlocks(const std::vector<Scalar*>& gyroscope_bias_parameter_blocks, const std::vector<Scalar*>& accelerometer_bias_parameter_blocks) const
+    -> Partitions<Scalar*> {
+  const auto gyroscope_bias_offset = kSensorVariablesOffset + parameter_blocks_.size();
+  const auto accelerometer_bias_offset = gyroscope_bias_offset + gyroscope_bias_parameter_blocks.size();
+  const auto num_parameter_blocks = accelerometer_bias_offset + accelerometer_bias_parameter_blocks.size();
+
+  Partitions<Scalar*> partitions;
+  auto& [idxs, parameter_blocks] = partitions;
+
+  idxs.reserve(kNumPartitions);
+  idxs.emplace_back(kSensorVariablesOffset);
+  idxs.emplace_back(gyroscope_bias_offset);
+  idxs.emplace_back(accelerometer_bias_offset);
+
+  parameter_blocks.reserve(num_parameter_blocks);
+  std::transform(parameter_blocks_.begin(), parameter_blocks_.end(), std::back_inserter(parameter_blocks), [](const auto& arg) { return arg; });
+  std::transform(gyroscope_bias_parameter_blocks.begin(), gyroscope_bias_parameter_blocks.end(), std::back_inserter(parameter_blocks), [](const auto& arg) { return arg; });
+  std::transform(accelerometer_bias_parameter_blocks.begin(), accelerometer_bias_parameter_blocks.end(), std::back_inserter(parameter_blocks), [](const auto& arg) { return arg; });
+  return partitions;
 }
 
 }  // namespace hyper::sensors

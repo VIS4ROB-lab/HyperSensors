@@ -20,6 +20,10 @@ class Sensor {
   };
 
   // Constants.
+  static constexpr auto kSensorPartitionIndex = 0;
+  static constexpr auto kSensorVariablesOffset = 0;
+  static constexpr auto kNumPartitions = kSensorPartitionIndex + 1;
+
   static constexpr auto kOffsetIndex = 0;
   static constexpr auto kTransformationIndex = kOffsetIndex + 1;
   static constexpr auto kNumVariables = kTransformationIndex + 1;
@@ -37,6 +41,9 @@ class Sensor {
   using Rate = Scalar;
   using Offset = variables::Cartesian<Scalar, 1>;
   using Transformation = variables::SE3<Scalar>;
+
+  template <typename T_>
+  using Partitions = std::pair<std::vector<int>, std::vector<T_>>;
 
   /// Default constructor.
   Sensor();
@@ -78,19 +85,19 @@ class Sensor {
 
   /// Variable pointers accessor.
   /// \return Pointers to variables.
-  [[nodiscard]] virtual auto variables() const -> std::vector<Variable*>;
+  [[nodiscard]] virtual auto variables() const -> Partitions<Variable*>;
 
   /// Time-based variable pointers accessor.
   /// \return Time-based pointers to variables.
-  [[nodiscard]] virtual auto variables(const Time& time) const -> std::vector<Variable*>;
+  [[nodiscard]] virtual auto variables(const Time& time) const -> Partitions<Variable*>;
 
   /// Parameter blocks accessor.
   /// \return Pointers to parameter blocks.
-  [[nodiscard]] virtual auto parameterBlocks() const -> std::vector<Scalar*>;
+  [[nodiscard]] virtual auto parameterBlocks() const -> Partitions<Scalar*>;
 
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] virtual auto parameterBlocks(const Time& time) const -> std::vector<Scalar*>;
+  [[nodiscard]] virtual auto parameterBlocks(const Time& time) const -> Partitions<Scalar*>;
 
   /// Offset accessor.
   /// \return Offset.
