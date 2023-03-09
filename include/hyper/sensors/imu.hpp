@@ -13,6 +13,10 @@ namespace hyper::sensors {
 class IMU final : public Sensor {
  public:
   // Constants.
+  static constexpr auto kGyroscopeBiasPartitionIndex = Sensor::kNumPartitions;
+  static constexpr auto kAccelerometerBiasPartitionIndex = kGyroscopeBiasPartitionIndex + 1;
+  static constexpr auto kNumPartitions = kAccelerometerBiasPartitionIndex + 1;
+
   static constexpr auto kGyroscopeIntrinsicsIndex = Sensor::kNumVariables;
   static constexpr auto kGyroscopeSensitivityIndex = kGyroscopeIntrinsicsIndex + 1;
   static constexpr auto kAccelerometerIntrinsicsIndex = kGyroscopeSensitivityIndex + 1;
@@ -45,19 +49,19 @@ class IMU final : public Sensor {
 
   /// Variable pointers accessor.
   /// \return Pointers to variables.
-  [[nodiscard]] auto variables() const -> std::vector<Variable*> final;
+  [[nodiscard]] auto variables() const -> Partitions<Variable*> final;
 
   /// Time-based variable pointers accessor.
   /// \return Time-based pointers to variables.
-  [[nodiscard]] auto variables(const Time& time) const -> std::vector<Variable*> final;
+  [[nodiscard]] auto variables(const Time& time) const -> Partitions<Variable*> final;
 
   /// Parameter blocks accessor.
   /// \return Pointers to parameter blocks.
-  [[nodiscard]] auto parameterBlocks() const -> std::vector<Scalar*> final;
+  [[nodiscard]] auto parameterBlocks() const -> Partitions<Scalar*> final;
 
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] auto parameterBlocks(const Time& time) const -> std::vector<Scalar*> final;
+  [[nodiscard]] auto parameterBlocks(const Time& time) const -> Partitions<Scalar*> final;
 
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.
@@ -131,6 +135,20 @@ class IMU final : public Sensor {
   /// Writes a sensor to a YAML emitter.
   /// \param emitter YAML emitter.
   auto write(Emitter& emitter) const -> void final;
+
+  /// Assembles the variables.
+  /// \param gyroscope_bias_variables Gyroscope bias variables.
+  /// \param accelerometer_bias_variables Accelerometer bias variables.
+  /// \return Variables.
+  [[nodiscard]] auto assembleVariables(const std::vector<GyroscopeBias::StampedVariable*>& gyroscope_bias_variables,
+                                       const std::vector<AccelerometerBias::StampedVariable*>& accelerometer_bias_variables) const -> Partitions<Variable*>;
+
+  /// Assembles the parameter blocks.
+  /// \param gyroscope_bias_parameter_blocks Gyroscope bias parameter blocks.
+  /// \param accelerometer_bias_parameter_blocks Accelerometer bias parameter blocks.
+  /// \return Parameter blocks.
+  [[nodiscard]] auto assembleParameterBlocks(const std::vector<Scalar*>& gyroscope_bias_parameter_blocks, const std::vector<Scalar*>& accelerometer_bias_parameter_blocks) const
+      -> Partitions<Scalar*>;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.
   GyroscopeBias gyroscope_bias_;                           ///< Gyroscope bias.

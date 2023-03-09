@@ -10,16 +10,16 @@ namespace hyper::messages {
 template <typename TScalar>
 class Measurement;
 
-template <typename TVariable>
+template <typename TValue>
 class AbsoluteMeasurement;
 
-template <typename TVariable>
+template <typename TValue>
 class VisualMeasurement;
 
 template <typename TManifold>
 class InertialMeasurement;
 
-template <typename TSensor, typename TVariable>
+template <typename TSensor, typename TValue>
 class RelativeMeasurement;
 
 }  // namespace hyper::messages

@@ -7,27 +7,22 @@
 
 namespace hyper::messages {
 
-template <typename TSensor, typename TVariable>
-class RelativeMeasurement final : public MeasurementBase<TVariable> {
+template <typename TSensor, typename TValue>
+class RelativeMeasurement final : public MeasurementBase<TValue> {
  public:
   // Definitions.
-  using Base = MeasurementBase<TVariable>;
+  using Base = MeasurementBase<TValue>;
   using Type = typename Base::Type;
   using Time = typename Base::Time;
 
-  /// Constructor from time, sensor and variable.
+  /// Constructor from time, sensor and value.
   /// \param time Time.
   /// \param sensor Sensor.
   /// \param other_time Other time.
   /// \param other_sensor Other sensor.
-  /// \param variable Variable.
-  RelativeMeasurement(const Time& time, const TSensor& sensor,
-                      const Time& other_time, const TSensor& other_sensor,
-                      const TVariable& variable)
-      : Base{Type::RELATIVE_MEASUREMENT, time, variable},
-        other_time_{other_time},
-        sensor_{&sensor},
-        other_sensor_{&other_sensor} {}
+  /// \param value Value.
+  RelativeMeasurement(const Time& time, const TSensor& sensor, const Time& other_time, const TSensor& other_sensor, const TValue& value)
+      : Base{Type::RELATIVE_MEASUREMENT, time, value}, other_time_{other_time}, sensor_{&sensor}, other_sensor_{&other_sensor} {}
 
   /// Other time accessor.
   /// \return Other time.
@@ -35,9 +30,7 @@ class RelativeMeasurement final : public MeasurementBase<TVariable> {
 
   /// Other time modifier.
   /// \return Other time.
-  auto otherTime() -> Time& {
-    return static_cast<Time&>(std::as_const(*this).otherTime());
-  }
+  auto otherTime() -> Time& { return static_cast<Time&>(std::as_const(*this).otherTime()); }
 
   /// Sensor accessor.
   /// \return Sensor.
@@ -49,15 +42,11 @@ class RelativeMeasurement final : public MeasurementBase<TVariable> {
 
   /// Other sensor accessor.
   /// \return Other sensor.
-  [[nodiscard]] inline auto otherSensor() const -> const TSensor& {
-    return *other_sensor_;
-  }
+  [[nodiscard]] inline auto otherSensor() const -> const TSensor& { return *other_sensor_; }
 
   /// Sets the associated other sensor.
   /// \param camera Other sensor to set.
-  inline auto setOtherSensor(const TSensor& other_sensor) -> void {
-    other_sensor_ = &other_sensor;
-  }
+  inline auto setOtherSensor(const TSensor& other_sensor) -> void { other_sensor_ = &other_sensor; }
 
  private:
   Time other_time_;              ///< Other time.
@@ -69,7 +58,6 @@ template <typename TSensor, typename TManifold>
 using RelativeManifoldMeasurement = RelativeMeasurement<TSensor, TManifold>;
 
 template <typename TSensor, typename TManifold>
-using RelativeTangentMeasurement =
-    RelativeMeasurement<TSensor, variables::Tangent<TManifold>>;
+using RelativeTangentMeasurement = RelativeMeasurement<TSensor, variables::Tangent<TManifold>>;
 
 }  // namespace hyper::messages
