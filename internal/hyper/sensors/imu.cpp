@@ -152,7 +152,7 @@ auto IMU::write(Emitter& emitter) const -> void {
 
 auto IMU::assembleVariables(const std::vector<GyroscopeBias::StampedVariable*>& gyroscope_bias_variables,
                             const std::vector<AccelerometerBias::StampedVariable*>& accelerometer_bias_variables) const -> Partitions<Variable*> {
-  const auto gyroscope_bias_offset = kSensorVariablesOffset + variables_.size();
+  const auto gyroscope_bias_offset = kVariablesOffset + variables_.size();
   const auto accelerometer_bias_offset = gyroscope_bias_offset + gyroscope_bias_variables.size();
   const auto num_variables = accelerometer_bias_offset + accelerometer_bias_variables.size();
 
@@ -160,7 +160,7 @@ auto IMU::assembleVariables(const std::vector<GyroscopeBias::StampedVariable*>& 
   auto& [idxs, variables] = partitions;
 
   idxs.reserve(kNumPartitions);
-  idxs.emplace_back(kSensorVariablesOffset);
+  idxs.emplace_back(kVariablesOffset);
   idxs.emplace_back(gyroscope_bias_offset);
   idxs.emplace_back(accelerometer_bias_offset);
 
@@ -173,7 +173,7 @@ auto IMU::assembleVariables(const std::vector<GyroscopeBias::StampedVariable*>& 
 
 auto IMU::assembleParameterBlocks(const std::vector<Scalar*>& gyroscope_bias_parameter_blocks, const std::vector<Scalar*>& accelerometer_bias_parameter_blocks) const
     -> Partitions<Scalar*> {
-  const auto gyroscope_bias_offset = kSensorVariablesOffset + parameter_blocks_.size();
+  const auto gyroscope_bias_offset = kVariablesOffset + parameter_blocks_.size();
   const auto accelerometer_bias_offset = gyroscope_bias_offset + gyroscope_bias_parameter_blocks.size();
   const auto num_parameter_blocks = accelerometer_bias_offset + accelerometer_bias_parameter_blocks.size();
 
@@ -181,7 +181,7 @@ auto IMU::assembleParameterBlocks(const std::vector<Scalar*>& gyroscope_bias_par
   auto& [idxs, parameter_blocks] = partitions;
 
   idxs.reserve(kNumPartitions);
-  idxs.emplace_back(kSensorVariablesOffset);
+  idxs.emplace_back(kVariablesOffset);
   idxs.emplace_back(gyroscope_bias_offset);
   idxs.emplace_back(accelerometer_bias_offset);
 

@@ -42,7 +42,7 @@ auto Sensor::variables() const -> Partitions<Variable*> {
   Partitions<Variable*> partitions;
   auto& [idxs, variables] = partitions;
   idxs.reserve(kNumPartitions);
-  idxs.emplace_back(kSensorVariablesOffset);
+  idxs.emplace_back(kVariablesOffset);
   variables.reserve(variables_.size());
   std::transform(variables_.begin(), variables_.end(), std::back_inserter(variables), [](const auto& arg) { return arg.get(); });
   return partitions;
@@ -56,7 +56,7 @@ auto Sensor::parameterBlocks() const -> Partitions<Scalar*> {
   Partitions<Scalar*> partitions;
   auto& [idxs, parameter_blocks] = partitions;
   idxs.reserve(kNumPartitions);
-  idxs.emplace_back(kSensorVariablesOffset);
+  idxs.emplace_back(kVariablesOffset);
   parameter_blocks = parameter_blocks_;
   return partitions;
 }

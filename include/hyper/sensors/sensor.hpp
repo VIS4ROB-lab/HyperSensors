@@ -20,9 +20,9 @@ class Sensor {
   };
 
   // Constants.
-  static constexpr auto kSensorPartitionIndex = 0;
-  static constexpr auto kSensorVariablesOffset = 0;
-  static constexpr auto kNumPartitions = kSensorPartitionIndex + 1;
+  static constexpr auto kVariablesOffset = 0;
+  static constexpr auto kVariablesPartitionIndex = 0;
+  static constexpr auto kNumPartitions = kVariablesPartitionIndex + 1;
 
   static constexpr auto kOffsetIndex = 0;
   static constexpr auto kTransformationIndex = kOffsetIndex + 1;
