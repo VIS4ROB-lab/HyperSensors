@@ -12,6 +12,9 @@ template <typename TScalar>
 class VisualTracks;
 
 template <typename TScalar>
+using MonocularVisualTracks = VisualTracks<TScalar>;
+
+template <typename TScalar>
 class StereoVisualTracks;
 
 }  // namespace hyper::messages

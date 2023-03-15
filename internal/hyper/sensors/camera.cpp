@@ -83,11 +83,15 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
   return c2 / (c2 + c3) * (T_ab.translation() + (c3 / c1) * (b_a + c0));
 }
 
-Camera::Camera() : Sensor{Type::CAMERA, kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
+Camera::Camera(JacobianType jacobian_type)
+    : Sensor{Type::CAMERA, jacobian_type, kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   // Initialize variables.
-  DCHECK_LE(kNumVariables, variables_.size());
+  DCHECK_EQ(kNumVariables, variables_.size());
+  DCHECK_EQ(kNumVariables, parameter_blocks_.size());
+  DCHECK_EQ(kNumVariables, parameter_block_sizes_.size());
   variables_[kIntrinsicsIndex] = std::make_unique<Intrinsics>();
   parameter_blocks_[kIntrinsicsIndex] = variables_[kIntrinsicsIndex]->asVector().data();
+  updateCameraParameterBlockSizes();
 }
 
 Camera::Camera(const Node& node) : Camera{} {
@@ -137,7 +141,9 @@ auto Camera::distortion() -> Distortion& {
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
   CHECK(distortion != nullptr);
   variables_[kDistortionIndex] = std::move(distortion);
-  parameter_blocks_[kDistortionIndex] = variables_[kDistortionIndex]->asVector().data();
+  auto vector = variables_[kDistortionIndex]->asVector();
+  parameter_blocks_[kDistortionIndex] = vector.data();
+  parameter_block_sizes_[kDistortionIndex] = vector.size();
 }
 
 auto Camera::randomPixel() const -> Pixel {
@@ -227,6 +233,19 @@ auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
     LOG(FATAL) << "Unknown distortion type.";
     return nullptr;
   }
+}
+
+auto Camera::updateCameraParameterBlockSizes() -> void {
+  if (jacobian_type_ == JacobianType::TANGENT_TO_MANIFOLD) {
+    parameter_block_sizes_[kIntrinsicsIndex] = Intrinsics::kNumParameters;
+  } else {
+    parameter_block_sizes_[kIntrinsicsIndex] = variables::Tangent<Intrinsics>::kNumParameters;
+  }
+}
+
+auto Camera::updateParameterBlockSizes() -> void {
+  updateSensorParameterBlockSizes();
+  updateCameraParameterBlockSizes();
 }
 
 auto Camera::read(const Node& node) -> void {

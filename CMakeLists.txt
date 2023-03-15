@@ -22,7 +22,7 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
 add_library(Hyper::Sensors ALIAS ${PROJECT_NAME})
 
 # Fetch (external) content.
-FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG b456476c7f052f7b57df7403c9191ed0febc47a2)
+FetchContent_Declare(HyperState GIT_REPOSITORY https://github.com/VIS4ROB-lab/HyperState.git GIT_TAG a0d9b9397b3e8e65beaac022be73e4678b795a43)
 FetchContent_MakeAvailable(HyperState)
 
 # Find Eigen target if not present.

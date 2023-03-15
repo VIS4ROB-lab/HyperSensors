@@ -16,31 +16,26 @@ class VisualMeasurement final : public MeasurementBase<TValue> {
   using Base = MeasurementBase<TValue>;
   using Type = typename Base::Type;
   using Time = typename Base::Time;
+  using Value = typename Base::Value;
 
-  using Camera = sensors::Camera;
+  using Sensor = sensors::Camera;
 
-  /// Constructor from time, camera and value.
+  /// Constructor from time, sensor and value.
   /// \param time Time.
-  /// \param camera Camera.
+  /// \param sensor Sensor.
   /// \param value Value.
-  VisualMeasurement(const Time& time, const Camera* camera, const TValue& value) : Base{Type::VISUAL_MEASUREMENT, time, value}, camera_{camera} {}
+  VisualMeasurement(const Time& time, const Sensor* sensor, const Value& value) : Base{Type::VISUAL_MEASUREMENT, time, value}, sensor_{sensor} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] inline auto sensor() const -> const Camera* final { return camera_; }
+  [[nodiscard]] inline auto sensor() const -> const Sensor* final { return sensor_; }
 
   /// Sets the associated sensor.
-  /// \param camera Sensor to set.
-  inline auto setSensor(const Camera* camera) -> void { camera_ = camera; }
+  /// \param sensor Sensor to set.
+  inline auto setSensor(const Sensor* sensor) -> void { sensor_ = sensor; }
 
  private:
-  const Camera* camera_;  ///< Camera.
+  const Sensor* sensor_;  ///< Sensor.
 };
-
-template <typename TScalar>
-using PixelMeasurement = VisualMeasurement<variables::Pixel<TScalar>>;
-
-template <typename TScalar>
-using BearingMeasurement = VisualMeasurement<variables::Bearing<TScalar>>;
 
 }  // namespace hyper::messages

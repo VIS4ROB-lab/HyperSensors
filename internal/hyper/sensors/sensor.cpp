@@ -20,14 +20,23 @@ constexpr auto kDefaultRate = -1;
 
 }  // namespace
 
-Sensor::Sensor() : Sensor{Type::ABSOLUTE, kNumVariables} {}
+Sensor::Sensor(JacobianType jacobian_type) : Sensor{Type::ABSOLUTE, jacobian_type, kNumVariables} {}
 
 Sensor::Sensor(const Node& node) : Sensor{} {
   node >> *this;
 }
 
-auto Sensor::type() const -> const Type& {
+auto Sensor::type() const -> Type {
   return type_;
+}
+
+auto Sensor::jacobianType() const -> JacobianType {
+  return jacobian_type_;
+}
+
+auto Sensor::setJacobianType(JacobianType jacobian_type) -> void {
+  jacobian_type_ = jacobian_type;
+  updateParameterBlockSizes();
 }
 
 auto Sensor::rate() const -> const Rate& {
@@ -38,31 +47,13 @@ auto Sensor::hasVariableRate() const -> bool {
   return rate() < Scalar{0};
 }
 
-auto Sensor::variables() const -> Partitions<Variable*> {
-  Partitions<Variable*> partitions;
-  auto& [idxs, variables] = partitions;
-  idxs.reserve(kNumPartitions);
-  idxs.emplace_back(kVariablesOffset);
-  variables.reserve(variables_.size());
-  std::transform(variables_.begin(), variables_.end(), std::back_inserter(variables), [](const auto& arg) { return arg.get(); });
+auto Sensor::partitions(const Time& /* time */) const -> Partitions<Scalar*> {
+  Partitions<Scalar*> partitions{kNumPartitions};
+  auto& [v_offset, v_parameter_blocks, v_parameter_block_sizes] = partitions[kVariablesPartitionIndex];
+  v_offset = kVariablesOffset;
+  v_parameter_blocks = parameter_blocks_;
+  v_parameter_block_sizes = parameter_block_sizes_;
   return partitions;
-}
-
-auto Sensor::variables(const Time& /* time */) const -> Partitions<Variable*> {
-  return Sensor::variables();
-}
-
-auto Sensor::parameterBlocks() const -> Partitions<Scalar*> {
-  Partitions<Scalar*> partitions;
-  auto& [idxs, parameter_blocks] = partitions;
-  idxs.reserve(kNumPartitions);
-  idxs.emplace_back(kVariablesOffset);
-  parameter_blocks = parameter_blocks_;
-  return partitions;
-}
-
-auto Sensor::parameterBlocks(const Time& /* time */) const -> Partitions<Scalar*> {
-  return Sensor::parameterBlocks();
 }
 
 auto Sensor::offset() const -> const Offset& {
@@ -94,14 +85,31 @@ auto operator<<(YAML::Emitter& emitter, const Sensor& sensor) -> YAML::Emitter& 
   return emitter;
 }
 
-Sensor::Sensor(const Type& type, const Size& num_variables) : type_{type}, rate_{kDefaultRate}, variables_{num_variables}, parameter_blocks_{num_variables} {
+Sensor::Sensor(const Type type, JacobianType jacobian_type, Size num_variables)
+    : type_{type}, jacobian_type_{jacobian_type}, rate_{kDefaultRate}, variables_(num_variables), parameter_blocks_(num_variables), parameter_block_sizes_(num_variables) {
   // Initialize variables.
   DCHECK_LE(kNumVariables, variables_.size());
   DCHECK_LE(kNumVariables, parameter_blocks_.size());
+  DCHECK_LE(kNumVariables, parameter_block_sizes_.size());
   variables_[kOffsetIndex] = std::make_unique<Offset>();
   variables_[kTransformationIndex] = std::make_unique<Transformation>();
   parameter_blocks_[kOffsetIndex] = variables_[kOffsetIndex]->asVector().data();
   parameter_blocks_[kTransformationIndex] = variables_[kTransformationIndex]->asVector().data();
+  updateSensorParameterBlockSizes();
+}
+
+auto Sensor::updateSensorParameterBlockSizes() -> void {
+  if (jacobian_type_ == JacobianType::TANGENT_TO_MANIFOLD) {
+    parameter_block_sizes_[kOffsetIndex] = Offset::kNumParameters;
+    parameter_block_sizes_[kTransformationIndex] = Transformation::kNumParameters;
+  } else {
+    parameter_block_sizes_[kOffsetIndex] = variables::Tangent<Offset>::kNumParameters;
+    parameter_block_sizes_[kTransformationIndex] = variables::Tangent<Transformation>::kNumParameters;
+  }
+}
+
+auto Sensor::updateParameterBlockSizes() -> void {
+  updateSensorParameterBlockSizes();
 }
 
 auto Sensor::read(const Node& node) -> void {

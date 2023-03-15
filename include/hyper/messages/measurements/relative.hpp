@@ -54,10 +54,4 @@ class RelativeMeasurement final : public MeasurementBase<TValue> {
   const TSensor* other_sensor_;  ///< Other sensor.
 };
 
-template <typename TSensor, typename TManifold>
-using RelativeManifoldMeasurement = RelativeMeasurement<TSensor, TManifold>;
-
-template <typename TSensor, typename TManifold>
-using RelativeTangentMeasurement = RelativeMeasurement<TSensor, variables::Tangent<TManifold>>;
-
 }  // namespace hyper::messages

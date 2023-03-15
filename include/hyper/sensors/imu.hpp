@@ -37,31 +37,20 @@ class IMU final : public Sensor {
   using BiasInterpolator = state::TemporalInterpolator<Scalar>;
   using DefaultBiasInterpolator = state::BasisInterpolator<Scalar, 4>;
 
-  /// Constructor from bias interpolators.
+  /// Constructor from Jacobian type and bias interpolators.
+  /// \param jacobian_type Jacobian type.
   /// \param gyroscope_bias_interpolator Interpolator.
   /// \param accelerometer_bias_interpolator Interpolator.
-  explicit IMU(std::unique_ptr<BiasInterpolator>&& gyroscope_bias_interpolator = std::make_unique<DefaultBiasInterpolator>(),
+  explicit IMU(JacobianType jacobian_type = kDefaultJacobianType, std::unique_ptr<BiasInterpolator>&& gyroscope_bias_interpolator = std::make_unique<DefaultBiasInterpolator>(),
                std::unique_ptr<BiasInterpolator>&& accelerometer_bias_interpolator = std::make_unique<DefaultBiasInterpolator>());
 
   /// Constructor from YAML node.
   /// \param node YAML node.
   explicit IMU(const Node& node);
 
-  /// Variable pointers accessor.
-  /// \return Pointers to variables.
-  [[nodiscard]] auto variables() const -> Partitions<Variable*> final;
-
-  /// Time-based variable pointers accessor.
-  /// \return Time-based pointers to variables.
-  [[nodiscard]] auto variables(const Time& time) const -> Partitions<Variable*> final;
-
-  /// Parameter blocks accessor.
-  /// \return Pointers to parameter blocks.
-  [[nodiscard]] auto parameterBlocks() const -> Partitions<Scalar*> final;
-
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] auto parameterBlocks(const Time& time) const -> Partitions<Scalar*> final;
+  [[nodiscard]] auto partitions(const Time& time) const -> Partitions<Scalar*> final;
 
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.
@@ -128,6 +117,16 @@ class IMU final : public Sensor {
   auto accelerometerBias() -> AccelerometerBias&;
 
  private:
+  // Definitions.
+  using GyroscopeBiasParameterBlocks = std::vector<Scalar*>;
+  using AccelerometerBiasParameterBlocks = std::vector<Scalar*>;
+
+  /// Updates the IMU parameter block sizes.
+  auto updateIMUParameterBlockSizes() -> void;
+
+  /// Updates the parameter block sizes.
+  auto updateParameterBlockSizes() -> void final;
+
   /// Reads a sensor from a YAML node.
   /// \param node YAML node.
   auto read(const Node& node) -> void final;
@@ -136,19 +135,12 @@ class IMU final : public Sensor {
   /// \param emitter YAML emitter.
   auto write(Emitter& emitter) const -> void final;
 
-  /// Assembles the variables.
-  /// \param gyroscope_bias_variables Gyroscope bias variables.
-  /// \param accelerometer_bias_variables Accelerometer bias variables.
-  /// \return Variables.
-  [[nodiscard]] auto assembleVariables(const std::vector<GyroscopeBias::StampedVariable*>& gyroscope_bias_variables,
-                                       const std::vector<AccelerometerBias::StampedVariable*>& accelerometer_bias_variables) const -> Partitions<Variable*>;
-
-  /// Assembles the parameter blocks.
+  /// Assembles the partitions.
   /// \param gyroscope_bias_parameter_blocks Gyroscope bias parameter blocks.
   /// \param accelerometer_bias_parameter_blocks Accelerometer bias parameter blocks.
   /// \return Parameter blocks.
-  [[nodiscard]] auto assembleParameterBlocks(const std::vector<Scalar*>& gyroscope_bias_parameter_blocks, const std::vector<Scalar*>& accelerometer_bias_parameter_blocks) const
-      -> Partitions<Scalar*>;
+  [[nodiscard]] auto assemblePartitions(GyroscopeBiasParameterBlocks&& gyroscope_bias_parameter_blocks,
+                                        AccelerometerBiasParameterBlocks&& accelerometer_bias_parameter_blocks) const -> Partitions<Scalar*>;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.
   GyroscopeBias gyroscope_bias_;                           ///< Gyroscope bias.

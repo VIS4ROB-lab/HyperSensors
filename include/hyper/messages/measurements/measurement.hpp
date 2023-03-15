@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "hyper/messages/measurements/forward.hpp"
+
 #include "hyper/messages/message.hpp"
 #include "hyper/variables/variable.hpp"
 

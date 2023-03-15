@@ -61,8 +61,9 @@ class Camera final : public Sensor {
   /// \return Triangulated landmark.
   static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
 
-  /// Default constructor.
-  Camera();
+  /// Constructor from Jacobian type.
+  /// \param jacobian_type Jacobian type.
+  explicit Camera(JacobianType jacobian_type = kDefaultJacobianType);
 
   /// Constructor from YAML node.
   /// \param node YAML node.
@@ -160,6 +161,12 @@ class Camera final : public Sensor {
   /// \param node Node
   /// \return Distortion
   static auto ReadDistortion(const Node& node) -> std::unique_ptr<Distortion>;
+
+  /// Updates the camera parameter block sizes.
+  auto updateCameraParameterBlockSizes() -> void;
+
+  /// Updates the parameter block sizes.
+  auto updateParameterBlockSizes() -> void final;
 
   /// Reads a sensor from a YAML node.
   /// \param node YAML node.

@@ -12,12 +12,17 @@ namespace hyper::sensors {
 
 class Sensor {
  public:
-  // Enum.
-  enum class Type {
-    ABSOLUTE,
-    CAMERA,
-    IMU,
+  // Parameter block partition.
+  template <typename TSize_, typename TPointer_>
+  struct Partition {
+    TSize_ offset;
+    std::vector<TPointer_> parameter_blocks;
+    std::vector<TSize_> parameter_block_sizes;
   };
+
+  // Parameter block partitions.
+  template <typename TPointer_>
+  using Partitions = std::vector<Partition<int, TPointer_>>;
 
   // Constants.
   static constexpr auto kVariablesOffset = 0;
@@ -27,6 +32,8 @@ class Sensor {
   static constexpr auto kOffsetIndex = 0;
   static constexpr auto kTransformationIndex = kOffsetIndex + 1;
   static constexpr auto kNumVariables = kTransformationIndex + 1;
+
+  static constexpr auto kDefaultJacobianType = JacobianType::TANGENT_TO_MANIFOLD;
 
   // Definitions.
   using Node = YAML::Node;
@@ -42,11 +49,9 @@ class Sensor {
   using Offset = variables::Cartesian<Scalar, 1>;
   using Transformation = variables::SE3<Scalar>;
 
-  template <typename T_>
-  using Partitions = std::pair<std::vector<int>, std::vector<T_>>;
-
-  /// Default constructor.
-  Sensor();
+  /// Constructor from Jacobian type.
+  /// \param jacobian_type Jacobian type.
+  explicit Sensor(JacobianType jacobian_type = kDefaultJacobianType);
 
   /// Constructor from YAML node.
   /// \param node YAML node.
@@ -71,11 +76,19 @@ class Sensor {
     return const_cast<TDerived_&>(std::as_const(*this).template as<TDerived_>());
   }
 
-  /// \brief Type accessor.
+  /// Type accessor.
   /// \return Sensor type.
-  [[nodiscard]] auto type() const -> const Type&;
+  [[nodiscard]] auto type() const -> Type;
 
-  /// \brief Rate accessor.
+  /// Jacobian type accessor.
+  /// \return Jacobian type.
+  [[nodiscard]] auto jacobianType() const -> JacobianType;
+
+  /// Jacobian type setter.
+  /// \param jacobian_type Jacobian type.
+  auto setJacobianType(JacobianType jacobian_type) -> void;
+
+  /// Rate accessor.
   /// \return Acquisition rate.
   [[nodiscard]] auto rate() const -> const Rate&;
 
@@ -83,21 +96,9 @@ class Sensor {
   /// \return True if rate is variable.
   [[nodiscard]] auto hasVariableRate() const -> bool;
 
-  /// Variable pointers accessor.
-  /// \return Pointers to variables.
-  [[nodiscard]] virtual auto variables() const -> Partitions<Variable*>;
-
-  /// Time-based variable pointers accessor.
-  /// \return Time-based pointers to variables.
-  [[nodiscard]] virtual auto variables(const Time& time) const -> Partitions<Variable*>;
-
-  /// Parameter blocks accessor.
-  /// \return Pointers to parameter blocks.
-  [[nodiscard]] virtual auto parameterBlocks() const -> Partitions<Scalar*>;
-
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] virtual auto parameterBlocks(const Time& time) const -> Partitions<Scalar*>;
+  [[nodiscard]] virtual auto partitions(const Time& time) const -> Partitions<Scalar*>;
 
   /// Offset accessor.
   /// \return Offset.
@@ -128,13 +129,20 @@ class Sensor {
   friend auto operator<<(Emitter& emitter, const Sensor& sensor) -> Emitter&;
 
  protected:
-  // Definitions.
+  /// Definitions.
   using Size = std::size_t;
 
   /// Constructor from sensor type and number of variables.
   /// \param type Sensor type.
+  /// \param jacobian_type Jacobian type.
   /// \param num_variables Number of variables.
-  explicit Sensor(const Type& type, const Size& num_variables);
+  explicit Sensor(Type type, JacobianType jacobian_type, Size num_variables);
+
+  /// Updates the sensor parameter block sizes.
+  auto updateSensorParameterBlockSizes() -> void;
+
+  /// Updates the parameter block sizes.
+  virtual auto updateParameterBlockSizes() -> void;
 
   /// Reads a sensor from a YAML node.
   /// \param node YAML node.
@@ -144,10 +152,13 @@ class Sensor {
   /// \param emitter YAML emitter.
   virtual auto write(Emitter& emitter) const -> void;
 
-  Type type_;                              ///< Type.
-  Rate rate_;                              ///< Rate.
-  Variables variables_;                    ///< Variables.
-  std::vector<Scalar*> parameter_blocks_;  ///< Parameter blocks.
+  Type type_;                   ///< Type.
+  JacobianType jacobian_type_;  ///< Jacobian type.
+
+  Rate rate_;                               ///< Rate.
+  Variables variables_;                     ///< Variables.
+  std::vector<Scalar*> parameter_blocks_;   ///< Parameter blocks.
+  std::vector<int> parameter_block_sizes_;  ///< Parameter block sizes.
 };
 
 }  // namespace hyper::sensors

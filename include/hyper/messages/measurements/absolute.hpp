@@ -15,6 +15,7 @@ class AbsoluteMeasurement final : public MeasurementBase<TValue> {
   using Base = MeasurementBase<TValue>;
   using Type = typename Base::Type;
   using Time = typename Base::Time;
+  using Value = typename Base::Value;
 
   using Sensor = sensors::Sensor;
 
@@ -22,7 +23,7 @@ class AbsoluteMeasurement final : public MeasurementBase<TValue> {
   /// \param time Time.
   /// \param sensor Sensor.
   /// \param value Value.
-  AbsoluteMeasurement(const Time& time, const Sensor* sensor, const TValue& value) : Base{Type::ABSOLUTE_MEASUREMENT, time, value}, sensor_{sensor} {}
+  AbsoluteMeasurement(const Time& time, const Sensor* sensor, const Value& value) : Base{Type::ABSOLUTE_MEASUREMENT, time, value}, sensor_{sensor} {}
 
   /// Sensor accessor.
   /// \return Sensor.
@@ -35,11 +36,5 @@ class AbsoluteMeasurement final : public MeasurementBase<TValue> {
  private:
   const Sensor* sensor_;  ///< Sensor.
 };
-
-template <typename TManifold>
-using ManifoldMeasurement = AbsoluteMeasurement<TManifold>;
-
-template <typename TManifold>
-using TangentMeasurement = AbsoluteMeasurement<variables::Tangent<TManifold>>;
 
 }  // namespace hyper::messages

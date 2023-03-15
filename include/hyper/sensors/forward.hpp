@@ -5,6 +5,10 @@
 
 namespace hyper::sensors {
 
+enum class Type { ABSOLUTE, CAMERA, IMU };
+
+enum class JacobianType { TANGENT_TO_TANGENT, TANGENT_TO_MANIFOLD };
+
 class Sensor;
 
 class Camera;
