@@ -49,10 +49,7 @@ auto Sensor::hasVariableRate() const -> bool {
 
 auto Sensor::partitions(const Time& /* time */) const -> Partitions<Scalar*> {
   Partitions<Scalar*> partitions{kNumPartitions};
-  auto& [v_offset, v_parameter_blocks, v_parameter_block_sizes] = partitions[kVariablesPartitionIndex];
-  v_offset = kVariablesOffset;
-  v_parameter_blocks = parameter_blocks_;
-  v_parameter_block_sizes = parameter_block_sizes_;
+  partitions[kVariablesPartitionIndex] = assembleVariablesPartition();
   return partitions;
 }
 
@@ -122,6 +119,22 @@ auto Sensor::write(Emitter& emitter) const -> void {
   yaml::Write(emitter, kRateName, rate());
   yaml::WriteVariable(emitter, kOffsetName, offset());
   yaml::WriteVariable(emitter, kTransformationName, transformation());
+}
+
+auto Sensor::assembleVariablesPartition() const -> Partition<int, Scalar*> {
+  Partition<int, Scalar*> partition;
+  auto& [v_offset, v_parameter_blocks, v_parameter_block_sizes] = partition;
+  const auto num_parameter_blocks = parameter_blocks_.size();
+  v_offset = kVariablesOffset;
+  v_parameter_blocks.reserve(num_parameter_blocks);
+  v_parameter_block_sizes.reserve(num_parameter_blocks);
+  for (auto i = std::size_t{0}; i < num_parameter_blocks; ++i) {
+    if (parameter_blocks_[i]) {
+      v_parameter_blocks.emplace_back(parameter_blocks_[i]);
+      v_parameter_block_sizes.emplace_back(parameter_block_sizes_[i]);
+    }
+  }
+  return partition;
 }
 
 }  // namespace hyper::sensors

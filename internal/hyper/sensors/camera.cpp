@@ -130,20 +130,26 @@ auto Camera::intrinsics() -> Intrinsics& {
   return const_cast<Intrinsics&>(std::as_const(*this).intrinsics());
 }
 
-auto Camera::distortion() const -> const Distortion& {
-  return static_cast<const Distortion&>(*variables_[kDistortionIndex]);  // NOLINT
+auto Camera::distortion() const -> const Distortion* {
+  return static_cast<const Distortion*>(variables_[kDistortionIndex].get());  // NOLINT
 }
 
-auto Camera::distortion() -> Distortion& {
-  return const_cast<Distortion&>(std::as_const(*this).distortion());
+auto Camera::distortion() -> Distortion* {
+  return const_cast<Distortion*>(std::as_const(*this).distortion());
 }
 
 auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
-  CHECK(distortion != nullptr);
+  if (!distortion) {
+    variables_[kDistortionIndex] = nullptr;
+    parameter_blocks_[kDistortionIndex] = nullptr;
+    parameter_block_sizes_[kDistortionIndex] = 0;
+    return;
+  }
+
+  auto v = distortion->asVector();
   variables_[kDistortionIndex] = std::move(distortion);
-  auto vector = variables_[kDistortionIndex]->asVector();
-  parameter_blocks_[kDistortionIndex] = vector.data();
-  parameter_block_sizes_[kDistortionIndex] = vector.size();
+  parameter_blocks_[kDistortionIndex] = v.data();
+  parameter_block_sizes_[kDistortionIndex] = v.size();
 }
 
 auto Camera::randomPixel() const -> Pixel {
@@ -154,16 +160,15 @@ auto Camera::randomPixel() const -> Pixel {
 }
 
 auto Camera::randomNormalizedPixel(bool distort) const -> Pixel {
-  if (distort) {
+  if (distort && distortion()) {
     const auto normalized_pixel = intrinsics().normalize(randomPixel());
-    return distortion().distort(normalized_pixel, nullptr, nullptr, nullptr);
-  } else {
-    return intrinsics().normalize(randomPixel());
+    return distortion()->distort(normalized_pixel, nullptr, nullptr, nullptr);
   }
+  return intrinsics().normalize(randomPixel());
 }
 
-auto Camera::randomBearing(bool distorted) -> Bearing {
-  return PixelToBearing(randomNormalizedPixel(distorted));
+auto Camera::randomBearing(bool distort) const -> Bearing {
+  return PixelToBearing(randomNormalizedPixel(distort));
 }
 
 auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time> {
@@ -183,18 +188,26 @@ auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pix
   return times;
 }
 
-auto Camera::pixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters) const -> std::vector<Bearing> {
+auto Camera::pixelsToBearings(const std::vector<Pixel>& pixels, bool distort, const Scalar* parameters) const -> std::vector<Bearing> {
   // Allocate memory.
   std::vector<Bearing> bearings;
   bearings.reserve(pixels.size());
 
-  // Undistort and convert.
-  for (const auto& pixel : pixels) {
-    const auto normalized_pixel = intrinsics().normalize(pixel);
-    const auto undistorted_pixel = distortion().undistort(normalized_pixel, nullptr, nullptr, parameters);
-    bearings.emplace_back(PixelToBearing(undistorted_pixel));
+  // Convert with undistortion.
+  if (distort && distortion()) {
+    for (const auto& pixel : pixels) {
+      const auto normalized_pixel = intrinsics().normalize(pixel);
+      const auto undistorted_pixel = distortion()->undistort(normalized_pixel, nullptr, nullptr, parameters);
+      bearings.emplace_back(PixelToBearing(undistorted_pixel));
+    }
+    return bearings;
   }
 
+  // Convert without undistortion.
+  for (const auto& pixel : pixels) {
+    const auto normalized_pixel = intrinsics().normalize(pixel);
+    bearings.emplace_back(PixelToBearing(normalized_pixel));
+  }
   return bearings;
 }
 
@@ -225,14 +238,16 @@ auto Camera::ReadShutterDelta(const Node& node) -> ShutterDelta {
 auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
   const auto distortion_node = yaml::Read(node, kDistortionName);
   const auto distortion_type_string = yaml::ReadAs<std::string>(distortion_node, "type");
-  if (distortion_type_string == "RADIAL_TANGENTIAL_2") {
+  if (distortion_type_string == "NONE") {
+    return nullptr;
+  } else if (distortion_type_string == "RADIAL_TANGENTIAL_2") {
     using RadialTangentialDistortion = variables::RadialTangentialDistortion<Scalar, 2>;
     const auto distortion = yaml::ReadVariable<RadialTangentialDistortion>(distortion_node, "parameters");
     return std::make_unique<RadialTangentialDistortion>(distortion);
   } else {
     LOG(FATAL) << "Unknown distortion type.";
-    return nullptr;
   }
+  return nullptr;
 }
 
 auto Camera::updateCameraParameterBlockSizes() -> void {
@@ -288,8 +303,12 @@ auto Camera::writeShutterDelta(Emitter& emitter) const -> void {
 auto Camera::writeDistortion(Emitter& emitter) const -> void {
   emitter << YAML::Key << kDistortionName;
   emitter << YAML::Value << YAML::BeginMap;
-  yaml::Write(emitter, "type", "RADIAL_TANGENTIAL_2");
-  yaml::WriteVariable(emitter, "parameters", distortion());
+  if (!distortion()) {
+    yaml::Write(emitter, "type", "NONE");
+  } else {
+    yaml::Write(emitter, "type", "RADIAL_TANGENTIAL_2");
+    yaml::WriteVariable(emitter, "parameters", *distortion());
+  }
   emitter << YAML::EndMap;
   emitter << YAML::EndMap;
 }

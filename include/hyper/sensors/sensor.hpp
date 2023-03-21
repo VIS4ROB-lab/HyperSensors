@@ -152,6 +152,10 @@ class Sensor {
   /// \param emitter YAML emitter.
   virtual auto write(Emitter& emitter) const -> void;
 
+  /// Assembles the variables partition.
+  /// \return Variables partition
+  auto assembleVariablesPartition() const -> Partition<int, Scalar*>;
+
   Type type_;                   ///< Type.
   JacobianType jacobian_type_;  ///< Jacobian type.
 

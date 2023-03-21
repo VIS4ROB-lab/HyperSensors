@@ -154,19 +154,13 @@ auto IMU::write(Emitter& emitter) const -> void {
 auto IMU::assemblePartitions(GyroscopeBiasParameterBlocks&& gyroscope_bias_parameter_blocks, AccelerometerBiasParameterBlocks&& accelerometer_bias_parameter_blocks) const
     -> Partitions<Scalar*> {
   Partitions<Scalar*> partitions{kNumPartitions};
-  auto& [v_offset, v_parameter_blocks, v_parameter_block_sizes] = partitions[kVariablesPartitionIndex];
+  partitions[kVariablesPartitionIndex] = assembleVariablesPartition();
   auto& [b_g_offset, b_g_parameter_blocks, b_g_parameter_block_sizes] = partitions[kGyroscopeBiasPartitionIndex];
   auto& [b_a_offset, b_a_parameter_blocks, b_a_parameter_block_sizes] = partitions[kAccelerometerBiasPartitionIndex];
-
-  v_offset = kVariablesOffset;
-  b_g_offset = v_offset + static_cast<int>(parameter_blocks_.size());
+  b_g_offset = kVariablesOffset + static_cast<int>(parameter_blocks_.size());
   b_a_offset = b_g_offset + static_cast<int>(gyroscope_bias_parameter_blocks.size());
-
-  v_parameter_block_sizes = parameter_block_sizes_;
   b_g_parameter_block_sizes = std::vector<int>(gyroscope_bias_parameter_blocks.size(), gyroscopeBias().localInputSize());
   b_a_parameter_block_sizes = std::vector<int>(accelerometer_bias_parameter_blocks.size(), accelerometerBias().localInputSize());
-
-  v_parameter_blocks = parameter_blocks_;
   b_g_parameter_blocks = std::move(gyroscope_bias_parameter_blocks);
   b_a_parameter_blocks = std::move(accelerometer_bias_parameter_blocks);
   return partitions;

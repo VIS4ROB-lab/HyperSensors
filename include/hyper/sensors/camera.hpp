@@ -103,11 +103,11 @@ class Camera final : public Sensor {
 
   /// Distortion accessor.
   /// \return Distortion.
-  [[nodiscard]] auto distortion() const -> const Distortion&;
+  [[nodiscard]] auto distortion() const -> const Distortion*;
 
   /// Distortion modifier.
   /// \return Distortion.
-  auto distortion() -> Distortion&;
+  auto distortion() -> Distortion*;
 
   /// Sets the distortion.
   /// \tparam DistortionType Distortion type.
@@ -119,14 +119,14 @@ class Camera final : public Sensor {
   [[nodiscard]] auto randomPixel() const -> Pixel;
 
   /// Retrieves a random (normalized) pixel on the image sensor.
-  /// \param distorted True if pixel is distorted.
+  /// \param distort Distortion flag.
   /// \return Random (normalized) pixel.
   [[nodiscard]] auto randomNormalizedPixel(bool distort = false) const -> Pixel;
 
   /// Retrieves a random (visible) bearing.
-  /// \param distorted True if bearing is distorted.
+  /// \param distort Distortion flag.
   /// \return Random bearing.
-  auto randomBearing(bool distorted = false) -> Bearing;
+  auto randomBearing(bool distort = false) const -> Bearing;
 
   /// Corrects the shutter times.
   /// \param time Global shutter time.
@@ -137,9 +137,10 @@ class Camera final : public Sensor {
   /// Converts (non-normalized) pixels to
   /// bearings (by normalization and undistortion).
   /// \param pixels Input pixels.
+  /// \param distort Distortion flag.
   /// \param parameters External distortion parameters (optional).
   /// \return Bearings.
-  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
+  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, bool distort, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
 
  private:
   /// Reads the sensor size.

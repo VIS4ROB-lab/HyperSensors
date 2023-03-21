@@ -117,8 +117,8 @@ TEST_F(CameraTests, DualityWithDistortion) {
     const auto bearing_0 = Camera::LandmarkToBearing(landmark);
     const auto pixel_0 = Camera::LandmarkToPixel(landmark);
     const auto normalized_pixel_0 = camera_.intrinsics().normalize(pixel_0);
-    const auto distorted_pixel_0 = camera_.distortion().distort(normalized_pixel_0, nullptr, nullptr, nullptr);
-    const auto normalized_pixel_1 = camera_.distortion().undistort(distorted_pixel_0, nullptr, nullptr, nullptr);
+    const auto distorted_pixel_0 = camera_.distortion() ? camera_.distortion()->distort(normalized_pixel_0, nullptr, nullptr, nullptr) : normalized_pixel_0;
+    const auto normalized_pixel_1 = camera_.distortion() ? camera_.distortion()->undistort(distorted_pixel_0, nullptr, nullptr, nullptr) : distorted_pixel_0;
     const auto pixel_1 = camera_.intrinsics().denormalize(normalized_pixel_1);
     const auto bearing_1 = Camera::PixelToBearing(pixel_1);
 
