@@ -25,9 +25,9 @@ class Sensor {
   using Partitions = std::vector<Partition<int, TPointer_>>;
 
   // Constants.
-  static constexpr auto kVariablesOffset = 0;
-  static constexpr auto kVariablesPartitionIndex = 0;
-  static constexpr auto kNumPartitions = kVariablesPartitionIndex + 1;
+  static constexpr auto kSensorPartitionOffset = 0;
+  static constexpr auto kSensorPartitionIndex = 0;
+  static constexpr auto kNumPartitions = kSensorPartitionIndex + 1;
 
   static constexpr auto kOffsetIndex = 0;
   static constexpr auto kTransformationIndex = kOffsetIndex + 1;
@@ -41,9 +41,8 @@ class Sensor {
 
   using Time = double;
   using Scalar = double;
-
-  using Variable = variables::Variable<Scalar>;
-  using Variables = std::vector<std::unique_ptr<Variable>>;
+  using ParameterBlocks = std::vector<Scalar*>;
+  using ParameterBlockSizes = std::vector<int>;
 
   using Rate = Scalar;
   using Offset = variables::Cartesian<Scalar, 1>;
@@ -94,11 +93,15 @@ class Sensor {
 
   /// Checks whether sensor has variable rate.
   /// \return True if rate is variable.
-  [[nodiscard]] auto hasVariableRate() const -> bool;
+  [[nodiscard]] auto rateIsVariable() const -> bool;
 
-  /// Time-based parameter blocks accessor.
-  /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] virtual auto partitions(const Time& time) const -> Partitions<Scalar*>;
+  /// Retrieves the parameter blocks of the sensor partition.
+  /// \return Parameter blocks.
+  auto parameterBlocks() const -> const ParameterBlocks&;
+
+  /// Retrieves the parameter block sizes of the sensor partition.
+  /// \return Parameter block sizes.
+  auto parameterBlockSizes() const -> const ParameterBlockSizes&;
 
   /// Offset accessor.
   /// \return Offset.
@@ -116,6 +119,10 @@ class Sensor {
   /// \return Transformation.
   [[nodiscard]] auto transformation() -> Transformation&;
 
+  /// Time-based parameter blocks accessor.
+  /// \return Time-based pointers to parameter blocks.
+  [[nodiscard]] virtual auto partitions(const Time& time) const -> Partitions<Scalar*>;
+
   /// Reads a sensor from a YAML file.
   /// \param node YAML node.
   /// \param sensor Sensor to read.
@@ -129,8 +136,10 @@ class Sensor {
   friend auto operator<<(Emitter& emitter, const Sensor& sensor) -> Emitter&;
 
  protected:
-  /// Definitions.
+  // Definitions.
   using Size = std::size_t;
+  using Variable = variables::Variable<Scalar>;
+  using Variables = std::vector<std::unique_ptr<Variable>>;
 
   /// Constructor from sensor type and number of variables.
   /// \param type Sensor type.
@@ -154,15 +163,15 @@ class Sensor {
 
   /// Assembles the variables partition.
   /// \return Variables partition
-  auto assembleVariablesPartition() const -> Partition<int, Scalar*>;
+  [[nodiscard]] auto assembleVariablesPartition() const -> Partition<int, Scalar*>;
 
   Type type_;                   ///< Type.
   JacobianType jacobian_type_;  ///< Jacobian type.
 
-  Rate rate_;                               ///< Rate.
-  Variables variables_;                     ///< Variables.
-  std::vector<Scalar*> parameter_blocks_;   ///< Parameter blocks.
-  std::vector<int> parameter_block_sizes_;  ///< Parameter block sizes.
+  Rate rate_;                                  ///< Rate.
+  Variables variables_;                        ///< Variables.
+  ParameterBlocks parameter_blocks_;           ///< Parameter blocks.
+  ParameterBlockSizes parameter_block_sizes_;  ///< Parameter block sizes.
 };
 
 }  // namespace hyper::sensors

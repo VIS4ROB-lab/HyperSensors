@@ -43,14 +43,16 @@ auto Sensor::rate() const -> const Rate& {
   return rate_;
 }
 
-auto Sensor::hasVariableRate() const -> bool {
+auto Sensor::rateIsVariable() const -> bool {
   return rate() < Scalar{0};
 }
 
-auto Sensor::partitions(const Time& /* time */) const -> Partitions<Scalar*> {
-  Partitions<Scalar*> partitions{kNumPartitions};
-  partitions[kVariablesPartitionIndex] = assembleVariablesPartition();
-  return partitions;
+auto Sensor::parameterBlocks() const -> const ParameterBlocks& {
+  return parameter_blocks_;
+}
+
+auto Sensor::parameterBlockSizes() const -> const ParameterBlockSizes& {
+  return parameter_block_sizes_;
 }
 
 auto Sensor::offset() const -> const Offset& {
@@ -67,6 +69,12 @@ auto Sensor::transformation() const -> const Transformation& {
 
 auto Sensor::transformation() -> Transformation& {
   return const_cast<Transformation&>(std::as_const(*this).transformation());
+}
+
+auto Sensor::partitions(const Time& /* time */) const -> Partitions<Scalar*> {
+  Partitions<Scalar*> partitions{kNumPartitions};
+  partitions[kSensorPartitionIndex] = assembleVariablesPartition();
+  return partitions;
 }
 
 auto operator>>(const YAML::Node& node, Sensor& sensor) -> const YAML::Node& {
@@ -125,7 +133,7 @@ auto Sensor::assembleVariablesPartition() const -> Partition<int, Scalar*> {
   Partition<int, Scalar*> partition;
   auto& [v_offset, v_parameter_blocks, v_parameter_block_sizes] = partition;
   const auto num_parameter_blocks = parameter_blocks_.size();
-  v_offset = kVariablesOffset;
+  v_offset = kSensorPartitionOffset;
   v_parameter_blocks.reserve(num_parameter_blocks);
   v_parameter_block_sizes.reserve(num_parameter_blocks);
   for (auto i = std::size_t{0}; i < num_parameter_blocks; ++i) {
