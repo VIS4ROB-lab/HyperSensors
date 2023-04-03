@@ -97,11 +97,11 @@ class Sensor {
 
   /// Retrieves the parameter blocks of the sensor partition.
   /// \return Parameter blocks.
-  auto parameterBlocks() const -> const ParameterBlocks&;
+  [[nodiscard]] auto parameterBlocks() const -> const ParameterBlocks&;
 
   /// Retrieves the parameter block sizes of the sensor partition.
   /// \return Parameter block sizes.
-  auto parameterBlockSizes() const -> const ParameterBlockSizes&;
+  [[nodiscard]] auto parameterBlockSizes() const -> const ParameterBlockSizes&;
 
   /// Offset accessor.
   /// \return Offset.
