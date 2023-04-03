@@ -137,10 +137,10 @@ class Camera final : public Sensor {
   /// Converts (non-normalized) pixels to
   /// bearings (by normalization and undistortion).
   /// \param pixels Input pixels.
-  /// \param distort Distortion flag.
+  /// \param undistort Undistortion flag.
   /// \param parameters External distortion parameters (optional).
   /// \return Bearings.
-  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, bool distort, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
+  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, bool undistort, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
 
  private:
   /// Reads the sensor size.

@@ -188,13 +188,13 @@ auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pix
   return times;
 }
 
-auto Camera::pixelsToBearings(const std::vector<Pixel>& pixels, bool distort, const Scalar* parameters) const -> std::vector<Bearing> {
+auto Camera::pixelsToBearings(const std::vector<Pixel>& pixels, bool undistort, const Scalar* parameters) const -> std::vector<Bearing> {
   // Allocate memory.
   std::vector<Bearing> bearings;
   bearings.reserve(pixels.size());
 
   // Convert with undistortion.
-  if (distort && distortion()) {
+  if (undistort && distortion()) {
     for (const auto& pixel : pixels) {
       const auto normalized_pixel = intrinsics().normalize(pixel);
       const auto undistorted_pixel = distortion()->undistort(normalized_pixel, nullptr, nullptr, parameters);

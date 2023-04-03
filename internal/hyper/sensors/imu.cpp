@@ -44,10 +44,6 @@ IMU::IMU(const Node& node) : IMU{} {
   node >> *this;
 }
 
-auto IMU::partitions(const Time& time) const -> Partitions<Scalar*> {
-  return assemblePartitions(gyroscopeBias().parameterBlocks(time), accelerometerBias().parameterBlocks(time));
-}
-
 auto IMU::gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity& {
   return gyroscope_noise_density_;
 }
@@ -112,6 +108,10 @@ auto IMU::accelerometerBias() -> AccelerometerBias& {
   return const_cast<AccelerometerBias&>(std::as_const(*this).accelerometerBias());
 }
 
+auto IMU::partitions(const Time& time) const -> Partitions<Scalar*> {
+  return assemblePartitions(gyroscopeBias().parameterBlocks(time), accelerometerBias().parameterBlocks(time));
+}
+
 auto IMU::updateIMUParameterBlockSizes() -> void {
   if (jacobian_type_ == JacobianType::TANGENT_TO_MANIFOLD) {
     parameter_block_sizes_[kGyroscopeIntrinsicsIndex] = GyroscopeIntrinsics::kNumParameters;
@@ -154,10 +154,10 @@ auto IMU::write(Emitter& emitter) const -> void {
 auto IMU::assemblePartitions(GyroscopeBiasParameterBlocks&& gyroscope_bias_parameter_blocks, AccelerometerBiasParameterBlocks&& accelerometer_bias_parameter_blocks) const
     -> Partitions<Scalar*> {
   Partitions<Scalar*> partitions{kNumPartitions};
-  partitions[kVariablesPartitionIndex] = assembleVariablesPartition();
+  partitions[kSensorPartitionIndex] = assembleVariablesPartition();
   auto& [b_g_offset, b_g_parameter_blocks, b_g_parameter_block_sizes] = partitions[kGyroscopeBiasPartitionIndex];
   auto& [b_a_offset, b_a_parameter_blocks, b_a_parameter_block_sizes] = partitions[kAccelerometerBiasPartitionIndex];
-  b_g_offset = kVariablesOffset + static_cast<int>(parameter_blocks_.size());
+  b_g_offset = kSensorPartitionOffset + static_cast<int>(parameter_blocks_.size());
   b_a_offset = b_g_offset + static_cast<int>(gyroscope_bias_parameter_blocks.size());
   b_g_parameter_block_sizes = std::vector<int>(gyroscope_bias_parameter_blocks.size(), gyroscopeBias().localInputSize());
   b_a_parameter_block_sizes = std::vector<int>(accelerometer_bias_parameter_blocks.size(), accelerometerBias().localInputSize());

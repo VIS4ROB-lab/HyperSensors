@@ -48,10 +48,6 @@ class IMU final : public Sensor {
   /// \param node YAML node.
   explicit IMU(const Node& node);
 
-  /// Time-based parameter blocks accessor.
-  /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] auto partitions(const Time& time) const -> Partitions<Scalar*> final;
-
   /// \brief Gyroscope noise density accessor.
   /// \return Gyroscope noise density.
   [[nodiscard]] auto gyroscopeNoiseDensity() const -> const GyroscopeNoiseDensity&;
@@ -115,6 +111,10 @@ class IMU final : public Sensor {
   /// Accelerometer bias modifier.
   /// \return Accelerometer bias.
   auto accelerometerBias() -> AccelerometerBias&;
+
+  /// Time-based parameter blocks accessor.
+  /// \return Time-based pointers to parameter blocks.
+  [[nodiscard]] auto partitions(const Time& time) const -> Partitions<Scalar*> final;
 
  private:
   // Definitions.
