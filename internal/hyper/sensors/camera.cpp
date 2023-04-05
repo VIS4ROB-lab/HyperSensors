@@ -2,7 +2,7 @@
 /// the 'LICENSE' file, which is part of this repository.
 
 #include "hyper/sensors/camera.hpp"
-#include "hyper/variables/jacobian.hpp"
+#include "hyper/jacobian.hpp"
 
 namespace hyper::sensors {
 
@@ -24,7 +24,7 @@ auto Camera::LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar*
   const auto inverse_z = Scalar{1} / landmark.z();
 
   if (J_l) {
-    using Jacobian = variables::JacobianNM<Pixel, Landmark>;
+    using Jacobian = hyper::JacobianNM<Pixel, Landmark>;
     auto J = Eigen::Map<Jacobian>{J_l};
     const auto inverse_z2 = inverse_z * inverse_z;
     J(0, 0) = inverse_z;
@@ -43,7 +43,7 @@ auto Camera::LandmarkToBearing(const Eigen::Ref<const Landmark>& landmark, Scala
   const auto i_n = std::sqrt(i_n2);
 
   if (J_l) {
-    using Jacobian = variables::JacobianNM<Bearing, Landmark>;
+    using Jacobian = hyper::JacobianNM<Bearing, Landmark>;
     Eigen::Map<Jacobian>{J_l} = (Jacobian::Identity() - landmark * landmark.transpose() * i_n2) * i_n;
   }
 
@@ -59,7 +59,7 @@ auto Camera::PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p) -
   const auto i_n = std::sqrt(i_n2);
 
   if (J_p) {
-    using Jacobian = variables::JacobianNM<Bearing, Pixel>;
+    using Jacobian = hyper::JacobianNM<Bearing, Pixel>;
     auto J = Eigen::Map<Jacobian>{J_p};
     const auto xy = pixel.x() * pixel.y();
     const auto i_n3 = i_n * i_n2;

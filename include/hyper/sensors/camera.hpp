@@ -21,7 +21,7 @@ class Camera final : public Sensor {
   using Index = Eigen::Index;
   using Pixel = variables::Pixel<Scalar>;
   using Bearing = variables::Bearing<Scalar>;
-  using Landmark = variables::Position<Scalar, 3>;
+  using Landmark = variables::R3<Scalar>;
   using Intrinsics = variables::Intrinsics<Scalar>;
   using Distortion = variables::Distortion<Scalar>;
 

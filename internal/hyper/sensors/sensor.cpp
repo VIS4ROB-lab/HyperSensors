@@ -4,7 +4,7 @@
 #include <glog/logging.h>
 
 #include "hyper/sensors/sensor.hpp"
-#include "hyper/variables/groups/se3.hpp"
+#include "hyper/variables/se3.hpp"
 
 namespace hyper::sensors {
 

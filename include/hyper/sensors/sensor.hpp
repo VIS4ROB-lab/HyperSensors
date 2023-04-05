@@ -5,7 +5,7 @@
 
 #include "hyper/sensors/forward.hpp"
 
-#include "hyper/variables/groups/se3.hpp"
+#include "hyper/variables/se3.hpp"
 #include "hyper/yaml/yaml.hpp"
 
 namespace hyper::sensors {

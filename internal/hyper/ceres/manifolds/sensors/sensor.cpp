@@ -5,7 +5,7 @@
 
 #include "hyper/ceres/manifolds/sensors/sensor.hpp"
 #include "hyper/ceres/manifolds/variables/euclidean.hpp"
-#include "hyper/ceres/manifolds/variables/groups/se3.hpp"
+#include "hyper/ceres/manifolds/variables/se3.hpp"
 
 namespace hyper::ceres::manifolds {
 

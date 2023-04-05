@@ -31,9 +31,9 @@ class CameraTests : public testing::Test {
   using Pixel = Camera::Pixel;
   using Bearing = Camera::Bearing;
   using Landmark = Camera::Landmark;
-  using BearingPixelJacobian = variables::JacobianNM<Bearing, Pixel>;
-  using PixelLandmarkJacobian = variables::JacobianNM<Pixel, Landmark>;
-  using BearingLandmarkJacobian = variables::JacobianNM<Bearing, Landmark>;
+  using BearingPixelJacobian = hyper::JacobianNM<Bearing, Pixel>;
+  using PixelLandmarkJacobian = hyper::JacobianNM<Pixel, Landmark>;
+  using BearingLandmarkJacobian = hyper::JacobianNM<Bearing, Landmark>;
 
   /// Setup.
   auto SetUp() -> void final {
