@@ -8,6 +8,8 @@
 
 namespace hyper::sensors {
 
+using namespace variables;
+
 namespace {
 
 // Variable names.
@@ -108,8 +110,8 @@ auto Sensor::updateSensorParameterBlockSizes() -> void {
     parameter_block_sizes_[kOffsetIndex] = Offset::kNumParameters;
     parameter_block_sizes_[kTransformationIndex] = Transformation::kNumParameters;
   } else {
-    parameter_block_sizes_[kOffsetIndex] = variables::Tangent<Offset>::kNumParameters;
-    parameter_block_sizes_[kTransformationIndex] = variables::Tangent<Transformation>::kNumParameters;
+    parameter_block_sizes_[kOffsetIndex] = Tangent<Offset>::kNumParameters;
+    parameter_block_sizes_[kTransformationIndex] = Tangent<Transformation>::kNumParameters;
   }
 }
 
@@ -129,17 +131,13 @@ auto Sensor::write(Emitter& emitter) const -> void {
   yaml::WriteVariable(emitter, kTransformationName, transformation());
 }
 
-auto Sensor::assembleVariablesPartition() const -> Partition<int, Scalar*> {
-  Partition<int, Scalar*> partition;
-  auto& [v_offset, v_parameter_blocks, v_parameter_block_sizes] = partition;
+auto Sensor::assembleVariablesPartition() const -> Partition<Scalar*> {
+  Partition<Scalar*> partition;
   const auto num_parameter_blocks = parameter_blocks_.size();
-  v_offset = kSensorPartitionOffset;
-  v_parameter_blocks.reserve(num_parameter_blocks);
-  v_parameter_block_sizes.reserve(num_parameter_blocks);
+  partition.reserve(num_parameter_blocks);
   for (auto i = std::size_t{0}; i < num_parameter_blocks; ++i) {
     if (parameter_blocks_[i]) {
-      v_parameter_blocks.emplace_back(parameter_blocks_[i]);
-      v_parameter_block_sizes.emplace_back(parameter_block_sizes_[i]);
+      partition.emplace_back(parameter_blocks_[i], parameter_block_sizes_[i]);
     }
   }
   return partition;

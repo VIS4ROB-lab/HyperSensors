@@ -8,6 +8,8 @@
 
 namespace hyper::sensors {
 
+using namespace variables;
+
 namespace {
 
 // Variable names.
@@ -109,7 +111,11 @@ auto IMU::accelerometerBias() -> AccelerometerBias& {
 }
 
 auto IMU::partitions(const Time& time) const -> Partitions<Scalar*> {
-  return assemblePartitions(gyroscopeBias().parameterBlocks(time), accelerometerBias().parameterBlocks(time));
+  Partitions<Scalar*> partitions{kNumPartitions};
+  partitions[kSensorPartitionIndex] = assembleVariablesPartition();
+  partitions[kGyroscopeBiasPartitionIndex] = gyroscopeBias().partition(time);
+  partitions[kAccelerometerBiasPartitionIndex] = accelerometerBias().partition(time);
+  return partitions;
 }
 
 auto IMU::updateIMUParameterBlockSizes() -> void {
@@ -149,21 +155,6 @@ auto IMU::write(Emitter& emitter) const -> void {
   yaml::Write(emitter, kAccelerometerNoiseDensityName, accelerometerNoiseDensity());
   yaml::WriteVariable(emitter, kAccelerometerIntrinsicsName, accelerometerIntrinsics());
   yaml::WriteVariable(emitter, kAccelerometerOffsetName, accelerometerOffset());
-}
-
-auto IMU::assemblePartitions(GyroscopeBiasParameterBlocks&& gyroscope_bias_parameter_blocks, AccelerometerBiasParameterBlocks&& accelerometer_bias_parameter_blocks) const
-    -> Partitions<Scalar*> {
-  Partitions<Scalar*> partitions{kNumPartitions};
-  partitions[kSensorPartitionIndex] = assembleVariablesPartition();
-  auto& [b_g_offset, b_g_parameter_blocks, b_g_parameter_block_sizes] = partitions[kGyroscopeBiasPartitionIndex];
-  auto& [b_a_offset, b_a_parameter_blocks, b_a_parameter_block_sizes] = partitions[kAccelerometerBiasPartitionIndex];
-  b_g_offset = kSensorPartitionOffset + static_cast<int>(parameter_blocks_.size());
-  b_a_offset = b_g_offset + static_cast<int>(gyroscope_bias_parameter_blocks.size());
-  b_g_parameter_block_sizes = std::vector<int>(gyroscope_bias_parameter_blocks.size(), gyroscopeBias().localInputSize());
-  b_a_parameter_block_sizes = std::vector<int>(accelerometer_bias_parameter_blocks.size(), accelerometerBias().localInputSize());
-  b_g_parameter_blocks = std::move(gyroscope_bias_parameter_blocks);
-  b_a_parameter_blocks = std::move(accelerometer_bias_parameter_blocks);
-  return partitions;
 }
 
 }  // namespace hyper::sensors

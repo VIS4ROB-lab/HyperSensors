@@ -12,18 +12,6 @@ namespace hyper::sensors {
 
 class Sensor {
  public:
-  // Parameter block partition.
-  template <typename TSize_, typename TPointer_>
-  struct Partition {
-    TSize_ offset;
-    std::vector<TPointer_> parameter_blocks;
-    std::vector<TSize_> parameter_block_sizes;
-  };
-
-  // Parameter block partitions.
-  template <typename TPointer_>
-  using Partitions = std::vector<Partition<int, TPointer_>>;
-
   // Constants.
   static constexpr auto kSensorPartitionOffset = 0;
   static constexpr auto kSensorPartitionIndex = 0;
@@ -121,7 +109,7 @@ class Sensor {
 
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] virtual auto partitions(const Time& time) const -> Partitions<Scalar*>;
+  [[nodiscard]] virtual auto partitions(const Time& time) const -> variables::Partitions<Scalar*>;
 
   /// Reads a sensor from a YAML file.
   /// \param node YAML node.
@@ -163,7 +151,7 @@ class Sensor {
 
   /// Assembles the variables partition.
   /// \return Variables partition
-  [[nodiscard]] auto assembleVariablesPartition() const -> Partition<int, Scalar*>;
+  [[nodiscard]] auto assembleVariablesPartition() const -> variables::Partition<Scalar*>;
 
   Type type_;                   ///< Type.
   JacobianType jacobian_type_;  ///< Jacobian type.

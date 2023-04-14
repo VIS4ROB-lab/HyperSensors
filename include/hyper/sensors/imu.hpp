@@ -114,7 +114,7 @@ class IMU final : public Sensor {
 
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] auto partitions(const Time& time) const -> Partitions<Scalar*> final;
+  [[nodiscard]] auto partitions(const Time& time) const -> variables::Partitions<Scalar*> final;
 
  private:
   // Definitions.
@@ -134,13 +134,6 @@ class IMU final : public Sensor {
   /// Writes a sensor to a YAML emitter.
   /// \param emitter YAML emitter.
   auto write(Emitter& emitter) const -> void final;
-
-  /// Assembles the partitions.
-  /// \param gyroscope_bias_parameter_blocks Gyroscope bias parameter blocks.
-  /// \param accelerometer_bias_parameter_blocks Accelerometer bias parameter blocks.
-  /// \return Parameter blocks.
-  [[nodiscard]] auto assemblePartitions(GyroscopeBiasParameterBlocks&& gyroscope_bias_parameter_blocks,
-                                        AccelerometerBiasParameterBlocks&& accelerometer_bias_parameter_blocks) const -> Partitions<Scalar*>;
 
   GyroscopeNoiseDensity gyroscope_noise_density_;          ///< Gyroscope noise density.
   GyroscopeBias gyroscope_bias_;                           ///< Gyroscope bias.
