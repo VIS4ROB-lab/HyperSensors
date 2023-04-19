@@ -136,9 +136,7 @@ auto Sensor::assembleVariablesPartition() const -> Partition<Scalar*> {
   const auto num_parameter_blocks = parameter_blocks_.size();
   partition.reserve(num_parameter_blocks);
   for (auto i = std::size_t{0}; i < num_parameter_blocks; ++i) {
-    if (parameter_blocks_[i]) {
-      partition.emplace_back(parameter_blocks_[i], parameter_block_sizes_[i]);
-    }
+    partition.emplace_back(parameter_blocks_[i], parameter_block_sizes_[i]);
   }
   return partition;
 }
