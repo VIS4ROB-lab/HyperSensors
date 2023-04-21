@@ -8,7 +8,7 @@
 
 #include "hyper/messages/message.hpp"
 #include "hyper/sensors/camera.hpp"
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::messages {
 

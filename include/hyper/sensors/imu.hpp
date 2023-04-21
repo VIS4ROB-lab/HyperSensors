@@ -27,12 +27,12 @@ class IMU final : public Sensor {
   using GyroscopeNoiseDensity = Scalar;
   using GyroscopeIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
   using GyroscopeSensitivity = variables::Sensitivity<Scalar, 3>;
-  using GyroscopeBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
+  using GyroscopeBias = state::ContinuousState<variables::Rn<Scalar, 3>>;
 
   using AccelerometerNoiseDensity = Scalar;
   using AccelerometerIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
-  using AccelerometerOffset = variables::Cartesian<Scalar, 9>;
-  using AccelerometerBias = state::ContinuousState<variables::Cartesian<Scalar, 3>>;
+  using AccelerometerOffset = variables::Rn<Scalar, 9>;
+  using AccelerometerBias = state::ContinuousState<variables::Rn<Scalar, 3>>;
 
   using BiasInterpolator = state::TemporalInterpolator<Scalar>;
   using DefaultBiasInterpolator = state::BasisInterpolator<Scalar, 4>;

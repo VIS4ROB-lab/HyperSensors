@@ -33,7 +33,7 @@ class Sensor {
   using ParameterBlockSizes = std::vector<int>;
 
   using Rate = Scalar;
-  using Offset = variables::Cartesian<Scalar, 1>;
+  using Offset = variables::R1<Scalar>;
   using Transformation = variables::SE3<Scalar>;
 
   /// Constructor from Jacobian type.
