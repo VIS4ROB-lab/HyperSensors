@@ -2,7 +2,6 @@
 /// the 'LICENSE' file, which is part of this repository.
 
 #include "hyper/sensors/camera.hpp"
-#include "hyper/jacobian.hpp"
 
 namespace hyper::sensors {
 
