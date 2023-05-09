@@ -1,0 +1,9 @@
+repositories:
+  HyperVariables:
+    type: git
+    url: git@github.com:VIS4ROB-lab/HyperVariables.git
+    version: develop
+  HyperState:
+    type: git
+    url: git@github.com:VIS4ROB-lab/HyperState.git
+    version: develop

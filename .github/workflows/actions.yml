@@ -12,34 +12,33 @@ env:
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # The CMake configure and build commands are platform-agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup (1/2)
         run: |
           chmod +x ${{github.workspace}}/setup.sh
           sudo ${{github.workspace}}/setup.sh
-
-      - name: Configure
-        run: |
-          source /opt/ros/humble/setup.bash
-          mkdir build && cd build && cmake ..
-
-      - name: Build
-        working-directory: ${{github.workspace}}/build
-        run: make -j$(nproc)
-
-      - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ./apps/tests/HyperSensorsTests --gtest_output="xml:${{github.workspace}}/tests/junit/results.xml"
-
+      - name: Setup (2/2)
+        uses: ros-tooling/setup-ros@v0.6
+        with:
+          required-ros-distributions: humble
+      - id: build
+        name: Build
+        uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          target-ros2-distro: humble
+          package-name: hyper_sensors
+          import-token: ${{secrets.GITHUB_TOKEN}}
+          vcs-repo-file-url: ${{github.workspace}}/vcs.repos
       - name: Publish
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          junit_files: "tests/junit/*.xml"
-          check_name: "tests"
+          junit_files: ${{steps.build.outputs.ros-workspace-directory-name}}/build/hyper_sensors/test_results/hyper_sensors/hyper_sensors_tests.gtest.xml
+          check_name: tests
