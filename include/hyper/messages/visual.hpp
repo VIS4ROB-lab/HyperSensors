@@ -28,7 +28,7 @@ class VisualTracks : public Message<TScalar> {
 
   using IDs = std::vector<typename Base::ID>;
   using Lengths = std::vector<typename Base::Size>;
-  using Positions = std::vector<variables::Position<TScalar>>;
+  using Positions = std::vector<variables::R3<TScalar>>;
 
   /// Constructor from time and sensor.
   /// \param time Time.

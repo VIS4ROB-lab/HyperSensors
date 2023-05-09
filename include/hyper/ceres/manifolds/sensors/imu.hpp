@@ -3,7 +3,7 @@
 
 #pragma once
 
-#ifdef HYPER_COMPILE_WITH_CERES
+#if HYPER_COMPILE_WITH_CERES
 
 #include "hyper/ceres/manifolds/sensors/sensor.hpp"
 #include "hyper/sensors/imu.hpp"
