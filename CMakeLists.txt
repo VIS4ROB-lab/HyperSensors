@@ -5,22 +5,21 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 find_package(ament_cmake REQUIRED)
-find_package(hyper_variables REQUIRED)
 find_package(hyper_state REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 file(GLOB_RECURSE PROJECT_SOURCE_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/include/*.hpp ${PROJECT_SOURCE_DIR}/internal/*.cpp)
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
-ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_targets(${PROJECT_NAME}_targets HAS_LIBRARY_TARGET)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(${PROJECT_NAME} yaml-cpp)
 
-ament_target_dependencies(${PROJECT_NAME} hyper_variables hyper_state cv_bridge yaml-cpp)
-ament_export_dependencies(hyper_variables hyper_state cv_bridge yaml-cpp)
+ament_target_dependencies(${PROJECT_NAME} hyper_state cv_bridge yaml-cpp)
+ament_export_dependencies(hyper_state cv_bridge yaml-cpp)
 
 install(
         DIRECTORY include/
@@ -29,12 +28,28 @@ install(
 
 install(
         TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}_targets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include
 )
+
+MACRO(SUBDIRLIST result dir)
+    FILE(GLOB children RELATIVE ${dir} ${dir}/*)
+    SET(dirlist "")
+    FOREACH (child ${children})
+        IF (IS_DIRECTORY ${dir}/${child})
+            LIST(APPEND dirlist ${dir}/${child})
+        ENDIF ()
+    ENDFOREACH ()
+    SET(${result} ${dirlist})
+ENDMACRO()
+
+SUBDIRLIST(SUBDIRS ${PROJECT_SOURCE_DIR}/apps)
+FOREACH (subdir ${SUBDIRS})
+    add_subdirectory(${subdir})
+ENDFOREACH ()
 
 if (BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)
@@ -51,4 +66,20 @@ if (BUILD_TESTING)
     endif ()
 endif ()
 
+if (BUILD_BENCHMARKS)
+    #find_package(... REQUIRED)
+    file(GLOB_RECURSE PROJECT_BENCHMARK_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/benchmarks/*.hpp ${PROJECT_SOURCE_DIR}/benchmarks/*.cpp)
+
+    if (PROJECT_BENCHMARK_FILES)
+        add_executable(${PROJECT_NAME}_benchmarks ${PROJECT_BENCHMARK_FILES})
+        target_include_directories(${PROJECT_NAME}_benchmarks PUBLIC
+                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/include>
+                $<INSTALL_INTERFACE:include>
+                )
+        target_link_libraries(${PROJECT_NAME}_benchmarks ${PROJECT_NAME})
+    endif ()
+endif ()
+
 ament_package()
+
