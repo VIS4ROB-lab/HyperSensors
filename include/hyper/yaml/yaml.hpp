@@ -5,7 +5,7 @@
 
 #include <glog/logging.h>
 
-#include "hyper/variables/forward.hpp"
+#include "hyper/variables/variable.hpp"
 #include "hyper/yaml/definitions.hpp"
 
 namespace hyper::yaml {
@@ -40,7 +40,7 @@ auto ReadString(const Node& node, const Key& key) -> String;
 /// \return Read parameters as target type.
 template <typename TVariable>
 auto ReadVariable(const Node& node, const Key& key) -> TVariable {
-  const auto values = ReadAs<std::vector<typename TVariable::Scalar>>(node, key);
+  const auto values = ReadAs<std::vector<Scalar>>(node, key);
   CHECK_EQ(values.size(), TVariable::kNumParameters);
   return TVariable{values.data()};
 }
@@ -67,7 +67,7 @@ auto WriteVariable(Emitter& emitter, const Key& key, const TVariable& variable) 
   const auto vector = variable.asVector();
   const auto data = vector.data();
   const auto size = vector.size();
-  return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<typename TVariable::Scalar>{data, data + size};
+  return emitter << YAML::Key << key << YAML::Value << YAML::Flow << std::vector<Scalar>{data, data + size};
 }
 
 }  // namespace hyper::yaml

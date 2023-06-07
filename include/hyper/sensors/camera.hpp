@@ -19,11 +19,11 @@ class Camera final : public Sensor {
 
   // Definitions.
   using Index = Eigen::Index;
-  using Pixel = variables::Pixel<Scalar>;
-  using Bearing = variables::Bearing<Scalar>;
-  using Landmark = variables::R3<Scalar>;
-  using Intrinsics = variables::Intrinsics<Scalar>;
-  using Distortion = variables::Distortion<Scalar>;
+  using Pixel = variables::R2;
+  using Bearing = variables::Bearing;
+  using Landmark = variables::R3;
+  using Intrinsics = variables::Intrinsics;
+  using Distortion = variables::Distortion;
 
   // Shutter delta (i.e. increment between readouts).
   using ShutterDelta = Scalar;
@@ -126,7 +126,7 @@ class Camera final : public Sensor {
   /// Retrieves a random (visible) bearing.
   /// \param distort Distortion flag.
   /// \return Random bearing.
-  auto randomBearing(bool distort = false) const -> Bearing;
+  [[nodiscard]] auto randomBearing(bool distort = false) const -> Bearing;
 
   /// Corrects the shutter times.
   /// \param time Global shutter time.

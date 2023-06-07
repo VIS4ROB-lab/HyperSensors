@@ -33,8 +33,8 @@ class Sensor {
   using ParameterBlockSizes = std::vector<int>;
 
   using Rate = Scalar;
-  using Offset = variables::R1<Scalar>;
-  using Transformation = variables::SE3<Scalar>;
+  using Offset = variables::R1;
+  using Transformation = variables::SE3;
 
   /// Constructor from Jacobian type.
   /// \param jacobian_type Jacobian type.
@@ -109,7 +109,7 @@ class Sensor {
 
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] virtual auto partitions(const Time& time) const -> variables::Partitions<Scalar*>;
+  [[nodiscard]] virtual auto partitions(const Time& time) const -> Partitions<Scalar*>;
 
   /// Reads a sensor from a YAML file.
   /// \param node YAML node.
@@ -126,7 +126,7 @@ class Sensor {
  protected:
   // Definitions.
   using Size = std::size_t;
-  using Variable = variables::Variable<Scalar>;
+  using Variable = variables::Variable;
   using Variables = std::vector<std::unique_ptr<Variable>>;
 
   /// Constructor from sensor type and number of variables.
@@ -151,7 +151,7 @@ class Sensor {
 
   /// Assembles the variables partition.
   /// \return Variables partition
-  [[nodiscard]] auto assembleVariablesPartition() const -> variables::Partition<Scalar*>;
+  [[nodiscard]] auto assembleVariablesPartition() const -> Partition<Scalar*>;
 
   Type type_;                   ///< Type.
   JacobianType jacobian_type_;  ///< Jacobian type.

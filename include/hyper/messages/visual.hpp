@@ -12,35 +12,27 @@
 
 namespace hyper::messages {
 
-template <typename TScalar>
-class VisualTracks : public Message<TScalar> {
+class VisualTracks : public Message {
  public:
   // Definitions.
-  using Base = Message<TScalar>;
-  using Type = typename Base::Type;
-  using Time = typename Base::Time;
-
   using Camera = sensors::Camera;
 
   using Image = cv_bridge::CvImageConstPtr;
   using Track = std::tuple<Image, std::vector<cv::Point2f>>;
   using Tracks = std::map<const Camera*, Track>;
 
-  using IDs = std::vector<typename Base::ID>;
-  using Lengths = std::vector<typename Base::Size>;
-  using Positions = std::vector<variables::R3<TScalar>>;
+  using IDs = std::vector<ID>;
+  using Lengths = std::vector<Size>;
+  using Positions = std::vector<variables::R3>;
 
   /// Constructor from time and sensor.
   /// \param time Time.
   /// \param camera Camera.
-  VisualTracks(const Time& time, const Camera* camera)
-      : VisualTracks{Base::Type::VISUAL_TRACKS, time, camera} {}
+  VisualTracks(const Time& time, const Camera* camera) : VisualTracks{Message::Type::VISUAL_TRACKS, time, camera} {}
 
   /// Sensor accessor.
   /// \return Sensor.
-  [[nodiscard]] inline auto sensor() const -> const Camera* final {
-    return camera_;
-  }
+  [[nodiscard]] inline auto sensor() const -> const Camera* final { return camera_; }
 
   /// Sets the associated sensor.
   /// \param camera Sensor to set.
@@ -66,9 +58,7 @@ class VisualTracks : public Message<TScalar> {
   /// Track modifier.
   /// \param camera Associated camera.
   /// \return Track containing the associated image and tracked points.
-  inline auto track(const Camera* camera) -> Track& {
-    return const_cast<Track&>(std::as_const(*this).track(camera));
-  }
+  inline auto track(const Camera* camera) -> Track& { return const_cast<Track&>(std::as_const(*this).track(camera)); }
 
   /// Tracks accessor.
   /// \return Tracks.
@@ -83,60 +73,37 @@ class VisualTracks : public Message<TScalar> {
   /// \param type Message type.
   /// \param time Time.
   /// \param camera Camera.
-  VisualTracks(const Type& type, const Time& time, const Camera* camera)
-      : Base{type, time},
-        ids{},
-        lengths{},
-        positions{},
-        camera_{camera},
-        tracks_{} {}
+  VisualTracks(const Type& type, const Time& time, const Camera* camera) : Message{type, time}, ids{}, lengths{}, positions{}, camera_{camera}, tracks_{} {}
 
  private:
   Tracks tracks_;         ///< Tracks.
   const Camera* camera_;  ///< Camera.
 };
 
-template <typename TScalar>
-class StereoVisualTracks : public VisualTracks<TScalar> {
+class StereoVisualTracks : public VisualTracks {
  public:
-  // Definitions.
-  using Base = VisualTracks<TScalar>;
-  using Type = typename Base::Type;
-  using Time = typename Base::Time;
-  using Camera = typename Base::Camera;
-
   /// Constructor from time and sensor.
   /// \param time Time.
   /// \param left_camera Camera.
   /// \param right_camera Other camera.
-  StereoVisualTracks(const Time& time, const Camera* left_camera,
-                     const Camera* right_camera)
-      : Base{Type::STEREO_VISUAL_TRACKS, time, left_camera},
-        right_camera_{right_camera} {}
+  StereoVisualTracks(const Time& time, const Camera* left_camera, const Camera* right_camera)
+      : VisualTracks{Type::STEREO_VISUAL_TRACKS, time, left_camera}, right_camera_{right_camera} {}
 
   /// Left sensor accessor.
   /// \return Left sensor.
-  [[nodiscard]] inline auto leftCamera() const -> const Camera* {
-    return this->sensor();
-  }
+  [[nodiscard]] inline auto leftCamera() const -> const Camera* { return this->sensor(); }
 
   /// Sets the left sensor.
   /// \param left_camera Left sensor to set.
-  inline auto setLeftCamera(const Camera* left_camera) -> void {
-    this->setSensor(left_camera);
-  }
+  inline auto setLeftCamera(const Camera* left_camera) -> void { this->setSensor(left_camera); }
 
   /// Right sensor accessor.
   /// \return Right sensor.
-  [[nodiscard]] inline auto rightCamera() const -> const Camera* {
-    return right_camera_;
-  }
+  [[nodiscard]] inline auto rightCamera() const -> const Camera* { return right_camera_; }
 
   /// Sets the right sensor.
   /// \param right_camera Right sensor to set.
-  inline auto setRightSensor(const Camera* right_camera) -> void {
-    right_camera_ = right_camera;
-  }
+  inline auto setRightSensor(const Camera* right_camera) -> void { right_camera_ = right_camera; }
 
  private:
   const Camera* right_camera_;  ///< Other camera.

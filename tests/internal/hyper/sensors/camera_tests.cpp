@@ -25,12 +25,10 @@ class CameraTests : public testing::Test {
 
   // Definitions.
   using Path = std::filesystem::path;
-
-  using Scalar = double;
   using Camera = sensors::Camera;
-  using Pixel = Camera::Pixel;
-  using Bearing = Camera::Bearing;
-  using Landmark = Camera::Landmark;
+  using Pixel = variables::R2;
+  using Bearing = variables::Bearing;
+  using Landmark = variables::R3;
   using BearingPixelJacobian = hyper::JacobianNM<Bearing, Pixel>;
   using PixelLandmarkJacobian = hyper::JacobianNM<Pixel, Landmark>;
   using BearingLandmarkJacobian = hyper::JacobianNM<Bearing, Landmark>;

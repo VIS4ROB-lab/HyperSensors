@@ -56,7 +56,7 @@ auto Manifold<Camera>::setDistortionConstant(const bool constant) -> void {
   }
 
   const auto num_parameters = sensor()->distortion()->asVector().size();
-  auto submanifold = std::make_unique<Manifold<variables::Rn<Scalar, Eigen::Dynamic>>>(num_parameters, constant);
+  auto submanifold = std::make_unique<Manifold<variables::Rx>>(num_parameters, constant);
   setDistortionSubmanifold(std::move(submanifold));
 }
 

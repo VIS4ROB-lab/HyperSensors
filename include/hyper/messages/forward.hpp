@@ -5,16 +5,12 @@
 
 namespace hyper::messages {
 
-template <typename TScalar>
 class Message;
 
-template <typename TScalar>
 class VisualTracks;
 
-template <typename TScalar>
-using MonocularVisualTracks = VisualTracks<TScalar>;
+using MonocularVisualTracks = VisualTracks;
 
-template <typename TScalar>
 class StereoVisualTracks;
 
 }  // namespace hyper::messages

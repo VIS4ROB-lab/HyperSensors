@@ -240,7 +240,7 @@ auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
   if (distortion_type_string == "NONE") {
     return nullptr;
   } else if (distortion_type_string == "RADIAL_TANGENTIAL_2") {
-    using RadialTangentialDistortion = variables::RadialTangentialDistortion<Scalar, 2>;
+    using RadialTangentialDistortion = variables::RadialTangentialDistortion<2>;
     const auto distortion = yaml::ReadVariable<RadialTangentialDistortion>(distortion_node, "parameters");
     return std::make_unique<RadialTangentialDistortion>(distortion);
   } else {

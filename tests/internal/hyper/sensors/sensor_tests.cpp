@@ -19,8 +19,6 @@ class SensorTests : public testing::Test {
 
   // Definitions.
   using Path = std::filesystem::path;
-
-  using Scalar = double;
   using Sensor = sensors::Sensor;
 
   /// Setup.

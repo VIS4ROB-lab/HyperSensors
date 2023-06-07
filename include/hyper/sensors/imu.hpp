@@ -25,17 +25,17 @@ class IMU final : public Sensor {
 
   // Definitions.
   using GyroscopeNoiseDensity = Scalar;
-  using GyroscopeIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
-  using GyroscopeSensitivity = variables::Sensitivity<Scalar, 3>;
-  using GyroscopeBias = state::ContinuousState<variables::Rn<Scalar, 3>>;
+  using GyroscopeIntrinsics = variables::OrthonormalityAlignment<3>;
+  using GyroscopeSensitivity = variables::Sensitivity<3>;
+  using GyroscopeBias = state::ContinuousState<variables::Rn<3>>;
 
   using AccelerometerNoiseDensity = Scalar;
-  using AccelerometerIntrinsics = variables::OrthonormalityAlignment<Scalar, 3>;
-  using AccelerometerOffset = variables::Rn<Scalar, 9>;
-  using AccelerometerBias = state::ContinuousState<variables::Rn<Scalar, 3>>;
+  using AccelerometerIntrinsics = variables::OrthonormalityAlignment<3>;
+  using AccelerometerOffset = variables::Rn<9>;
+  using AccelerometerBias = state::ContinuousState<variables::Rn<3>>;
 
-  using BiasInterpolator = state::TemporalInterpolator<Scalar>;
-  using DefaultBiasInterpolator = state::BasisInterpolator<Scalar, 4>;
+  using BiasInterpolator = state::TemporalInterpolator;
+  using DefaultBiasInterpolator = state::BasisInterpolator<4>;
 
   /// Constructor from Jacobian type and bias interpolators.
   /// \param jacobian_type Jacobian type.
@@ -114,13 +114,9 @@ class IMU final : public Sensor {
 
   /// Time-based parameter blocks accessor.
   /// \return Time-based pointers to parameter blocks.
-  [[nodiscard]] auto partitions(const Time& time) const -> variables::Partitions<Scalar*> final;
+  [[nodiscard]] auto partitions(const Time& time) const -> Partitions<Scalar*> final;
 
  private:
-  // Definitions.
-  using GyroscopeBiasParameterBlocks = std::vector<Scalar*>;
-  using AccelerometerBiasParameterBlocks = std::vector<Scalar*>;
-
   /// Updates the IMU parameter block sizes.
   auto updateIMUParameterBlockSizes() -> void;
 

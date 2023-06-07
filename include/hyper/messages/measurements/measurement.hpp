@@ -10,39 +10,27 @@
 
 namespace hyper::messages {
 
-template <typename TScalar>
-class Measurement : public Message<TScalar> {
+class Measurement : public Message {
  public:
-  // Definitions.
-  using Base = Message<TScalar>;
-  using Type = typename Base::Type;
-  using Time = typename Base::Time;
-
-  using Value = variables::Variable<TScalar>;
-
   /// Value accessor.
   /// \return Value.
-  [[nodiscard]] virtual auto value() const -> const Value& = 0;
+  [[nodiscard]] virtual auto value() const -> const variables::Variable& = 0;
 
   /// Value modifier.
   /// \return Value.
-  [[nodiscard]] virtual auto value() -> Value& = 0;
+  [[nodiscard]] virtual auto value() -> variables::Variable& = 0;
 
  protected:
   /// Constructor from type and time.
   /// \param type Message type.
   /// \param time Message time.
-  explicit Measurement(const Type& type, const Time& time) : Base{type, time} {}
+  explicit Measurement(const Type& type, const Time& time) : Message{type, time} {}
 };
 
 template <typename TValue>
-class MeasurementBase : public Measurement<typename TValue::Scalar> {
+class MeasurementBase : public Measurement {
  public:
   // Definitions.
-  using Base = Measurement<typename TValue::Scalar>;
-  using Type = typename Base::Type;
-  using Time = typename Base::Time;
-
   using Value = TValue;
 
   /// Value accessor.
@@ -58,7 +46,7 @@ class MeasurementBase : public Measurement<typename TValue::Scalar> {
   /// \param type Message type.
   /// \param time Message time.
   /// \param value Value.
-  MeasurementBase(const Type& type, const Time& time, const TValue& value) : Base{type, time}, value_{value} {}
+  MeasurementBase(const Type& type, const Time& time, const TValue& value) : Measurement{type, time}, value_{value} {}
 
  private:
   TValue value_;  ///< Value.

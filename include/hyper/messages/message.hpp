@@ -10,9 +10,10 @@
 #include "hyper/messages/forward.hpp"
 #include "hyper/sensors/forward.hpp"
 
+#include "hyper/definitions.hpp"
+
 namespace hyper::messages {
 
-template <typename TScalar>
 class Message {
  public:
   // Enum.
@@ -28,9 +29,6 @@ class Message {
   // Definitions.
   using ID = Eigen::Index;
   using Size = Eigen::Index;
-
-  using Time = TScalar;
-  using Scalar = TScalar;
   using Sensor = sensors::Sensor;
 
   /// Default destructor.
@@ -49,8 +47,7 @@ class Message {
   /// \return Cast instance.
   template <typename TDerived_>
   inline auto as() -> TDerived_& {
-    return const_cast<TDerived_&>(
-        std::as_const(*this).template as<TDerived_>());
+    return const_cast<TDerived_&>(std::as_const(*this).template as<TDerived_>());
   }
 
   /// Type accessor.
@@ -63,9 +60,7 @@ class Message {
 
   /// Time modifier.
   /// \return Time.
-  inline auto time() -> Time& {
-    return const_cast<Time&>(std::as_const(*this).time());
-  }
+  inline auto time() -> Time& { return const_cast<Time&>(std::as_const(*this).time()); }
 
   /// Sensor accessor.
   /// \return Sensor.
@@ -75,8 +70,7 @@ class Message {
   /// Constructor from type and time.
   /// \param type Message type.
   /// \param time Message time.
-  explicit Message(const Type& type, const Time& time)
-      : type_{type}, time_{time} {}
+  explicit Message(const Type& type, const Time& time) : type_{type}, time_{time} {}
 
  private:
   Type type_;  ///< Type.

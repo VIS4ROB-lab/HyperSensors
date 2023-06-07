@@ -19,8 +19,6 @@ class IMUTests : public testing::Test {
 
   // Definitions.
   using Path = std::filesystem::path;
-
-  using Scalar = double;
   using IMU = sensors::IMU;
 
   /// Setup.
