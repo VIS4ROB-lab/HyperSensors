@@ -27,8 +27,6 @@ class Sensor {
   using Node = YAML::Node;
   using Emitter = YAML::Emitter;
 
-  using Time = double;
-  using Scalar = double;
   using ParameterBlocks = std::vector<Scalar*>;
   using ParameterBlockSizes = std::vector<int>;
 

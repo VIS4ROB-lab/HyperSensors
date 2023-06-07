@@ -13,7 +13,6 @@ class RelativeMeasurement final : public MeasurementBase<TValue> {
   // Definitions.
   using Base = MeasurementBase<TValue>;
   using Type = typename Base::Type;
-  using Time = typename Base::Time;
 
   /// Constructor from time, sensor and value.
   /// \param time Time.

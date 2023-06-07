@@ -14,7 +14,6 @@ class InertialMeasurement final : public MeasurementBase<variables::Tangent<TMan
   // Definitions.
   using Base = MeasurementBase<variables::Tangent<TManifold>>;
   using Type = typename Base::Type;
-  using Time = typename Base::Time;
   using Value = typename Base::Value;
 
   using Sensor = sensors::IMU;

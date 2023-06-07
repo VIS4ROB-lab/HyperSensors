@@ -17,9 +17,6 @@ template <>
 class Manifold<sensors::Sensor> {
  public:
   // Definitions.
-  using Size = std::size_t;
-  using Time = double;
-  using Scalar = double;
   using Sensor = sensors::Sensor;
   using Submanifold = ::ceres::Manifold;
   using Submanifolds = std::vector<std::unique_ptr<Submanifold>>;
@@ -66,6 +63,8 @@ class Manifold<sensors::Sensor> {
   auto setTransformationConstant(bool constant) -> void;
 
  protected:
+  using Size = std::size_t;
+
   /// Constructor from sensor, number of submanifolds and constancy flag.
   /// \param sensor Input sensor.
   /// \param num_submanifolds Number of submanifolds.

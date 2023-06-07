@@ -14,7 +14,6 @@ class AbsoluteMeasurement final : public MeasurementBase<TValue> {
   // Definitions.
   using Base = MeasurementBase<TValue>;
   using Type = typename Base::Type;
-  using Time = typename Base::Time;
   using Value = typename Base::Value;
 
   using Sensor = sensors::Sensor;
