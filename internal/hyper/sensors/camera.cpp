@@ -83,7 +83,7 @@ auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eig
 }
 
 Camera::Camera(JacobianType jacobian_type)
-    : Sensor{Type::CAMERA, jacobian_type, kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
+    : Sensor{typeid(Camera), jacobian_type, kNumVariables}, sensor_size_{}, shutter_type_{ShutterType::DEFAULT}, shutter_delta_{kDefaultShutterDelta} {
   // Initialize variables.
   DCHECK_EQ(kNumVariables, variables_.size());
   DCHECK_EQ(kNumVariables, parameter_blocks_.size());
@@ -250,7 +250,7 @@ auto Camera::ReadDistortion(const Node& node) -> std::unique_ptr<Distortion> {
 }
 
 auto Camera::updateCameraParameterBlockSizes() -> void {
-  if (jacobian_type_ == JacobianType::TANGENT_TO_MANIFOLD) {
+  if (jacobian_type_ == JacobianType::TANGENT_TO_GROUP) {
     parameter_block_sizes_[kIntrinsicsIndex] = Intrinsics::kNumParameters;
   } else {
     parameter_block_sizes_[kIntrinsicsIndex] = variables::Tangent<Intrinsics>::kNumParameters;

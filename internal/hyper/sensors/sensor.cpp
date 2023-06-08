@@ -22,7 +22,7 @@ constexpr auto kDefaultRate = -1;
 
 }  // namespace
 
-Sensor::Sensor(JacobianType jacobian_type) : Sensor{Type::ABSOLUTE, jacobian_type, kNumVariables} {}
+Sensor::Sensor(JacobianType jacobian_type) : Sensor{typeid(Sensor), jacobian_type, kNumVariables} {}
 
 Sensor::Sensor(const Node& node) : Sensor{} {
   node >> *this;
@@ -106,7 +106,7 @@ Sensor::Sensor(const Type type, JacobianType jacobian_type, Size num_variables)
 }
 
 auto Sensor::updateSensorParameterBlockSizes() -> void {
-  if (jacobian_type_ == JacobianType::TANGENT_TO_MANIFOLD) {
+  if (jacobian_type_ == JacobianType::TANGENT_TO_GROUP) {
     parameter_block_sizes_[kOffsetIndex] = Offset::kNumParameters;
     parameter_block_sizes_[kTransformationIndex] = Transformation::kNumParameters;
   } else {

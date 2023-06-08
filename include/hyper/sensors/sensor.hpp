@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <typeindex>
+
 #include "hyper/sensors/forward.hpp"
 
 #include "hyper/variables/se3.hpp"
@@ -21,9 +23,10 @@ class Sensor {
   static constexpr auto kTransformationIndex = kOffsetIndex + 1;
   static constexpr auto kNumVariables = kTransformationIndex + 1;
 
-  static constexpr auto kDefaultJacobianType = JacobianType::TANGENT_TO_MANIFOLD;
+  static constexpr auto kDefaultJacobianType = JacobianType::TANGENT_TO_GROUP;
 
   // Definitions.
+  using Type = std::type_index;
   using Node = YAML::Node;
   using Emitter = YAML::Emitter;
 

@@ -23,7 +23,7 @@ constexpr auto kAccelerometerOffsetName = "accelerometer_offset";
 }  // namespace
 
 IMU::IMU(JacobianType jacobian_type, std::unique_ptr<BiasInterpolator>&& gyroscope_bias_interpolator, std::unique_ptr<BiasInterpolator>&& accelerometer_bias_interpolator)
-    : Sensor{Type::IMU, jacobian_type, kNumVariables},
+    : Sensor{typeid(IMU), jacobian_type, kNumVariables},
       gyroscope_noise_density_{},
       gyroscope_bias_{std::move(gyroscope_bias_interpolator)},
       accelerometer_noise_density_{},
@@ -119,7 +119,7 @@ auto IMU::partitions(const Time& time) const -> Partitions<Scalar*> {
 }
 
 auto IMU::updateIMUParameterBlockSizes() -> void {
-  if (jacobian_type_ == JacobianType::TANGENT_TO_MANIFOLD) {
+  if (jacobian_type_ == JacobianType::TANGENT_TO_GROUP) {
     parameter_block_sizes_[kGyroscopeIntrinsicsIndex] = GyroscopeIntrinsics::kNumParameters;
     parameter_block_sizes_[kGyroscopeSensitivityIndex] = GyroscopeSensitivity::kNumParameters;
     parameter_block_sizes_[kAccelerometerIntrinsicsIndex] = AccelerometerIntrinsics::kNumParameters;
