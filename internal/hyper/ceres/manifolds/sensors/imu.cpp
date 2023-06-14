@@ -10,6 +10,7 @@
 
 namespace hyper::ceres::manifolds {
 
+using namespace variables;
 using namespace sensors;
 
 Manifold<IMU>::Manifold(IMU* imu, const bool constant) : Manifold<Sensor>{imu, kNumSubmanifolds, constant} {
@@ -56,12 +57,12 @@ auto Manifold<IMU>::gyroscopeBiasSubmanifold() const -> Submanifold* {
 }
 
 auto Manifold<IMU>::setGyroscopeBiasSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
-  DCHECK_EQ(submanifold->AmbientSize(), IMU::GyroscopeBias::StampedElement::kNumParameters);
+  DCHECK_EQ(submanifold->AmbientSize(), Stamped<IMU::GyroscopeBias::Group>::kNumParameters);
   submanifolds_[kGyroscopeBiasSubmanifoldIndex] = std::move(submanifold);
 }
 
 auto Manifold<IMU>::setGyroscopeBiasConstant(const bool constant) -> void {
-  auto submanifold = std::make_unique<Manifold<IMU::GyroscopeBias::StampedElement>>(true, constant);
+  auto submanifold = std::make_unique<Manifold<Stamped<IMU::GyroscopeBias::Group>>>(true, constant);
   setGyroscopeBiasSubmanifold(std::move(submanifold));
 }
 
@@ -98,12 +99,12 @@ auto Manifold<IMU>::accelerometerBiasSubmanifold() const -> Submanifold* {
 }
 
 auto Manifold<IMU>::setAccelerometerBiasSubmanifold(std::unique_ptr<Submanifold>&& submanifold) -> void {
-  DCHECK_EQ(submanifold->AmbientSize(), IMU::AccelerometerBias::StampedElement::kNumParameters);
+  DCHECK_EQ(submanifold->AmbientSize(), Stamped<IMU::AccelerometerBias::Group>::kNumParameters);
   submanifolds_[kAccelerometerBiasSubmanifoldIndex] = std::move(submanifold);
 }
 
 auto Manifold<IMU>::setAccelerometerBiasConstant(const bool constant) -> void {
-  auto submanifold = std::make_unique<Manifold<IMU::AccelerometerBias::StampedElement>>(true, constant);
+  auto submanifold = std::make_unique<Manifold<Stamped<IMU::AccelerometerBias::Group>>>(true, constant);
   setAccelerometerBiasSubmanifold(std::move(submanifold));
 }
 
