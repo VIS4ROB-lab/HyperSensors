@@ -19,11 +19,11 @@ constexpr auto kDefaultShutterDelta = 0;
 
 }  // namespace
 
-auto Camera::LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l) -> Pixel {
+auto Camera::LandmarkToPixel(const Eigen::Ref<const R3>& landmark, Scalar* J_l) -> R2 {
   const auto inverse_z = Scalar{1} / landmark.z();
 
   if (J_l) {
-    using Jacobian = hyper::JacobianNM<Pixel, Landmark>;
+    using Jacobian = hyper::JacobianNM<R2, R3>;
     auto J = Eigen::Map<Jacobian>{J_l};
     const auto inverse_z2 = inverse_z * inverse_z;
     J(0, 0) = inverse_z;
@@ -37,19 +37,19 @@ auto Camera::LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar*
   return {landmark.x() * inverse_z, landmark.y() * inverse_z};
 }
 
-auto Camera::LandmarkToBearing(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l) -> Bearing {
+auto Camera::LandmarkToBearing(const Eigen::Ref<const R3>& landmark, Scalar* J_l) -> Bearing {
   const auto i_n2 = Scalar{1} / landmark.squaredNorm();
   const auto i_n = std::sqrt(i_n2);
 
   if (J_l) {
-    using Jacobian = hyper::JacobianNM<Bearing, Landmark>;
+    using Jacobian = hyper::JacobianNM<Bearing, R3>;
     Eigen::Map<Jacobian>{J_l} = (Jacobian::Identity() - landmark * landmark.transpose() * i_n2) * i_n;
   }
 
   return landmark * i_n;
 }
 
-auto Camera::PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p) -> Bearing {
+auto Camera::PixelToBearing(const Eigen::Ref<const R2>& pixel, Scalar* J_p) -> Bearing {
   const auto x = pixel.x();
   const auto y = pixel.y();
   const auto x2 = x * x;
@@ -58,7 +58,7 @@ auto Camera::PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p) -
   const auto i_n = std::sqrt(i_n2);
 
   if (J_p) {
-    using Jacobian = hyper::JacobianNM<Bearing, Pixel>;
+    using Jacobian = hyper::JacobianNM<Bearing, R2>;
     auto J = Eigen::Map<Jacobian>{J_p};
     const auto xy = pixel.x() * pixel.y();
     const auto i_n3 = i_n * i_n2;
@@ -73,7 +73,7 @@ auto Camera::PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p) -
   return {pixel.x() * i_n, pixel.y() * i_n, i_n};
 }
 
-auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark {
+auto Camera::Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> R3 {
   // Triangulate landmark.
   const auto c0 = (T_ab.rotation() * b_b).eval();
   const auto c1 = c0.cross(b_a).norm();
@@ -151,14 +151,14 @@ auto Camera::setDistortion(std::unique_ptr<Distortion>&& distortion) -> void {
   parameter_block_sizes_[kDistortionIndex] = v.size();
 }
 
-auto Camera::randomPixel() const -> Pixel {
-  Pixel pixel;
+auto Camera::randomPixel() const -> R2 {
+  R2 pixel;
   pixel.x() = static_cast<Scalar>(sensor_size_.width - 1) * Eigen::internal::random<Scalar>(0, 1);
   pixel.y() = static_cast<Scalar>(sensor_size_.height - 1) * Eigen::internal::random<Scalar>(0, 1);
   return pixel;
 }
 
-auto Camera::randomNormalizedPixel(bool distort) const -> Pixel {
+auto Camera::randomNormalizedPixel(bool distort) const -> R2 {
   if (distort && distortion()) {
     const auto normalized_pixel = intrinsics().normalize(randomPixel());
     return distortion()->distort(normalized_pixel, nullptr, nullptr, nullptr);
@@ -170,7 +170,11 @@ auto Camera::randomBearing(bool distort) const -> Bearing {
   return PixelToBearing(randomNormalizedPixel(distort));
 }
 
-auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time> {
+auto Camera::randomLandmark(bool distort) const -> R3 {
+  return Eigen::internal::random(0.2, 10.0) * randomBearing(distort);
+}
+
+auto Camera::correctShutterTimes(const Time& time, const std::vector<R2>& pixels) const -> std::vector<Time> {
   std::vector<Time> times;
   times.reserve(pixels.size());
   if (shutterType() == ShutterType::HORIZONTAL) {
@@ -187,7 +191,7 @@ auto Camera::correctShutterTimes(const Time& time, const std::vector<Pixel>& pix
   return times;
 }
 
-auto Camera::pixelsToBearings(const std::vector<Pixel>& pixels, bool undistort, const Scalar* parameters) const -> std::vector<Bearing> {
+auto Camera::pixelsToBearings(const std::vector<R2>& pixels, bool undistort, const Scalar* parameters) const -> std::vector<Bearing> {
   // Allocate memory.
   std::vector<Bearing> bearings;
   bearings.reserve(pixels.size());

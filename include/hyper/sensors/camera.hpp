@@ -19,9 +19,9 @@ class Camera final : public Sensor {
 
   // Definitions.
   using Index = Eigen::Index;
-  using Pixel = variables::R2;
+  using R2 = variables::R2;
+  using R3 = variables::R3;
   using Bearing = variables::Bearing;
-  using Landmark = variables::R3;
   using Intrinsics = variables::Intrinsics;
   using Distortion = variables::Distortion;
 
@@ -40,26 +40,26 @@ class Camera final : public Sensor {
   /// \param landmark Landmark.
   /// \param J_l Jacobian (optional).
   /// \return Pixel.
-  static auto LandmarkToPixel(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Pixel;
+  static auto LandmarkToPixel(const Eigen::Ref<const R3>& landmark, Scalar* J_l = nullptr) -> R2;
 
   /// Converts a landmark to a bearing.
   /// \param landmark Landmark.
   /// \param J_l Jacobian (optional).
   /// \return Bearing.
-  static auto LandmarkToBearing(const Eigen::Ref<const Landmark>& landmark, Scalar* J_l = nullptr) -> Bearing;
+  static auto LandmarkToBearing(const Eigen::Ref<const R3>& landmark, Scalar* J_l = nullptr) -> Bearing;
 
   /// Converts a (normalized) pixel coordinate to a bearing.
   /// \param pixel Pixel.
   /// \param J_p Jacobian (optional).
   /// \return Bearing.
-  static auto PixelToBearing(const Eigen::Ref<const Pixel>& pixel, Scalar* J_p = nullptr) -> Bearing;
+  static auto PixelToBearing(const Eigen::Ref<const R2>& pixel, Scalar* J_p = nullptr) -> Bearing;
 
   /// Triangulates a landmark from relative a transformation and bearings.
   /// \param T_ab Input transformation.
   /// \param b_a Input bearing in frame a.
   /// \param b_b Input bearing in frame b.
   /// \return Triangulated landmark.
-  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> Landmark;
+  static auto Triangulate(const Eigen::Ref<const Transformation>& T_ab, const Eigen::Ref<const Bearing>& b_a, const Eigen::Ref<const Bearing>& b_b) -> R3;
 
   /// Constructor from Jacobian type.
   /// \param jacobian_type Jacobian type.
@@ -116,23 +116,28 @@ class Camera final : public Sensor {
 
   /// Retrieves a random pixel on the image sensor.
   /// \return Random pixel.
-  [[nodiscard]] auto randomPixel() const -> Pixel;
+  [[nodiscard]] auto randomPixel() const -> R2;
 
   /// Retrieves a random (normalized) pixel on the image sensor.
   /// \param distort Distortion flag.
   /// \return Random (normalized) pixel.
-  [[nodiscard]] auto randomNormalizedPixel(bool distort = false) const -> Pixel;
+  [[nodiscard]] auto randomNormalizedPixel(bool distort = false) const -> R2;
 
   /// Retrieves a random (visible) bearing.
   /// \param distort Distortion flag.
   /// \return Random bearing.
   [[nodiscard]] auto randomBearing(bool distort = false) const -> Bearing;
 
+  /// Retrieves a random (visible) landmark.
+  /// \param distort Distortion flag.
+  /// \return Random landmark.
+  [[nodiscard]] auto randomLandmark(bool distort = false) const -> R3;
+
   /// Corrects the shutter times.
   /// \param time Global shutter time.
   /// \param pixels Input pixels.
   /// \return Corrected shutter times.
-  [[nodiscard]] auto correctShutterTimes(const Time& time, const std::vector<Pixel>& pixels) const -> std::vector<Time>;
+  [[nodiscard]] auto correctShutterTimes(const Time& time, const std::vector<R2>& pixels) const -> std::vector<Time>;
 
   /// Converts (non-normalized) pixels to
   /// bearings (by normalization and undistortion).
@@ -140,7 +145,7 @@ class Camera final : public Sensor {
   /// \param undistort Undistortion flag.
   /// \param parameters External distortion parameters (optional).
   /// \return Bearings.
-  [[nodiscard]] auto pixelsToBearings(const std::vector<Pixel>& pixels, bool undistort, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
+  [[nodiscard]] auto pixelsToBearings(const std::vector<R2>& pixels, bool undistort, const Scalar* parameters = nullptr) const -> std::vector<Bearing>;
 
  private:
   /// Reads the sensor size.
